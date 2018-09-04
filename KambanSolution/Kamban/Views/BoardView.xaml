@@ -1,0 +1,86 @@
+﻿<UserControl x:Class="Kamban.Views.BoardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+             dialogs:DialogParticipation.Register="{Binding}"
+             xmlns:local="clr-namespace:Kamban.Views"
+             xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
+             xmlns:kanbanControl="clr-namespace:Ui.Wpf.KanbanControl;assembly=Ui.Wpf.KanbanControl"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:viewModels="clr-namespace:Kamban.ViewModels"
+             mc:Ignorable="d">
+    
+    <UserControl.Resources>
+          <ResourceDictionary Source="WpfResources/TemplatesDictionary.xaml"/>
+    </UserControl.Resources>
+
+    <Grid Width="Auto" Height="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <StackPanel
+            Orientation="Horizontal"
+            dd:DragDrop.IsDragSource="True"
+            dd:DragDrop.IsDropTarget="True">
+
+            <mah:SplitButton 
+                Height="auto" 
+                ItemsSource="{Binding BoardsInFile}"
+                DisplayMemberPath="Name"
+                SelectedItem="{Binding CurrentBoard}"
+                Margin="5"
+                BorderThickness="1" BorderBrush="{DynamicResource AccentBaseColorBrush}">
+            </mah:SplitButton>
+
+            <mah:DropDownButton 
+                Content="Создать"
+                Height="auto" 
+                ItemsSource="{Binding Entities}"
+                Margin="5"
+                BorderThickness="1" BorderBrush="{DynamicResource AccentBaseColorBrush}">
+                <mah:DropDownButton.ItemContainerStyle>
+                    <Style TargetType="MenuItem">
+                        <Setter Property="Command" 
+                                Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=DataContext.AddNewElementCommand}"/>
+                        <Setter Property="CommandParameter" Value="{Binding}"/>
+                    </Style>
+                </mah:DropDownButton.ItemContainerStyle>
+            </mah:DropDownButton>
+
+            <Button Content="Удалить" Command="{Binding DeleteCommand}" Margin="5"/>
+        </StackPanel>
+
+
+        <kanbanControl:Kanban 
+            
+            Grid.Row="1" 
+            HorizontalDimension="{Binding HorizontalDimension}" 
+            VerticalDimension="{Binding VerticalDimension}"
+            Cards="{Binding Issues}"
+            CardMouseDoubleClickCommand="{Binding UpdateCardCommand}"
+            CardContent="{Binding CardContent}"
+            CardMouseClickCommand="{Binding IssueSelectCommand}"
+            HorizontalHeaderMouseClickCommand="{Binding ColumnHeaderSelectCommand}"
+            VerticalHeaderMouseClickCommand="{Binding RowHeaderSelectCommand}"
+            HorizontalHeaderDoubleClickCommand="{Binding UpdateHorizontalHeaderCommand}"
+            VerticalHeaderDoubleClickCommand="{Binding UpdateVerticalHeaderCommand}"
+            />
+
+        <mah:Flyout Header="Issue editor"
+                    BorderThickness="1" BorderBrush="{DynamicResource AccentBaseColorBrush}"
+                    Position="Top"
+                    Grid.RowSpan="2"
+                    CloseButtonVisibility="Hidden"
+                    Width="auto"
+                    IsOpen="{Binding IssueViewModel.IsOpened}"
+                    Theme="Light"
+                    IsModal="True"
+                    Content="{Binding IssueViewModel}"
+                    >
+        </mah:Flyout>
+    </Grid>
+</UserControl>

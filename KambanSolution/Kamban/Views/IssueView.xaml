@@ -1,0 +1,81 @@
+﻿<UserControl x:Class="Kamban.Views.IssueView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:dd="urn:gong-wpf-dragdrop"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             FontSize="15"
+             FontFamily="Italic">
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="WpfResources/TemplatesDictionary.xaml"/>
+    </UserControl.Resources>
+
+
+    <Grid Width="650" HorizontalAlignment="Center" Margin="0 80 0 0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50" />
+            <RowDefinition Height="Auto" MinHeight="100"/>
+            <RowDefinition Height="Auto" MinHeight="50"/>
+            <RowDefinition Height="Auto" MinHeight="50"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="450"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Content="Название задачи" />
+        <TextBox Grid.Column="1"
+                 Text="{Binding Head,UpdateSourceTrigger=PropertyChanged}" 
+                 mah:TextBoxHelper.Watermark="Введите значение"
+                 mah:TextBoxHelper.ClearTextButton="True" />
+
+        <Label Grid.Row="1"
+               Content="Описание задачи" />
+        <TextBox Grid.Column="1" Grid.Row="1"
+                 Text="{Binding Body,UpdateSourceTrigger=PropertyChanged}" 
+                 TextWrapping="Wrap"
+                 AcceptsReturn="True"
+                 mah:TextBoxHelper.Watermark="Введите значение"
+                 mah:TextBoxHelper.ClearTextButton="True" />
+
+        <Label Grid.Row="2" Content="Строка" 
+               HorizontalContentAlignment="Center"
+               VerticalContentAlignment="Center"
+               dd:DragDrop.DropHandler="{Binding LocalBoardHandler}"/>
+        <ComboBox Grid.Column="1" Grid.Row="2" 
+                  BorderThickness="1" BorderBrush="{DynamicResource AccentBaseColorBrush}"
+                  ItemsSource="{Binding AwailableRows}"
+                  DisplayMemberPath="Name"
+                  SelectedItem="{Binding Row}"
+                  />
+
+        <Label Grid.Row="3" Content="Столбец" />
+        <ComboBox Grid.Column="1" Grid.Row="3" 
+                  ItemsSource="{Binding AwailableColumns}"
+                  SelectedItem="{Binding Column}"
+                  BorderThickness="1" BorderBrush="{DynamicResource AccentBaseColorBrush}"
+                  DisplayMemberPath="Name"/>
+
+        <Label Grid.Row="4" Content="Цвет" />
+        <xctk:ColorPicker Grid.Row="4" Grid.Column="1" ShowTabHeaders="True" 
+                          BorderThickness="1" BorderBrush="{DynamicResource AccentBaseColorBrush}"
+                          DisplayColorAndName="True" SelectedColor="{Binding Color}"/>
+
+        <StackPanel Grid.Row="5" Grid.Column="1" 
+                    Orientation="Horizontal">
+            <Button Content="Сохранить" Margin="10" Padding="5"
+                    Command="{Binding SaveCommand}"/>
+            <Button Content="Отмена" Margin="10" Padding="5"
+                    Command="{Binding CancelCommand}"/>
+        </StackPanel>
+
+
+    </Grid>
+</UserControl>
