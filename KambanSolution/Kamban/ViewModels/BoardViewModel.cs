@@ -38,7 +38,6 @@ namespace Kamban.ViewModels
 
         public ReactiveList<LocalIssue> Issues { get; internal set; }
 
-
         public ReactiveCommand RefreshCommand { get; set; }
 
         public ReactiveCommand DeleteCommand { get; set; }
@@ -63,7 +62,7 @@ namespace Kamban.ViewModels
             BoardsInFile = new ReactiveList<BoardInfo>();
 
             RefreshCommand =
-                ReactiveCommand.CreateFromTask(RefreshContent);
+                ReactiveCommand.Create(RefreshContent);
 
             var isSelectedEditable = this.WhenAnyValue(t => t.SelectedIssue, t => t.SelectedColumn,
                 t => t.SelectedRow,
@@ -116,26 +115,26 @@ namespace Kamban.ViewModels
 
             this.WhenAnyValue(bvm => bvm.CurrentBoard)
                 .Where(val => val != null)
-                .Subscribe(async _ => { await RefreshContent(); });
+                .Subscribe(_ => { RefreshContent(); });
 
             this.WhenAnyValue(w => w.IssueViewModel.IssueChanged)
                 .Where(ch => ch)
-                .Subscribe(async _ => await RefreshContent());
+                .Subscribe(_ => RefreshContent());
         }
 
-        private async Task RefreshContent()
+        private void RefreshContent()
         {
             Issues.Clear();
 
             VerticalDimension = null;
-            VerticalDimension = await scope.GetRowHeadersAsync(CurrentBoard.Id);
+            VerticalDimension = scope.GetRowHeadersAsync(CurrentBoard.Id);
 
             HorizontalDimension = null;
-            HorizontalDimension = await scope.GetColumnHeadersAsync(CurrentBoard.Id);
+            HorizontalDimension = scope.GetColumnHeadersAsync(CurrentBoard.Id);
 
             CardContent = scope.GetCardContent();
 
-            Issues.PublishCollection(await scope.GetIssuesByBoardIdAsync(CurrentBoard.Id));
+            Issues.PublishCollection(scope.GetIssuesByBoardIdAsync(CurrentBoard.Id));
         }
 
         private async Task DeleteElement()
@@ -151,15 +150,13 @@ namespace Kamban.ViewModels
                 return;
 
             if (SelectedIssue != null)
-                await scope.DeleteIssueAsync(SelectedIssue.Id);
-
+                scope.DeleteIssueAsync(SelectedIssue.Id);
             else if (SelectedRow != null)
-                await scope.DeleteRowAsync(SelectedRow.Id);
-
+                scope.DeleteRowAsync(SelectedRow.Id);
             else if (SelectedColumn != null)
-                await scope.DeleteColumnAsync(SelectedColumn.Id);
+                scope.DeleteColumnAsync(SelectedColumn.Id);
 
-            await RefreshContent();
+            RefreshContent();
         }
 
         private void UpdateCard(object o)
@@ -171,7 +168,6 @@ namespace Kamban.ViewModels
                     Scope = scope,
                     Board = CurrentBoard
                 });
-
             else if (o is null)
                 IssueViewModel.Initialize(new IssueViewRequest
                 {
@@ -190,10 +186,10 @@ namespace Kamban.ViewModels
             if (!string.IsNullOrEmpty(newName))
             {
                 column.Name = newName;
-                await scope.CreateOrUpdateColumnAsync(column);
+                scope.CreateOrUpdateColumnAsync(column);
             }
 
-            await RefreshContent();
+            RefreshContent();
         }
 
         private async Task UpdateVerticalHeader(object o)
@@ -205,14 +201,13 @@ namespace Kamban.ViewModels
             if (!string.IsNullOrEmpty(newName))
             {
                 row.Name = newName;
-                await scope.CreateOrUpdateRowAsync(row);
+                scope.CreateOrUpdateRowAsync(row);
             }
 
-            await RefreshContent();
+            RefreshContent();
         }
 
-        private async Task
-            AddNewElement(string elementName)
+        private async Task AddNewElement(string elementName)
         {
             if (elementName == "Задачу")
             {
@@ -223,7 +218,6 @@ namespace Kamban.ViewModels
                     Board = CurrentBoard
                 });
             }
-
             else if (elementName == "Строку")
             {
                 var newName = await ShowRowNameInput();
@@ -231,10 +225,9 @@ namespace Kamban.ViewModels
                 if (!string.IsNullOrEmpty(newName))
                 {
                     var newRow = new RowInfo {Name = newName, Board = CurrentBoard};
-                    await scope.CreateOrUpdateRowAsync(newRow);
+                    scope.CreateOrUpdateRowAsync(newRow);
                 }
             }
-
             else if (elementName == "Столбец")
             {
                 var newName = await ShowColumnNameInput();
@@ -242,11 +235,11 @@ namespace Kamban.ViewModels
                 if (!string.IsNullOrEmpty(newName))
                 {
                     var newColumn = new ColumnInfo {Name = newName, Board = CurrentBoard};
-                    await scope.CreateOrUpdateColumnAsync(newColumn);
+                    scope.CreateOrUpdateColumnAsync(newColumn);
                 }
             }
 
-            await RefreshContent();
+            RefreshContent();
         }
 
         private async Task<string> ShowColumnNameInput()
@@ -282,7 +275,17 @@ namespace Kamban.ViewModels
 
             scope = request.Scope;
 
-            Observable.FromAsync(() => scope.GetAllBoardsInFileAsync())
+            var boards = scope.GetAllBoardsInFileAsync();
+
+            BoardsInFile.PublishCollection(boards);
+
+            CurrentBoard = !string.IsNullOrEmpty(request.SelectedBoardName)
+                ? BoardsInFile.First(board => board.Name == request.SelectedBoardName)
+                : BoardsInFile.First();
+
+            RefreshContent();
+
+            /*Observable.FromAsync(() => scope.GetAllBoardsInFileAsync())
                 .ObserveOnDispatcher()
                 .Subscribe(boards =>
                 {
@@ -308,7 +311,7 @@ namespace Kamban.ViewModels
                         .ObserveOnDispatcher()
                         .Subscribe(issues =>
                             Issues.AddRange(issues)); 
-                });
+                });*/
         }
     }
 }

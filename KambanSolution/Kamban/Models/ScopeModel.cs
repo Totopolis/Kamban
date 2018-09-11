@@ -7,79 +7,78 @@ using Ui.Wpf.Common;
 using Ui.Wpf.KanbanControl.Dimensions;
 using Ui.Wpf.KanbanControl.Dimensions.Generic;
 using Ui.Wpf.KanbanControl.Elements.CardElement;
-using Autofac;
-using Kamban.SqliteLocalStorage;
 using Kamban.SqliteLocalStorage.Entities;
+using Kamban.Repository;
 
 namespace Kamban.Models
 {
-    // TODO: container for boards
     // TODO: local or server access
-
     public interface IScopeModel
     {
-        Task<IDimension> GetColumnHeadersAsync(int boardId);
-        Task<IDimension> GetRowHeadersAsync(int boardId);
+        IDimension GetColumnHeadersAsync(int boardId);
+        IDimension GetRowHeadersAsync(int boardId);
 
-        Task<List<RowInfo>> GetRowsByBoardIdAsync(int boardId);
-        Task<List<ColumnInfo>> GetColumnsByBoardIdAsync(int boardId);
-        Task<IEnumerable<LocalIssue>> GetIssuesByBoardIdAsync(int boardId);
-        Task<List<BoardInfo>> GetAllBoardsInFileAsync();
+        List<RowInfo> GetRowsByBoardIdAsync(int boardId);
+        List<ColumnInfo> GetColumnsByBoardIdAsync(int boardId);
+        IEnumerable<LocalIssue> GetIssuesByBoardIdAsync(int boardId);
+        List<BoardInfo> GetAllBoardsInFileAsync();
         CardContent GetCardContent();
         RowInfo GetSelectedRow(string rowName);
         ColumnInfo GetSelectedColumn(string colName);
 
-        Task DeleteIssueAsync(int issueId);
-        Task DeleteRowAsync(int rowId);
-        Task DeleteColumnAsync(int columnId);
+        void DeleteIssueAsync(int issueId);
+        void DeleteRowAsync(int rowId);
+        void DeleteColumnAsync(int columnId);
 
-        Task<BoardInfo> CreateOrUpdateBoardAsync(BoardInfo board);
-        Task CreateOrUpdateColumnAsync(ColumnInfo column);
-        Task CreateOrUpdateRowAsync(RowInfo row);
-        Task CreateOrUpdateIssueAsync(LocalIssue issue);
+        BoardInfo CreateOrUpdateBoardAsync(BoardInfo board);
+        void CreateOrUpdateColumnAsync(ColumnInfo column);
+        void CreateOrUpdateRowAsync(RowInfo row);
+        void CreateOrUpdateIssueAsync(LocalIssue issue);
 
-        Task<LocalIssue> LoadOrCreateIssueAsync(int? issueId);
+        LocalIssue LoadOrCreateIssueAsync(int? issueId);
     }
 
     public class ScopeModel : IScopeModel
     {
-        private readonly SqliteLocalRepository repo;
+        private readonly IRepository repo;
 
         private List<RowInfo> rows = new List<RowInfo>();
         private List<ColumnInfo> columns = new List<ColumnInfo>();
 
-        public ScopeModel(IShell shell, string uri)
+        public ScopeModel(IShell shell, IRepository repository, string uri)
         {
-            repo = shell.Container.Resolve<SqliteLocalRepository>(
-                new NamedParameter("conStr", uri));
+            repo = repository;
+            repo.Initialize(uri);
         }
 
         #region GettingInfo
 
-        public async Task<List<BoardInfo>> GetAllBoardsInFileAsync()
+        public List<BoardInfo> GetAllBoardsInFileAsync()
         {
-            return await repo.GetAllBoardsInFileAsync();
+            return repo.GetAllBoardsInFile();
         }
 
-        public async Task<IDimension> GetColumnHeadersAsync(int boardId)
+        public IDimension GetColumnHeadersAsync(int boardId)
         {
             columns.Clear();
-            columns = await repo.GetColumnsAsync(boardId);
+            columns = repo.GetColumns(boardId);
 
             var columnHeaders = columns.Select(c => c.Name).ToArray();
 
             return new TagDimension<string, LocalIssue>(
                 tags: columnHeaders,
-                getItemTags: i => new[] {i.Column.Name},
+                getItemTags: i => new[] {
+                    columns.Where(x => x.Id == i.ColumnId).Select(x => x.Name).FirstOrDefault()
+                },
                 categories: columnHeaders
                     .Select(c => new TagsDimensionCategory<string>(c, c))
-                    .Select(tdc => (IDimensionCategory) tdc)
+                    .Select(tdc => (IDimensionCategory)tdc)
                     .ToArray());
         }
 
-        public async Task<CardsColors> GetTaskColorsAsync(int boardId)
+        public CardsColors GetTaskColorsAsync(int boardId)
         {
-            var isss = await GetIssuesByBoardIdAsync(boardId);
+            var isss = GetIssuesByBoardIdAsync(boardId);
 
             var cardsColors = new CardsColors
             {
@@ -97,31 +96,28 @@ namespace Kamban.Models
             return cardsColors;
         }
 
-
-        public async Task<IDimension> GetRowHeadersAsync(int boardId)
+        public IDimension GetRowHeadersAsync(int boardId)
         {
             rows.Clear();
-            rows = await repo.GetRowsAsync(boardId);
+            rows = repo.GetRows(boardId);
 
             var rowHeaders = rows.Select(r => r.Name).ToArray();
 
             return new TagDimension<string, LocalIssue>(
                 tags: rowHeaders,
-                getItemTags: i => new[] {i.Row.Name},
+                getItemTags: i => new[] {
+                    rows.Where(x=>x.Id == i.RowId).Select(x=>x.Name).FirstOrDefault()
+                }, //i.Row.Name},
                 categories: rowHeaders
                     .Select(r => new TagsDimensionCategory<string>(r, r))
-                    .Select(tdc => (IDimensionCategory) tdc)
+                    .Select(tdc => (IDimensionCategory)tdc)
                     .ToArray()
             );
         }
 
-        public async Task<IEnumerable<LocalIssue>> GetIssuesByBoardIdAsync(int boardId)
+        public IEnumerable<LocalIssue> GetIssuesByBoardIdAsync(int boardId)
         {
-            return await repo.GetIssuesAsync
-            (new NameValueCollection
-            {
-                {"BoardId", boardId.ToString()}
-            });
+            return repo.GetIssuesByBoardId(boardId);
         }
 
         public CardContent GetCardContent()
@@ -143,21 +139,21 @@ namespace Kamban.Models
             return columns.FirstOrDefault(c => c.Name == colName);
         }
 
-        public async Task<List<RowInfo>> GetRowsByBoardIdAsync(int boardId)
+        public List<RowInfo> GetRowsByBoardIdAsync(int boardId)
         {
-            return await repo.GetRowsAsync(boardId);
+            return repo.GetRows(boardId);
         }
 
-        public async Task<List<ColumnInfo>> GetColumnsByBoardIdAsync(int boardId)
+        public List<ColumnInfo> GetColumnsByBoardIdAsync(int boardId)
         {
-            return await repo.GetColumnsAsync(boardId);
+            return repo.GetColumns(boardId);
         }
 
-        public async Task<LocalIssue> LoadOrCreateIssueAsync(int? issueId)
+        public LocalIssue LoadOrCreateIssueAsync(int? issueId)
         {
             var t = new LocalIssue();
             if (issueId.HasValue)
-                t = await repo.GetIssueAsync(issueId.Value);
+                t = repo.GetIssue(issueId.Value);
 
             return t;
         }
@@ -166,43 +162,43 @@ namespace Kamban.Models
 
         #region DeletingInfo
 
-        public async Task DeleteIssueAsync(int issueId)
+        public void DeleteIssueAsync(int issueId)
         {
-            await repo.DeleteIssueAsync(issueId);
+            repo.DeleteIssue(issueId);
         }
 
-        public async Task DeleteRowAsync(int rowId)
+        public void DeleteRowAsync(int rowId)
         {
-            await repo.DeleteRowAsync(rowId);
+            repo.DeleteRow(rowId);
         }
 
-        public async Task DeleteColumnAsync(int columnId)
+        public void DeleteColumnAsync(int columnId)
         {
-            await repo.DeleteColumnAsync(columnId);
+            repo.DeleteColumn(columnId);
         }
 
         #endregion
 
         #region SavingInfo
 
-        public async Task<BoardInfo> CreateOrUpdateBoardAsync(BoardInfo board)
+        public BoardInfo CreateOrUpdateBoardAsync(BoardInfo board)
         {
-            return await repo.CreateOrUpdateBoardInfoAsync(board);
+            return repo.CreateOrUpdateBoardInfo(board);
         }
 
-        public async Task CreateOrUpdateColumnAsync(ColumnInfo column)
+        public void CreateOrUpdateColumnAsync(ColumnInfo column)
         {
-            await repo.CreateOrUpdateColumnAsync(column);
+            repo.CreateOrUpdateColumn(column);
         }
 
-        public async Task CreateOrUpdateRowAsync(RowInfo row)
+        public void CreateOrUpdateRowAsync(RowInfo row)
         {
-            await repo.CreateOrUpdateRowAsync(row);
+            repo.CreateOrUpdateRow(row);
         }
 
-        public async Task CreateOrUpdateIssueAsync(LocalIssue issue)
+        public void CreateOrUpdateIssueAsync(LocalIssue issue)
         {
-            await repo.CreateOrUpdateIssueAsync(issue);
+            repo.CreateOrUpdateIssue(issue);
         }
 
 

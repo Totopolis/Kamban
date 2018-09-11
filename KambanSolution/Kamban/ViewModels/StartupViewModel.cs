@@ -1,12 +1,16 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Threading;
 using Kamban.Models;
 using Kamban.Views;
 using MahApps.Metro;
 using MahApps.Metro.Controls.Dialogs;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ShowOptions;
 using Ui.Wpf.Common.ViewModels;
@@ -23,6 +27,9 @@ namespace Kamban.ViewModels
         public ReactiveCommand<string, Unit> OpenRecentDbCommand { get; set; }
         public ReactiveCommand<string, Unit> RemoveRecentCommand { get; set; }
         public ReactiveCommand<string, Unit> AccentChangeCommand { get; set; }
+
+        [Reactive]
+        public bool IsLoading { get; set; }
 
         private readonly IDistinctShell shell;
         private readonly IAppModel appModel;
@@ -43,13 +50,19 @@ namespace Kamban.ViewModels
                         ThemeManager.GetAccent(color),
                         ThemeManager.GetAppTheme("baselight")));
 
-            OpenRecentDbCommand = ReactiveCommand.Create<string>(uri =>
+            OpenRecentDbCommand = ReactiveCommand.CreateFromTask<string>(async (uri) =>
             {
-                if (OpenBoardView(uri)) return;
+                IsLoading = true;
 
-                RemoveRecent(uri);
-                DialogCoordinator.Instance.ShowMessageAsync(this, "Ошибка",
-                    "Файл был удалён или перемещён из данной папки");
+                if (! await OpenBoardView(uri))
+                {
+                    RemoveRecent(uri);
+
+                    await DialogCoordinator.Instance.ShowMessageAsync(this, "Ошибка",
+                        "Файл был удалён или перемещён из данной папки");
+                }
+
+                IsLoading = false;
             });
 
             RemoveRecentCommand = ReactiveCommand.Create<string>(RemoveRecent);
@@ -89,10 +102,12 @@ namespace Kamban.ViewModels
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
                     var uri = dialog.FileName;
-                    OpenBoardView(uri);
+                    OpenBoardView(uri).Wait();
                     AddRecent(uri);
                 }
             });
+
+            this.IsLoading = false;
 
         } //ctor
 
@@ -114,14 +129,16 @@ namespace Kamban.ViewModels
                 BaseList.RemoveAt(3);
         }
 
-        private bool OpenBoardView(string uri)
+        private async Task<bool> OpenBoardView(string uri)
         {
             var file = new FileInfo(uri);
 
             if (!file.Exists)
                 return false;
 
-            var scope = appModel.LoadScope(uri);
+            IScopeModel scope = null;
+
+            await Task.Run( () => scope = appModel.LoadScope(uri) );
 
             var title = file.FullName;
 

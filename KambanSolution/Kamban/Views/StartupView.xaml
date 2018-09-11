@@ -7,6 +7,7 @@
         dialogs:DialogParticipation.Register="{Binding}"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:metro="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:loadin="clr-namespace:LoadingIndicators.WPF;assembly=LoadingIndicators.WPF"
         mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -26,7 +27,16 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-
+        <loadin:LoadingIndicator 
+            Panel.ZIndex="10"
+            Grid.Column="0" 
+            Grid.Row="0"
+            Grid.ColumnSpan="4"
+            Grid.RowSpan="3"
+            SpeedRatio="3" 
+            IsActive="{Binding IsLoading}" 
+            Style="{DynamicResource LoadingIndicatorArcsStyle}"/>
+        
         <Label Grid.Row="1" Margin="5" BorderThickness="0" HorizontalAlignment="Stretch" Grid.ColumnSpan="4">
             Выберите режим работы программы
         </Label>
@@ -104,5 +114,6 @@
                 </ListBox>
             </StackPanel>
         </Border>
+
     </Grid>
 </UserControl>

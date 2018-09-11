@@ -5,6 +5,7 @@ using Kamban.Views;
 using Kamban.ViewModels;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
+using Kamban.Repository;
 
 namespace Kamban
 {
@@ -31,7 +32,8 @@ namespace Kamban
                 .As<IDockWindow>();
 
             builder
-                .RegisterType<SqliteLocalRepository>();
+                .RegisterType<LiteDbRepository>()
+                .As<IRepository>();
 
             builder
                 .RegisterType<ScopeModel>()
@@ -42,7 +44,6 @@ namespace Kamban
                 .As<IAppModel>()
                 .SingleInstance();
 
-            //TODO: Modules discovering?
             ConfigureView<StartupViewModel, StartupView>(builder);
             ConfigureView<WizardViewModel, WizardView>(builder);
             ConfigureView<BoardViewModel, BoardView>(builder);
@@ -59,4 +60,3 @@ namespace Kamban
         }
     }
 }
-// loadscope,validation,

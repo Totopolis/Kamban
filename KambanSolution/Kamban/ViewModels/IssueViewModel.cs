@@ -49,13 +49,13 @@ namespace Kamban.ViewModels
             mapper = CreateMapper();
 
             var issueFilled = this.WhenAnyValue(t => t.Head, t => t.Body, t => t.Row, t => t.Column,
-                (sh, sb, sr, sc) => sr != null                && sc != null &&
+                (sh, sb, sr, sc) => sr != null && sc != null &&
                                     !string.IsNullOrEmpty(sh) && !string.IsNullOrEmpty(sb));
             //TODO :add selectcommand when click uneditable with nulling all "selected" fields
 
-            SaveCommand = ReactiveCommand.CreateFromTask(async _ =>
+            SaveCommand = ReactiveCommand.Create(() =>
             {
-                var editedIssue = new LocalIssue() {Board = board};
+                var editedIssue = new LocalIssue() { BoardId = board.Id };
 
                 mapper.Map(this, editedIssue);
 
@@ -64,7 +64,7 @@ namespace Kamban.ViewModels
 
                 editedIssue.Modified = DateTime.Now;
 
-                await scope.CreateOrUpdateIssueAsync(editedIssue);
+                scope.CreateOrUpdateIssueAsync(editedIssue);
 
                 IsOpened = false;
                 IssueChanged = true;
@@ -78,14 +78,32 @@ namespace Kamban.ViewModels
             if (viewRequest is IssueViewRequest request)
             {
                 scope = request.Scope;
-
                 board = request.Board;
 
                 mapper.Map(new LocalIssue(), this);
 
                 IssueChanged = false;
 
-                Observable.FromAsync(() => scope.GetRowsByBoardIdAsync(board.Id))
+                var rows = scope.GetRowsByBoardIdAsync(board.Id);
+                AwailableRows.PublishCollection(rows);
+                Row = AwailableRows.First();
+
+                var columns = scope.GetColumnsByBoardIdAsync(board.Id);
+                AwailableColumns.PublishCollection(columns);
+                Column = AwailableColumns.First();
+
+                var issueId = request.IssueId;
+
+                if (issueId != null && issueId > 0)
+                {
+                    var issue = scope.LoadOrCreateIssueAsync(issueId);
+
+                    mapper.Map(issue, this);
+                    Row = AwailableRows.First(r => r.Id == Row.Id);
+                    Column = AwailableColumns.First(c => c.Id == Column.Id);
+                }
+
+                /*Observable.FromAsync(() => scope.GetRowsByBoardIdAsync(board.Id))
                     .ObserveOnDispatcher()
                     .Subscribe(rows =>
                     {
@@ -112,7 +130,7 @@ namespace Kamban.ViewModels
                             mapper.Map(issue, this);
                             Row = AwailableRows.First(r => r.Id       == Row.Id);
                             Column = AwailableColumns.First(c => c.Id == Column.Id);
-                        });
+                        });*/
             }
 
             Title = $"Редактирование задачи {Head}";
@@ -136,5 +154,5 @@ namespace Kamban.ViewModels
                 CreateMap<IssueViewModel, LocalIssue>();
             }
         }
-    }
+    }//end of class
 }

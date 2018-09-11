@@ -121,9 +121,9 @@ namespace Kamban.ViewModels
                 .Subscribe(_ => UpdateDimensionList(RowList));
 
             this.WhenAnyObservable(s => s.AllErrors.Changed)
-                .Subscribe(_ => CanCreate = !AllErrors.Any()                            &&
+                .Subscribe(_ => CanCreate = !AllErrors.Any() &&
                                             ColumnList.Count(col => col.HasErrors) == 0 &&
-                                            RowList.Count(row => row.HasErrors)    == 0);
+                                            RowList.Count(row => row.HasErrors) == 0);
         }
 
         private void UpdateDimensionList(ReactiveList<LocalDimension> list)
@@ -152,9 +152,9 @@ namespace Kamban.ViewModels
 
             list.ChangeTrackingEnabled = true;
 
-            CanCreate = !AllErrors.Any()                            &&
+            CanCreate = !AllErrors.Any() &&
                         ColumnList.Count(col => col.HasErrors) == 0 &&
-                        RowList.Count(row => row.HasErrors)    == 0;
+                        RowList.Count(row => row.HasErrors) == 0;
         }
 
         private string BoardNameToFileName(string boardName)
@@ -196,7 +196,7 @@ namespace Kamban.ViewModels
 
             else
             {
-                var boards = await scope.GetAllBoardsInFileAsync();
+                var boards = scope.GetAllBoardsInFileAsync();
                 BoardsInFile.PublishCollection(boards.Select(board => board.Name));
 
                 if (BoardsInFile.Contains(BoardName))
@@ -218,17 +218,17 @@ namespace Kamban.ViewModels
                 Modified = DateTime.Now
             };
 
-            newBoard = await scope.CreateOrUpdateBoardAsync(newBoard);
+            newBoard = scope.CreateOrUpdateBoardAsync(newBoard);
 
             foreach (var colName in ColumnList.Select(column => column.Name))
-                await scope.CreateOrUpdateColumnAsync(new ColumnInfo
+                scope.CreateOrUpdateColumnAsync(new ColumnInfo
                 {
                     Name = colName,
                     Board = newBoard
                 });
 
             foreach (var rowName in RowList.Select(row => row.Name))
-                await scope.CreateOrUpdateRowAsync(new RowInfo
+                scope.CreateOrUpdateRowAsync(new RowInfo
                 {
                     Name = rowName,
                     Board = newBoard
@@ -237,15 +237,15 @@ namespace Kamban.ViewModels
             Close();
 
             shell.ShowDistinctView<BoardView>(uri,
-                viewRequest: new BoardViewRequest {Scope = scope, SelectedBoardName = BoardName},
-                options: new UiShowOptions {Title = uri});
+                viewRequest: new BoardViewRequest { Scope = scope, SelectedBoardName = BoardName },
+                options: new UiShowOptions { Title = uri });
         }
 
         public void Initialize(ViewRequest viewRequest)
         {
             var request = viewRequest as WizardViewRequest;
 
-            InExistedFile = (bool) request?.InExistedFile;
+            InExistedFile = (bool)request?.InExistedFile;
 
             if (InExistedFile)
             {
@@ -255,10 +255,10 @@ namespace Kamban.ViewModels
                 FullTitle = $"Creating new board";
                 FullTitle = $"Creating new board in {uri}";
                 scope = appModel.CreateScope(uri);
-                Observable.FromAsync(() => scope.GetAllBoardsInFileAsync())
+                /*Observable.FromAsync(() => scope.GetAllBoardsInFileAsync())
                     .ObserveOnDispatcher()
                     .Subscribe(boards =>
-                        BoardsInFile.PublishCollection(boards.Select(board => board.Name)));
+                        BoardsInFile.PublishCollection(boards.Select(board => board.Name)));*/
             }
         }
 
@@ -322,6 +322,5 @@ namespace Kamban.ViewModels
 
             return String.Join(newVal, temp);
         }
-
     }
 }
