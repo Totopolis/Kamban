@@ -160,10 +160,10 @@
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Repository\IRepository.cs" />
     <Compile Include="Repository\LiteDbRepository.cs" />
-    <Compile Include="Sqlite\BoardInfo.cs" />
-    <Compile Include="Sqlite\ColumnInfo.cs" />
-    <Compile Include="Sqlite\LocalIssue.cs" />
-    <Compile Include="Sqlite\RowInfo.cs" />
+    <Compile Include="Model\BoardInfo.cs" />
+    <Compile Include="Model\ColumnInfo.cs" />
+    <Compile Include="Model\Issue.cs" />
+    <Compile Include="Model\RowInfo.cs" />
     <Compile Include="ViewModels\BoardDropHandler.cs" />
     <Compile Include="ViewModels\BoardViewModel.cs" />
     <Compile Include="ViewModels\IssueViewModel.cs" />
@@ -186,10 +186,10 @@
     <Compile Include="Views\WpfResources\Validators.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\AppModel.cs" />
-    <Compile Include="Models\IDistinctShell.cs" />
-    <Compile Include="Models\ScopeModel.cs" />
-    <Compile Include="Models\ViewRequests.cs" />
+    <Compile Include="Model\AppModel.cs" />
+    <Compile Include="Model\IDistinctShell.cs" />
+    <Compile Include="Model\ScopeModel.cs" />
+    <Compile Include="Model\ViewRequests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

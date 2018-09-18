@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Threading;
-using Kamban.Models;
+using Kamban.Model;
 using Kamban.Views;
 using MahApps.Metro;
 using MahApps.Metro.Controls.Dialogs;
@@ -140,13 +140,11 @@ namespace Kamban.ViewModels
             if (!file.Exists)
                 return false;
 
-            IScopeModel scope = null;
-
-            await Task.Run( () => scope = appModel.LoadScope(uri) );
+            IScopeModel scope = await Task.Run(() => appModel.LoadScope(uri));
 
             var title = file.FullName;
 
-            await Task.Delay(500);
+            await Task.Delay(200);
 
             shell.ShowDistinctView<BoardView>(title,
                 viewRequest: new BoardViewRequest {Scope = scope},

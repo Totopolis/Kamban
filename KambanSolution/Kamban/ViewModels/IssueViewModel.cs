@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Windows.Media;
 using AutoMapper;
-using Kamban.Models;
-using Kamban.SqliteLocalStorage.Entities;
+using Kamban.Model;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
+using Brush = System.Windows.Media.Brush;
+using ColorConverter = System.Windows.Media.ColorConverter;
+using WpfColor = System.Windows.Media.Color;
 
 namespace Kamban.ViewModels
 {
@@ -16,6 +19,24 @@ namespace Kamban.ViewModels
         public int? IssueId { get; set; }
         public IScopeModel Scope { get; set; }
         public BoardInfo Board { get; set; }
+    }
+
+    public class ColorItem
+    {
+        public SolidColorBrush Brush { get; set; }
+        public string Name { get; set; }
+
+        public static ColorItem I(string colorName)
+        {
+            ColorConverter converter = new ColorConverter();
+            Color color = (Color)converter.ConvertFromInvariantString(colorName);
+
+            return new ColorItem
+            {
+                Brush = new SolidColorBrush(color),
+                Name = colorName
+            };
+        }
     }
 
     public class IssueViewModel : ViewModelBase, IInitializableViewModel
@@ -37,25 +58,35 @@ namespace Kamban.ViewModels
         [Reactive] public string Body { get; set; }
         [Reactive] public RowInfo Row { get; set; }
         [Reactive] public ColumnInfo Column { get; set; }
-        [Reactive] public string Color { get; set; }
+        public string Color { get; set; }
 
         public ReactiveCommand CancelCommand { get; set; }
         public ReactiveCommand SaveCommand { get; set; }
         [Reactive] public bool IsOpened { get; set; }
         [Reactive] public bool IssueChanged { get; set; }
 
+        [Reactive] public Brush Background { get; set; }
+
+        [Reactive] public ColorItem[] ColorItems { get; set; } =
+        {
+            ColorItem.I("LemonChiffon"),
+            ColorItem.I("WhiteSmoke"),
+            ColorItem.I("NavajoWhite"),
+            ColorItem.I("HoneyDew")
+        };
+
+        [Reactive] public ColorItem SelectedColor { get; set; }
+
         public IssueViewModel()
         {
             mapper = CreateMapper();
 
-            var issueFilled = this.WhenAnyValue(t => t.Head, t => t.Body, t => t.Row, t => t.Column,
-                (sh, sb, sr, sc) => sr != null && sc != null &&
-                                    !string.IsNullOrEmpty(sh) && !string.IsNullOrEmpty(sb));
-            //TODO :add selectcommand when click uneditable with nulling all "selected" fields
+            var issueFilled = this.WhenAnyValue(t => t.Head, t => t.Row, t => t.Column,
+                (sh, sr, sc) => sr != null && sc != null && !string.IsNullOrEmpty(sh));
 
             SaveCommand = ReactiveCommand.Create(() =>
             {
-                var editedIssue = new LocalIssue() { BoardId = board.Id };
+                var editedIssue = new Issue() { BoardId = board.Id };
 
                 mapper.Map(this, editedIssue);
 
@@ -80,7 +111,9 @@ namespace Kamban.ViewModels
                 scope = request.Scope;
                 board = request.Board;
 
-                mapper.Map(new LocalIssue(), this);
+                mapper.Map(new Issue(), this);
+
+                SelectedColor = ColorItems.First();
 
                 IssueChanged = false;
 
@@ -103,15 +136,23 @@ namespace Kamban.ViewModels
                 var issueId = request.IssueId;
 
                 if (issueId != null && issueId > 0)
-
                     Observable.FromAsync(() => scope.LoadOrCreateIssueAsync(issueId))
                         .ObserveOnDispatcher()
                         .Subscribe(issue =>
                         {
                             mapper.Map(issue, this);
-                            Row = AwailableRows.First(r => r.Id == Row.Id);
-                            Column = AwailableColumns.First(c => c.Id == Column.Id);
+                            Row = AwailableRows.First(r => r.Id == issue.RowId);
+                            Column = AwailableColumns.First(c => c.Id == issue.ColumnId);
+                            SelectedColor = ColorItems.FirstOrDefault(c => c.Brush.Color.ToString() == issue.Color);
                         });
+
+                this.WhenAnyValue(x => x.SelectedColor)
+                    .Where(x => x != null)
+                    .Subscribe(_ =>
+                    {
+                        Background = SelectedColor.Brush;
+                        Color = SelectedColor.Brush.Color.ToString();
+                    });
             }
 
             Title = $"Issue edit {Head}";
@@ -130,9 +171,9 @@ namespace Kamban.ViewModels
         {
             public MapperProfileSqliteRepos()
             {
-                CreateMap<LocalIssue, IssueViewModel>();
+                CreateMap<Issue, IssueViewModel>();
 
-                CreateMap<IssueViewModel, LocalIssue>();
+                CreateMap<IssueViewModel, Issue>();
             }
         }
     }//end of class

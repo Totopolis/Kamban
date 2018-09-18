@@ -1,6 +1,6 @@
-﻿namespace Kamban.SqliteLocalStorage.Entities
+﻿namespace Kamban.Model
 {
-    public class ColumnInfo
+    public class RowInfo
     {
         public int Id { get; set; }
         public string Name { get; set; }

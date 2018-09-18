@@ -1,6 +1,6 @@
 ﻿using Ui.Wpf.Common;
 
-namespace Kamban.Models
+namespace Kamban.Model
 {
     public class WizardViewRequest : ViewRequest
     {
@@ -13,5 +13,4 @@ namespace Kamban.Models
         public IScopeModel Scope { get; set; }
         public string SelectedBoardName { get; set; }
     }
-
 }

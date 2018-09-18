@@ -3,8 +3,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using Kamban.Models;
-using Kamban.SqliteLocalStorage.Entities;
+using Kamban.Model;
 using MahApps.Metro.Controls.Dialogs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -21,7 +20,7 @@ namespace Kamban.ViewModels
 
         private readonly IDialogCoordinator dialogCoordinator = DialogCoordinator.Instance;
 
-        [Reactive] private LocalIssue SelectedIssue { get; set; }
+        //[Reactive] private Issue SelectedIssue { get; set; }
         [Reactive] private RowInfo SelectedRow { get; set; }
         [Reactive] private ColumnInfo SelectedColumn { get; set; }
 
@@ -34,9 +33,9 @@ namespace Kamban.ViewModels
         [Reactive] public IssueViewModel IssueViewModel { get; set; }
 
         public ReactiveList<string> Entities { get; }
-            = new ReactiveList<string>() {"Задачу", "Столбец", "Строку"};
+            = new ReactiveList<string>() { "Task", "Column", "Row" };
 
-        public ReactiveList<LocalIssue> Issues { get; internal set; }
+        public ReactiveList<Issue> Issues { get; internal set; }
 
         public ReactiveCommand RefreshCommand { get; set; }
 
@@ -58,19 +57,21 @@ namespace Kamban.ViewModels
 
         public BoardViewModel()
         {
-            Issues = new ReactiveList<LocalIssue>();
+            Issues = new ReactiveList<Issue>();
             BoardsInFile = new ReactiveList<BoardInfo>();
 
             RefreshCommand =
                 ReactiveCommand.Create(RefreshContent);
 
-            var isSelectedEditable = this.WhenAnyValue(t => t.SelectedIssue, t => t.SelectedColumn,
+            /*var isSelectedEditable = this.WhenAnyValue(t => t.SelectedIssue, t => t.SelectedColumn,
                 t => t.SelectedRow,
                 (si, sc, sr) =>
                     si != null || sc != null ||
-                    sr != null); //TODO :add selectcommand when click uneditable with nulling all "selected" fields
+                    sr != null); 
+            */
+            //TODO :add selectcommand when click uneditable with nulling all "selected" fields
 
-            DeleteCommand = ReactiveCommand.CreateFromTask(DeleteElement, isSelectedEditable);
+            //DeleteCommand = ReactiveCommand.CreateFromTask(DeleteElement, isSelectedEditable);
 
             UpdateCardCommand = ReactiveCommand.Create<object>(UpdateCard);
 
@@ -83,9 +84,9 @@ namespace Kamban.ViewModels
             AddNewElementCommand =
                 ReactiveCommand.CreateFromTask<string>(async name => await AddNewElement(name));
 
-            IssueSelectCommand = ReactiveCommand.Create<object>(o =>
+            /*IssueSelectCommand = ReactiveCommand.Create<object>(o =>
             {
-                SelectedIssue = o as LocalIssue;
+                SelectedIssue = o as Issue;
 
                 if (SelectedIssue == null) return;
 
@@ -111,7 +112,7 @@ namespace Kamban.ViewModels
 
                 SelectedRow = null;
                 SelectedIssue = null;
-            });
+            });*/
 
             this.ObservableForProperty(w => w.CurrentBoard)
                 .Where(v => v != null)
@@ -137,7 +138,7 @@ namespace Kamban.ViewModels
             Issues.PublishCollection(await scope.GetIssuesByBoardIdAsync(CurrentBoard.Id));
         }
 
-        private async Task DeleteElement()
+        /*private async Task DeleteElement()
         {
             var element = SelectedIssue != null ? "задачу" :
                 SelectedColumn          != null ? "весь столбец" : "всю строку";
@@ -157,11 +158,21 @@ namespace Kamban.ViewModels
                 scope.DeleteColumnAsync(SelectedColumn.Id);
 
             await RefreshContent();
-        }
+        }*/
 
         private void UpdateCard(object o)
         {
-            if (o is LocalIssue)
+            var iss = o as Issue;
+
+            if (iss != null)
+                IssueViewModel.Initialize(new IssueViewRequest
+                {
+                    IssueId = iss.Id,
+                    Scope = scope,
+                    Board = CurrentBoard
+                });
+
+            /*if (o is Issue)
                 IssueViewModel.Initialize(new IssueViewRequest
                 {
                     IssueId = SelectedIssue.Id,
@@ -174,7 +185,7 @@ namespace Kamban.ViewModels
                     IssueId = 0,
                     Scope = scope,
                     Board = CurrentBoard
-                });
+                });*/
         }
 
         private async Task UpdateHorizontalHeader(object o)
@@ -209,7 +220,7 @@ namespace Kamban.ViewModels
 
         private async Task AddNewElement(string elementName)
         {
-            if (elementName == "Задачу")
+            if (elementName == "Task")
             {
                 IssueViewModel.Initialize(new IssueViewRequest
                 {
@@ -218,23 +229,23 @@ namespace Kamban.ViewModels
                     Board = CurrentBoard
                 });
             }
-            else if (elementName == "Строку")
+            else if (elementName == "Row")
             {
                 var newName = await ShowRowNameInput();
 
                 if (!string.IsNullOrEmpty(newName))
                 {
-                    var newRow = new RowInfo {Name = newName, Board = CurrentBoard};
+                    var newRow = new RowInfo { Name = newName, Board = CurrentBoard };
                     scope.CreateOrUpdateRowAsync(newRow);
                 }
             }
-            else if (elementName == "Столбец")
+            else if (elementName == "Column")
             {
                 var newName = await ShowColumnNameInput();
 
                 if (!string.IsNullOrEmpty(newName))
                 {
-                    var newColumn = new ColumnInfo {Name = newName, Board = CurrentBoard};
+                    var newColumn = new ColumnInfo { Name = newName, Board = CurrentBoard };
                     scope.CreateOrUpdateColumnAsync(newColumn);
                 }
             }
@@ -245,11 +256,11 @@ namespace Kamban.ViewModels
         private async Task<string> ShowColumnNameInput()
         {
             return await dialogCoordinator
-                .ShowInputAsync(this, "ColumnRed", "Введите название столбца",
+                .ShowInputAsync(this, "ColumnRed", "Input column name",
                     new MetroDialogSettings()
                     {
-                        AffirmativeButtonText = "подтвердить",
-                        NegativeButtonText = "отмена",
+                        AffirmativeButtonText = "OK",
+                        NegativeButtonText = "Cancel",
                         DefaultText = SelectedColumn?.Name
                     });
         }
@@ -257,11 +268,11 @@ namespace Kamban.ViewModels
         private async Task<string> ShowRowNameInput()
         {
             return await dialogCoordinator
-                .ShowInputAsync(this, "RowRed", "Введите название строки",
+                .ShowInputAsync(this, "RowRed", "Input row name",
                     new MetroDialogSettings()
                     {
-                        AffirmativeButtonText = "подтвердить",
-                        NegativeButtonText = "отмена",
+                        AffirmativeButtonText = "OK",
+                        NegativeButtonText = "Cancel",
                         DefaultText = SelectedRow?.Name,
                         DialogResultOnCancel = MessageDialogResult.Negative
 

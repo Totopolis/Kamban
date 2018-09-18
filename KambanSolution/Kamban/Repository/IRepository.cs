@@ -1,4 +1,4 @@
-﻿using Kamban.SqliteLocalStorage.Entities;
+﻿using Kamban.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,13 +13,13 @@ namespace Kamban.Repository
 
         RowInfo CreateOrUpdateRow(RowInfo row);
         ColumnInfo CreateOrUpdateColumn(ColumnInfo column);
-        LocalIssue CreateOrUpdateIssue(LocalIssue issue);
+        Issue CreateOrUpdateIssue(Issue issue);
         BoardInfo CreateOrUpdateBoardInfo(BoardInfo info);
 
-        List<LocalIssue> GetIssuesByBoardId(int boardId);
+        List<Issue> GetIssuesByBoardId(int boardId);
         List<RowInfo> GetRows(int boardId);
         List<ColumnInfo> GetColumns(int boardId);
-        LocalIssue GetIssue(int issueId);
+        Issue GetIssue(int issueId);
         List<BoardInfo> GetAllBoardsInFile();
 
         void DeleteRow(int rowId);

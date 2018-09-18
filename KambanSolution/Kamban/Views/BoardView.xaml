@@ -11,18 +11,29 @@
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:viewModels="clr-namespace:Kamban.ViewModels"
              mc:Ignorable="d">
-    
+
     <UserControl.Resources>
-          <ResourceDictionary Source="WpfResources/TemplatesDictionary.xaml"/>
+        <ResourceDictionary Source="WpfResources/TemplatesDictionary.xaml"/>
     </UserControl.Resources>
 
-    <Grid Width="Auto" Height="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition />
         </Grid.RowDefinitions>
 
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="30*"/>
+            <ColumnDefinition Width="20*"/>
+            <ColumnDefinition Width="20*"/>
+            <ColumnDefinition Width="30*"/>
+        </Grid.ColumnDefinitions>
+        
         <StackPanel
+            Grid.Row="0"
+            Grid.RowSpan="1"
+            Grid.Column="0"
+            Grid.ColumnSpan="4"
             Orientation="Horizontal"
             dd:DragDrop.IsDragSource="True"
             dd:DragDrop.IsDropTarget="True">
@@ -37,7 +48,7 @@
             </mah:SplitButton>
 
             <mah:DropDownButton 
-                Content="Создать"
+                Content="Create"
                 Height="auto" 
                 ItemsSource="{Binding Entities}"
                 Margin="5"
@@ -51,36 +62,42 @@
                 </mah:DropDownButton.ItemContainerStyle>
             </mah:DropDownButton>
 
-            <Button Content="Удалить" Command="{Binding DeleteCommand}" Margin="5"/>
+            <Button Content="Delete" Command="{Binding DeleteCommand}" Margin="5"/>
         </StackPanel>
 
-
         <kanbanControl:Kanban 
-            
-            Grid.Row="1" 
+            Grid.Row="1"
+            Grid.RowSpan="1"
+            Grid.Column="0"
+            Grid.ColumnSpan="4"
             HorizontalDimension="{Binding HorizontalDimension}" 
             VerticalDimension="{Binding VerticalDimension}"
             Cards="{Binding Issues}"
-            CardMouseDoubleClickCommand="{Binding UpdateCardCommand}"
+            CardMouseClickCommand="{Binding UpdateCardCommand}"
             CardContent="{Binding CardContent}"
-            CardMouseClickCommand="{Binding IssueSelectCommand}"
             HorizontalHeaderMouseClickCommand="{Binding ColumnHeaderSelectCommand}"
             VerticalHeaderMouseClickCommand="{Binding RowHeaderSelectCommand}"
             HorizontalHeaderDoubleClickCommand="{Binding UpdateHorizontalHeaderCommand}"
             VerticalHeaderDoubleClickCommand="{Binding UpdateVerticalHeaderCommand}"
             />
 
-        <mah:Flyout Header="Issue editor"
-                    BorderThickness="1" BorderBrush="{DynamicResource AccentBaseColorBrush}"
+        <mah:Flyout Header="112233"
+                    BorderThickness="5" 
+                    BorderBrush="{DynamicResource AccentBaseColorBrush}"
                     Position="Top"
-                    Grid.RowSpan="2"
+                    Grid.Row="1"
+                    Grid.RowSpan="1"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="4"
                     CloseButtonVisibility="Hidden"
-                    Width="auto"
+                    TitleVisibility="Hidden"
                     IsOpen="{Binding IssueViewModel.IsOpened}"
-                    Theme="Light"
+                    Theme="Adapt"
                     IsModal="True"
                     Content="{Binding IssueViewModel}"
-                    >
-        </mah:Flyout>
+                    AnimateOpacity="True"
+                    Width="600"
+                    />
+
     </Grid>
 </UserControl>

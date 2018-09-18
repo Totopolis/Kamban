@@ -6,7 +6,7 @@ using System.Linq;
 using Ui.Wpf.Common;
 using Autofac;
 
-namespace Kamban.Models
+namespace Kamban.Model
 {
     public interface IAppModel
     {

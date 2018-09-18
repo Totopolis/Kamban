@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Kamban.SqliteLocalStorage.Entities
+namespace Kamban.Model
 {
     public class BoardInfo
     {

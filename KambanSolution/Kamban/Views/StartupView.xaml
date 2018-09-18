@@ -37,13 +37,13 @@
             Style="{DynamicResource LoadingIndicatorArcsStyle}"/>
         
         <Label Grid.Row="1" Margin="5" BorderThickness="0" HorizontalAlignment="Stretch" Grid.ColumnSpan="4">
-            Выберите режим работы программы
+            Lets work
         </Label>
 
         <metro:DropDownButton HorizontalAlignment="Left"
                   Margin="2"
                   VerticalAlignment="Top"
-            Content="Цветовая схема"
+            Content="Theme"
                   ItemsSource="{x:Static metro:ThemeManager.Accents}"
             DisplayMemberPath="Name">
             <metro:DropDownButton.ItemContainerStyle>
@@ -56,22 +56,22 @@
         </metro:DropDownButton>
 
         <Button Grid.Row="2" FontSize="16" Margin="5" Background="White" BorderThickness="1" BorderBrush="{DynamicResource AccentColorBrush}"  Grid.Column="0" Command="{Binding NewFileCommand}" Style="{DynamicResource  FlatButton}">
-            Создать новый файл
+            Create new database
         </Button>
 
         <Button Grid.Row="2"  FontSize="16" Margin="5" Background="White" BorderThickness="1" BorderBrush="{DynamicResource AccentColorBrush}"  Grid.Column="1" Command="{Binding NewBoardCommand}" Style="{DynamicResource  FlatButton}">
-            Создать новую доску в существующем файле
+            Create board in exists database
         </Button>
 
         <Button Grid.Row="2"  FontSize="16" Margin="5" Background="White" BorderThickness="1" BorderBrush="{DynamicResource AccentColorBrush}"  Grid.Column="2" Command="{Binding OpenFileCommand}" Style="{DynamicResource  FlatButton}">
-            Открыть существующий файл
+            Open database
         </Button>
 
         <Border Grid.Row="2" Grid.Column="3" Margin="5" BorderThickness="1" BorderBrush="{DynamicResource AccentColorBrush}" >
             <StackPanel >
 
                 <TextBlock FontSize="16"  Margin="5" HorizontalAlignment="Stretch" TextAlignment="Center">
-            Открыть один из последних файлов
+            Open recent
                 </TextBlock>
 
                 <ListBox Background="White" ItemsSource="{Binding BaseList}">

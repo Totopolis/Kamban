@@ -2,7 +2,7 @@
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ShowOptions;
 
-namespace Kamban.Models
+namespace Kamban.Model
 {
     interface IDistinctShell : IShell
     {

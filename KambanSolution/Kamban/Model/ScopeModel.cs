@@ -7,10 +7,9 @@ using Ui.Wpf.Common;
 using Ui.Wpf.KanbanControl.Dimensions;
 using Ui.Wpf.KanbanControl.Dimensions.Generic;
 using Ui.Wpf.KanbanControl.Elements.CardElement;
-using Kamban.SqliteLocalStorage.Entities;
 using Kamban.Repository;
 
-namespace Kamban.Models
+namespace Kamban.Model
 {
     // TODO: local or server access
     public interface IScopeModel
@@ -20,7 +19,7 @@ namespace Kamban.Models
 
         Task<List<RowInfo>> GetRowsByBoardIdAsync(int boardId);
         Task<List<ColumnInfo>> GetColumnsByBoardIdAsync(int boardId);
-        Task<IEnumerable<LocalIssue>> GetIssuesByBoardIdAsync(int boardId);
+        Task<IEnumerable<Issue>> GetIssuesByBoardIdAsync(int boardId);
         Task<List<BoardInfo>> GetAllBoardsInFileAsync();
 
         CardContent GetCardContent();
@@ -34,9 +33,9 @@ namespace Kamban.Models
         BoardInfo CreateOrUpdateBoardAsync(BoardInfo board);
         void CreateOrUpdateColumnAsync(ColumnInfo column);
         void CreateOrUpdateRowAsync(RowInfo row);
-        void CreateOrUpdateIssueAsync(LocalIssue issue);
+        void CreateOrUpdateIssueAsync(Issue issue);
 
-        Task<LocalIssue> LoadOrCreateIssueAsync(int? issueId);
+        Task<Issue> LoadOrCreateIssueAsync(int? issueId);
     }
 
     public class ScopeModel : IScopeModel
@@ -66,7 +65,7 @@ namespace Kamban.Models
 
             var columnHeaders = columns.Select(c => c.Name).ToArray();
 
-            return new TagDimension<string, LocalIssue>(
+            return new TagDimension<string, Issue>(
                 tags: columnHeaders,
                 getItemTags: i => new[] {
                     columns.Where(x => x.Id == i.ColumnId).Select(x => x.Name).FirstOrDefault()
@@ -104,7 +103,7 @@ namespace Kamban.Models
 
             var rowHeaders = rows.Select(r => r.Name).ToArray();
 
-            return new TagDimension<string, LocalIssue>(
+            return new TagDimension<string, Issue>(
                 tags: rowHeaders,
                 getItemTags: i => new[] {
                     rows.Where(x=>x.Id == i.RowId).Select(x=>x.Name).FirstOrDefault()
@@ -116,7 +115,7 @@ namespace Kamban.Models
             );
         }
 
-        public async Task<IEnumerable<LocalIssue>> GetIssuesByBoardIdAsync(int boardId)
+        public async Task<IEnumerable<Issue>> GetIssuesByBoardIdAsync(int boardId)
         {
             return await Task.Run(() => repo.GetIssuesByBoardId(boardId));
         }
@@ -150,9 +149,9 @@ namespace Kamban.Models
             return await Task.Run(() => repo.GetColumns(boardId));
         }
 
-        public async Task<LocalIssue> LoadOrCreateIssueAsync(int? issueId)
+        public async Task<Issue> LoadOrCreateIssueAsync(int? issueId)
         {
-            var t = new LocalIssue();
+            var t = new Issue();
             if (issueId.HasValue)
                 t = await Task.Run(() => repo.GetIssue(issueId.Value));
 
@@ -197,7 +196,7 @@ namespace Kamban.Models
             repo.CreateOrUpdateRow(row);
         }
 
-        public void CreateOrUpdateIssueAsync(LocalIssue issue)
+        public void CreateOrUpdateIssueAsync(Issue issue)
         {
             repo.CreateOrUpdateIssue(issue);
         }

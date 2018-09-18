@@ -1,6 +1,5 @@
 ﻿using Autofac;
-using Kamban.Models;
-using Kamban.SqliteLocalStorage;
+using Kamban.Model;
 using Kamban.Views;
 using Kamban.ViewModels;
 using Ui.Wpf.Common;

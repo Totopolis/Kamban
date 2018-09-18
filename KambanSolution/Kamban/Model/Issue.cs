@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Kamban.SqliteLocalStorage.Entities
+namespace Kamban.Model
 {
-    public class LocalIssue
+    public class Issue
     {
         public int Id { get; set; }
         public string Head { get; set; }

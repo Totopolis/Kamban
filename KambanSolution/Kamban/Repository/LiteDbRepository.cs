@@ -1,4 +1,4 @@
-﻿using Kamban.SqliteLocalStorage.Entities;
+﻿using Kamban.Model;
 using LiteDB;
 using System;
 using System.Collections.Generic;
@@ -30,7 +30,7 @@ namespace Kamban.Repository
                 if (typeof(T) == typeof(BoardInfo))
                 return "boards";
             else
-                if (typeof(T) == typeof(LocalIssue))
+                if (typeof(T) == typeof(Issue))
                 return "issues";
 
             throw new NotImplementedException();
@@ -57,7 +57,7 @@ namespace Kamban.Repository
             return Upsert(column);
         }
 
-        public LocalIssue CreateOrUpdateIssue(LocalIssue issue)
+        public Issue CreateOrUpdateIssue(Issue issue)
         {
             return Upsert(issue);
         }
@@ -67,11 +67,11 @@ namespace Kamban.Repository
             return Upsert(info);
         }
 
-        public List<LocalIssue> GetIssuesByBoardId(int boardId)
+        public List<Issue> GetIssuesByBoardId(int boardId)
         {
             using (var db = new LiteDatabase(fileName))
             {
-                var issues = db.GetCollection<LocalIssue>(Name<LocalIssue>());
+                var issues = db.GetCollection<Issue>(Name<Issue>());
                 var results = issues.Find(x => x.BoardId == boardId);
 
                 return results.ToList();
@@ -100,11 +100,11 @@ namespace Kamban.Repository
             }
         }
 
-        public LocalIssue GetIssue(int issueId)
+        public Issue GetIssue(int issueId)
         {
             using (var db = new LiteDatabase(fileName))
             {
-                var issues = db.GetCollection<LocalIssue>(Name<LocalIssue>());
+                var issues = db.GetCollection<Issue>(Name<Issue>());
                 var result = issues.Find(x => x.Id == issueId);
 
                 return result.First();
@@ -144,7 +144,7 @@ namespace Kamban.Repository
         {
             using (var db = new LiteDatabase(fileName))
             {
-                var issues = db.GetCollection<LocalIssue>(Name<LocalIssue>());
+                var issues = db.GetCollection<Issue>(Name<Issue>());
                 issues.Delete(x => x.Id == issueId);
             }
         }
