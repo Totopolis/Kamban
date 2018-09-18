@@ -50,7 +50,7 @@ namespace Kamban.ViewModels
                         ThemeManager.GetAccent(color),
                         ThemeManager.GetAppTheme("baselight")));
 
-            OpenRecentDbCommand = ReactiveCommand.CreateFromTask<string>(async (uri) =>
+            OpenRecentDbCommand = ReactiveCommand.Create<string>(async (uri) =>
             {
                 IsLoading = true;
 
@@ -91,7 +91,7 @@ namespace Kamban.ViewModels
                 }
             });
 
-            OpenFileCommand = ReactiveCommand.Create(() =>
+            OpenFileCommand = ReactiveCommand.Create(async () =>
             {
                 var dialog = new OpenFileDialog
                 {
@@ -101,9 +101,13 @@ namespace Kamban.ViewModels
 
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
+                    this.IsLoading = true;
+
                     var uri = dialog.FileName;
-                    OpenBoardView(uri).Wait();
+                    await OpenBoardView(uri);
                     AddRecent(uri);
+
+                    this.IsLoading = false;
                 }
             });
 
@@ -142,10 +146,12 @@ namespace Kamban.ViewModels
 
             var title = file.FullName;
 
+            await Task.Delay(500);
+
             shell.ShowDistinctView<BoardView>(title,
                 viewRequest: new BoardViewRequest {Scope = scope},
                 options: new UiShowOptions {Title = title});
-
+            
             AddRecent(uri);
 
             return true;

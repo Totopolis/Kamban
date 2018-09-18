@@ -113,28 +113,28 @@ namespace Kamban.ViewModels
                 SelectedIssue = null;
             });
 
-            this.WhenAnyValue(bvm => bvm.CurrentBoard)
-                .Where(val => val != null)
-                .Subscribe(_ => { RefreshContent(); });
+            this.ObservableForProperty(w => w.CurrentBoard)
+                .Where(v => v != null)
+                .Subscribe(async _ => await RefreshContent());
 
-            this.WhenAnyValue(w => w.IssueViewModel.IssueChanged)
-                .Where(ch => ch)
-                .Subscribe(_ => RefreshContent());
+            this.ObservableForProperty(w => w.IssueViewModel.IssueChanged)
+                .Where(ch => ch.Value == true)
+                .Subscribe(async _ => await RefreshContent());
         }
 
-        private void RefreshContent()
+        private async Task RefreshContent()
         {
             Issues.Clear();
 
             VerticalDimension = null;
-            VerticalDimension = scope.GetRowHeadersAsync(CurrentBoard.Id);
+            VerticalDimension = await scope.GetRowHeadersAsync(CurrentBoard.Id);
 
             HorizontalDimension = null;
-            HorizontalDimension = scope.GetColumnHeadersAsync(CurrentBoard.Id);
+            HorizontalDimension = await scope.GetColumnHeadersAsync(CurrentBoard.Id);
 
             CardContent = scope.GetCardContent();
 
-            Issues.PublishCollection(scope.GetIssuesByBoardIdAsync(CurrentBoard.Id));
+            Issues.PublishCollection(await scope.GetIssuesByBoardIdAsync(CurrentBoard.Id));
         }
 
         private async Task DeleteElement()
@@ -156,7 +156,7 @@ namespace Kamban.ViewModels
             else if (SelectedColumn != null)
                 scope.DeleteColumnAsync(SelectedColumn.Id);
 
-            RefreshContent();
+            await RefreshContent();
         }
 
         private void UpdateCard(object o)
@@ -189,7 +189,7 @@ namespace Kamban.ViewModels
                 scope.CreateOrUpdateColumnAsync(column);
             }
 
-            RefreshContent();
+            await RefreshContent();
         }
 
         private async Task UpdateVerticalHeader(object o)
@@ -204,7 +204,7 @@ namespace Kamban.ViewModels
                 scope.CreateOrUpdateRowAsync(row);
             }
 
-            RefreshContent();
+            await RefreshContent();
         }
 
         private async Task AddNewElement(string elementName)
@@ -239,7 +239,7 @@ namespace Kamban.ViewModels
                 }
             }
 
-            RefreshContent();
+            await RefreshContent();
         }
 
         private async Task<string> ShowColumnNameInput()
@@ -275,17 +275,7 @@ namespace Kamban.ViewModels
 
             scope = request.Scope;
 
-            var boards = scope.GetAllBoardsInFileAsync();
-
-            BoardsInFile.PublishCollection(boards);
-
-            CurrentBoard = !string.IsNullOrEmpty(request.SelectedBoardName)
-                ? BoardsInFile.First(board => board.Name == request.SelectedBoardName)
-                : BoardsInFile.First();
-
-            RefreshContent();
-
-            /*Observable.FromAsync(() => scope.GetAllBoardsInFileAsync())
+            Observable.FromAsync(() => scope.GetAllBoardsInFileAsync())
                 .ObserveOnDispatcher()
                 .Subscribe(boards =>
                 {
@@ -310,8 +300,8 @@ namespace Kamban.ViewModels
                     Observable.FromAsync(() => scope.GetIssuesByBoardIdAsync(CurrentBoard.Id))
                         .ObserveOnDispatcher()
                         .Subscribe(issues =>
-                            Issues.AddRange(issues)); 
-                });*/
+                            Issues.AddRange(issues));
+                });
         }
-    }
+    }//end of class
 }

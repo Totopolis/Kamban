@@ -84,26 +84,7 @@ namespace Kamban.ViewModels
 
                 IssueChanged = false;
 
-                var rows = scope.GetRowsByBoardIdAsync(board.Id);
-                AwailableRows.PublishCollection(rows);
-                Row = AwailableRows.First();
-
-                var columns = scope.GetColumnsByBoardIdAsync(board.Id);
-                AwailableColumns.PublishCollection(columns);
-                Column = AwailableColumns.First();
-
-                var issueId = request.IssueId;
-
-                if (issueId != null && issueId > 0)
-                {
-                    var issue = scope.LoadOrCreateIssueAsync(issueId);
-
-                    mapper.Map(issue, this);
-                    Row = AwailableRows.First(r => r.Id == Row.Id);
-                    Column = AwailableColumns.First(c => c.Id == Column.Id);
-                }
-
-                /*Observable.FromAsync(() => scope.GetRowsByBoardIdAsync(board.Id))
+                Observable.FromAsync(() => scope.GetRowsByBoardIdAsync(board.Id))
                     .ObserveOnDispatcher()
                     .Subscribe(rows =>
                     {
@@ -128,12 +109,12 @@ namespace Kamban.ViewModels
                         .Subscribe(issue =>
                         {
                             mapper.Map(issue, this);
-                            Row = AwailableRows.First(r => r.Id       == Row.Id);
+                            Row = AwailableRows.First(r => r.Id == Row.Id);
                             Column = AwailableColumns.First(c => c.Id == Column.Id);
-                        });*/
+                        });
             }
 
-            Title = $"Редактирование задачи {Head}";
+            Title = $"Issue edit {Head}";
             IsOpened = true;
         }
 

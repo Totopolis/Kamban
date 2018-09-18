@@ -196,7 +196,7 @@ namespace Kamban.ViewModels
 
             else
             {
-                var boards = scope.GetAllBoardsInFileAsync();
+                var boards = await scope.GetAllBoardsInFileAsync();
                 BoardsInFile.PublishCollection(boards.Select(board => board.Name));
 
                 if (BoardsInFile.Contains(BoardName))

@@ -27,13 +27,12 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <loadin:LoadingIndicator 
-            Panel.ZIndex="10"
-            Grid.Column="0" 
+        <loadin:LoadingIndicator
+            Grid.Column="0"
             Grid.Row="0"
             Grid.ColumnSpan="4"
             Grid.RowSpan="3"
-            SpeedRatio="3" 
+            SpeedRatio="3"
             IsActive="{Binding IsLoading}" 
             Style="{DynamicResource LoadingIndicatorArcsStyle}"/>
         

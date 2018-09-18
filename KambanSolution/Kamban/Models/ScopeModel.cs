@@ -15,13 +15,14 @@ namespace Kamban.Models
     // TODO: local or server access
     public interface IScopeModel
     {
-        IDimension GetColumnHeadersAsync(int boardId);
-        IDimension GetRowHeadersAsync(int boardId);
+        Task<IDimension> GetColumnHeadersAsync(int boardId);
+        Task<IDimension> GetRowHeadersAsync(int boardId);
 
-        List<RowInfo> GetRowsByBoardIdAsync(int boardId);
-        List<ColumnInfo> GetColumnsByBoardIdAsync(int boardId);
-        IEnumerable<LocalIssue> GetIssuesByBoardIdAsync(int boardId);
-        List<BoardInfo> GetAllBoardsInFileAsync();
+        Task<List<RowInfo>> GetRowsByBoardIdAsync(int boardId);
+        Task<List<ColumnInfo>> GetColumnsByBoardIdAsync(int boardId);
+        Task<IEnumerable<LocalIssue>> GetIssuesByBoardIdAsync(int boardId);
+        Task<List<BoardInfo>> GetAllBoardsInFileAsync();
+
         CardContent GetCardContent();
         RowInfo GetSelectedRow(string rowName);
         ColumnInfo GetSelectedColumn(string colName);
@@ -35,7 +36,7 @@ namespace Kamban.Models
         void CreateOrUpdateRowAsync(RowInfo row);
         void CreateOrUpdateIssueAsync(LocalIssue issue);
 
-        LocalIssue LoadOrCreateIssueAsync(int? issueId);
+        Task<LocalIssue> LoadOrCreateIssueAsync(int? issueId);
     }
 
     public class ScopeModel : IScopeModel
@@ -53,15 +54,15 @@ namespace Kamban.Models
 
         #region GettingInfo
 
-        public List<BoardInfo> GetAllBoardsInFileAsync()
+        public async Task<List<BoardInfo>> GetAllBoardsInFileAsync()
         {
-            return repo.GetAllBoardsInFile();
+            return await Task.Run(() => repo.GetAllBoardsInFile());
         }
 
-        public IDimension GetColumnHeadersAsync(int boardId)
+        public async Task<IDimension> GetColumnHeadersAsync(int boardId)
         {
             columns.Clear();
-            columns = repo.GetColumns(boardId);
+            columns = await Task.Run(() => repo.GetColumns(boardId));
 
             var columnHeaders = columns.Select(c => c.Name).ToArray();
 
@@ -76,9 +77,9 @@ namespace Kamban.Models
                     .ToArray());
         }
 
-        public CardsColors GetTaskColorsAsync(int boardId)
+        public async Task<CardsColors> GetTaskColorsAsync(int boardId)
         {
-            var isss = GetIssuesByBoardIdAsync(boardId);
+            var isss = await GetIssuesByBoardIdAsync(boardId);
 
             var cardsColors = new CardsColors
             {
@@ -96,10 +97,10 @@ namespace Kamban.Models
             return cardsColors;
         }
 
-        public IDimension GetRowHeadersAsync(int boardId)
+        public async Task<IDimension> GetRowHeadersAsync(int boardId)
         {
             rows.Clear();
-            rows = repo.GetRows(boardId);
+            rows = await Task.Run(() => repo.GetRows(boardId));
 
             var rowHeaders = rows.Select(r => r.Name).ToArray();
 
@@ -115,9 +116,9 @@ namespace Kamban.Models
             );
         }
 
-        public IEnumerable<LocalIssue> GetIssuesByBoardIdAsync(int boardId)
+        public async Task<IEnumerable<LocalIssue>> GetIssuesByBoardIdAsync(int boardId)
         {
-            return repo.GetIssuesByBoardId(boardId);
+            return await Task.Run(() => repo.GetIssuesByBoardId(boardId));
         }
 
         public CardContent GetCardContent()
@@ -139,21 +140,21 @@ namespace Kamban.Models
             return columns.FirstOrDefault(c => c.Name == colName);
         }
 
-        public List<RowInfo> GetRowsByBoardIdAsync(int boardId)
+        public async Task<List<RowInfo>> GetRowsByBoardIdAsync(int boardId)
         {
-            return repo.GetRows(boardId);
+            return await Task.Run(() => repo.GetRows(boardId));
         }
 
-        public List<ColumnInfo> GetColumnsByBoardIdAsync(int boardId)
+        public async Task<List<ColumnInfo>> GetColumnsByBoardIdAsync(int boardId)
         {
-            return repo.GetColumns(boardId);
+            return await Task.Run(() => repo.GetColumns(boardId));
         }
 
-        public LocalIssue LoadOrCreateIssueAsync(int? issueId)
+        public async Task<LocalIssue> LoadOrCreateIssueAsync(int? issueId)
         {
             var t = new LocalIssue();
             if (issueId.HasValue)
-                t = repo.GetIssue(issueId.Value);
+                t = await Task.Run(() => repo.GetIssue(issueId.Value));
 
             return t;
         }
@@ -201,8 +202,6 @@ namespace Kamban.Models
             repo.CreateOrUpdateIssue(issue);
         }
 
-
         #endregion
-
-    }
+    }//end of class
 }
