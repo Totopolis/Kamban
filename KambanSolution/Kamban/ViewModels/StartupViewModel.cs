@@ -58,8 +58,8 @@ namespace Kamban.ViewModels
                 {
                     RemoveRecent(uri);
 
-                    await DialogCoordinator.Instance.ShowMessageAsync(this, "Ошибка",
-                        "Файл был удалён или перемещён из данной папки");
+                    await DialogCoordinator.Instance.ShowMessageAsync(this, "Error",
+                        "File was deleted or moved");
                 }
 
                 IsLoading = false;
@@ -74,8 +74,8 @@ namespace Kamban.ViewModels
             {
                 var dialog = new OpenFileDialog
                 {
-                    Filter = @"SQLite DataBase | *.db",
-                    Title = @"Выбор существующего файла базы данных"
+                    Filter = @"Kamban DataBase | *.db",
+                    Title = @"Select exists database"
                 };
 
                 if (dialog.ShowDialog() == DialogResult.OK)
@@ -96,7 +96,7 @@ namespace Kamban.ViewModels
                 var dialog = new OpenFileDialog
                 {
                     Filter = @"SQLite DataBase | *.db",
-                    Title = @"Выбор существующего файла базы данных"
+                    Title = @"Select exists database"
                 };
 
                 if (dialog.ShowDialog() == DialogResult.OK)

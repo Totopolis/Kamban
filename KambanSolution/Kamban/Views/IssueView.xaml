@@ -6,6 +6,7 @@
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:wpfresources="clr-namespace:Kamban.Views.WpfResources"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              FontSize="15"
@@ -15,6 +16,10 @@
     <!--UserControl.Resources>
         <ResourceDictionary Source="WpfResources/TemplatesDictionary.xaml"/>
     </-->
+
+    <UserControl.InputBindings>
+        <KeyBinding Command="{Binding CancelCommand}" Key="Esc" />
+    </UserControl.InputBindings>
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -75,7 +80,7 @@
                                 <ColumnDefinition Width="30"/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            
+
                             <Canvas Grid.Column="0" Grid.ColumnSpan="1">
                                 <Ellipse 
                                     Width="18" 
@@ -86,7 +91,7 @@
                                     Canvas.Left="0"
                                     Canvas.Top="0"/>
                             </Canvas>
-                            
+
                             <TextBlock 
                                 Grid.Column="1"
                                 Grid.ColumnSpan="1"
@@ -96,7 +101,7 @@
 
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            
+
             <!--xctk:ColorPicker ShowTabHeaders="True"
                               Foreground="Gray"
                           BorderThickness="0" 
@@ -123,18 +128,55 @@
                  TextWrapping="Wrap"
                  AcceptsReturn="True"
                  mah:TextBoxHelper.Watermark="Type description..."
-                 mah:TextBoxHelper.ClearTextButton="True" />
+                 mah:TextBoxHelper.ClearTextButton="True">
+            <TextBox.InputBindings>
+                <KeyBinding Command="{Binding SaveCommand}" Modifiers="Ctrl" Key="Return" />
+            </TextBox.InputBindings>
+        </TextBox>
 
+        <xctk:DropDownButton
+            FontFamily="Segoe UI, Lucida Sans Unicode, Verdana"
+            FontSize="12"
+            FontStretch="Normal"
+            Height="20"
+            Grid.Row="4"
+            Grid.RowSpan="1"
+            HorizontalAlignment="Left"
+            Foreground="Gray"
+            Background="{Binding Background}"
+            DropDownContentBackground="{Binding Background}"
+            BorderThickness="0">
+
+            <xctk:DropDownButton.Content>
+                <TextBlock>Actions</TextBlock>
+            </xctk:DropDownButton.Content>
+
+            <xctk:DropDownButton.DropDownContent>
+                <Menu Background="{Binding Background}" FontFamily="Segoe UI, Lucida Sans Unicode, Verdana"
+            FontSize="12"
+            FontStretch="Normal"
+            Foreground="Gray">
+                    <Menu.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel Orientation="Vertical"/>
+                        </ItemsPanelTemplate>
+                    </Menu.ItemsPanel>
+                    
+                    <MenuItem Background="{Binding Background}" Header="Delete" Command="{Binding DeleteCommand}"/>
+                    <MenuItem Background="{Binding Background}" Header="Archive"/>
+                </Menu>
+            </xctk:DropDownButton.DropDownContent>
+        </xctk:DropDownButton>
+        
         <StackPanel Grid.Row="4"
                     Grid.RowSpan="1" 
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
             <Button Content="Save" Width="60" Margin="10" Padding="5" TabIndex="3"
-                    Command="{Binding SaveCommand}"/>
+                    Command="{Binding SaveCommand}" Background="{Binding Background}"/>
             <Button Content="Cancel" Width="60" Margin="10" Padding="5"
-                    Command="{Binding CancelCommand}"/>
+                    Command="{Binding CancelCommand}" Background="{Binding Background}"/>
         </StackPanel>
-
 
     </Grid>
 </UserControl>

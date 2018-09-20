@@ -38,7 +38,7 @@ namespace Kamban.ViewModels
             };
         }
     }
-
+    
     public class IssueViewModel : ViewModelBase, IInitializableViewModel
     {
         private readonly IMapper mapper;
@@ -58,12 +58,14 @@ namespace Kamban.ViewModels
         [Reactive] public string Body { get; set; }
         [Reactive] public RowInfo Row { get; set; }
         [Reactive] public ColumnInfo Column { get; set; }
-        public string Color { get; set; }
+        [Reactive] public string Color { get; set; }
 
         public ReactiveCommand CancelCommand { get; set; }
         public ReactiveCommand SaveCommand { get; set; }
         [Reactive] public bool IsOpened { get; set; }
         [Reactive] public bool IssueChanged { get; set; }
+
+        public ReactiveCommand DeleteCommand { get; set; }
 
         [Reactive] public Brush Background { get; set; }
 
@@ -81,8 +83,10 @@ namespace Kamban.ViewModels
         {
             mapper = CreateMapper();
 
-            var issueFilled = this.WhenAnyValue(t => t.Head, t => t.Row, t => t.Column,
-                (sh, sr, sc) => sr != null && sc != null && !string.IsNullOrEmpty(sh));
+            var issueFilled = this.WhenAnyValue(
+                t => t.Head, t => t.Row, t => t.Column, t => t.Color,
+                (sh, sr, sc, cc) => 
+                sr != null && sc != null && !string.IsNullOrEmpty(sh) && !string.IsNullOrEmpty(cc));
 
             SaveCommand = ReactiveCommand.Create(() =>
             {
@@ -102,6 +106,16 @@ namespace Kamban.ViewModels
             }, issueFilled);
 
             CancelCommand = ReactiveCommand.Create(() => IsOpened = false);
+
+            DeleteCommand = ReactiveCommand.Create(Delete);
+        }
+
+        public void Delete()
+        {
+            scope.DeleteIssueAsync(Id);
+
+            IssueChanged = true;
+            IsOpened = false;
         }
 
         public void Initialize(ViewRequest viewRequest)

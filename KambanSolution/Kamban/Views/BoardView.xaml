@@ -65,7 +65,7 @@
             <Button Content="Delete" Command="{Binding DeleteCommand}" Margin="5"/>
         </StackPanel>
 
-        <kanbanControl:Kanban 
+        <kanbanControl:Kanban
             Grid.Row="1"
             Grid.RowSpan="1"
             Grid.Column="0"
