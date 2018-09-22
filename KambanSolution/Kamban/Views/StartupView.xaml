@@ -8,111 +8,104 @@
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:metro="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns:loadin="clr-namespace:LoadingIndicators.WPF;assembly=LoadingIndicators.WPF"
-        mc:Ignorable="d">
+        mc:Ignorable="d" Background="#191970">
 
     <UserControl.Resources>
-        <ResourceDictionary Source="WpfResources/TemplatesDictionary.xaml"/>
+
+        <Style x:Key="LargeTileStyle" TargetType="metro:Tile">
+            <Setter Property="Width" Value="300" />
+            <Setter Property="Height" Value="125" />
+            <Setter Property="TitleFontSize" Value="10" />
+        </Style>
+
+        <Style x:Key="SmallTileStyle" TargetType="metro:Tile">
+            <Setter Property="Width" Value="147" />
+            <Setter Property="Height" Value="125" />
+            <Setter Property="TitleFontSize" Value="10" />
+        </Style>
     </UserControl.Resources>
 
-    <Grid >
-        <Grid.RowDefinitions>
-            <RowDefinition Height="90"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="87*"/>
+            <ColumnDefinition Width="430*"/>
         </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10*"/>
+            <RowDefinition Height="40*"/>
+            <RowDefinition Height="10*"/>
+            <RowDefinition Height="40*"/>
+        </Grid.RowDefinitions>
 
         <loadin:LoadingIndicator
             Grid.Column="0"
             Grid.Row="0"
-            Grid.ColumnSpan="4"
-            Grid.RowSpan="3"
+            Grid.ColumnSpan="2"
+            Grid.RowSpan="4"
             SpeedRatio="3"
             IsActive="{Binding IsLoading}" 
             Style="{DynamicResource LoadingIndicatorArcsStyle}"/>
         
-        <Label Grid.Row="1" Margin="5" BorderThickness="0" HorizontalAlignment="Stretch" Grid.ColumnSpan="4">
-            Lets work
-        </Label>
+        <TextBlock Grid.Column="1"
+                   VerticalAlignment="Center"
+                   Text="Start"
+                   FontWeight="Light"
+                   Foreground="White"
+                   FontSize="30"
+                   FontFamily="Segoe UI" />
 
-        <metro:DropDownButton HorizontalAlignment="Left"
-                  Margin="2"
-                  VerticalAlignment="Top"
-            Content="Theme"
-                  ItemsSource="{x:Static metro:ThemeManager.Accents}"
-            DisplayMemberPath="Name">
-            <metro:DropDownButton.ItemContainerStyle>
-                <Style TargetType="MenuItem">
-                    <Setter Property="Command" 
-                            Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=DataContext.AccentChangeCommand}"/>
-                    <Setter Property="CommandParameter" Value="{Binding Path=Name}"/>
-                </Style>
-            </metro:DropDownButton.ItemContainerStyle>
-        </metro:DropDownButton>
+        <WrapPanel Grid.Row="1" Grid.Column="1" Width="940" Height="382" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <metro:Tile 
+                Title="Create new database"
+                Command="{Binding NewFileCommand}"
+                Style="{StaticResource LargeTileStyle}" 
+                Content="ImageHere" 
+                Background="Teal" 
+                Margin="3"/>
 
-        <Button Grid.Row="2" FontSize="16" Margin="5" Background="White" BorderThickness="1" BorderBrush="{DynamicResource AccentColorBrush}"  Grid.Column="0" Command="{Binding NewFileCommand}" Style="{DynamicResource  FlatButton}">
-            Create new database
-        </Button>
+            <metro:Tile 
+                Title="Create board in exists database"
+                Command="{Binding NewBoardCommand}"
+                Style="{StaticResource LargeTileStyle}"
+                Margin="3"/>
 
-        <Button Grid.Row="2"  FontSize="16" Margin="5" Background="White" BorderThickness="1" BorderBrush="{DynamicResource AccentColorBrush}"  Grid.Column="1" Command="{Binding NewBoardCommand}" Style="{DynamicResource  FlatButton}">
-            Create board in exists database
-        </Button>
+            <metro:Tile 
+                Title="Open database" 
+                Command="{Binding OpenFileCommand}"
+                Style="{StaticResource LargeTileStyle}" 
+                Background="Green" />
+            
+            <!--metro:Tile Title="222" Style="{StaticResource LargeTileStyle}" Background="#D2691E" />
+            <metro:Tile Title="111" Style="{StaticResource LargeTileStyle}" Background="#1E90FF" />
+            <metro:Tile Title="News" Style="{StaticResource SmallTileStyle}" Background="#1E90FF" /-->
+            <metro:Tile Title="Settings" Style="{StaticResource SmallTileStyle}" Background="Green" />
+        </WrapPanel>
 
-        <Button Grid.Row="2"  FontSize="16" Margin="5" Background="White" BorderThickness="1" BorderBrush="{DynamicResource AccentColorBrush}"  Grid.Column="2" Command="{Binding OpenFileCommand}" Style="{DynamicResource  FlatButton}">
-            Open database
-        </Button>
+        <TextBlock 
+            Grid.Row="2"
+            Grid.Column="1"
+            VerticalAlignment="Center"
+            Text="Recents"
+            FontWeight="Light"
+            Foreground="White"
+            FontSize="30"
+            FontFamily="Segoe UI"/>
 
-        <Border Grid.Row="2" Grid.Column="3" Margin="5" BorderThickness="1" BorderBrush="{DynamicResource AccentColorBrush}" >
-            <StackPanel >
-
-                <TextBlock FontSize="16"  Margin="5" HorizontalAlignment="Stretch" TextAlignment="Center">
-            Open recent
-                </TextBlock>
-
-                <ListBox Background="White" ItemsSource="{Binding BaseList}">
-                    <ListBox.ItemContainerStyle>
-                        <Style>
-                            <Style.Triggers>
-                                <Trigger Property="Selector.IsSelected" Value="True">
-                                    <Setter Property="TextElement.Foreground" Value="White"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ListBox.ItemContainerStyle>
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <Button Content="{Binding}"
-                            Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}},
-                            Path=DataContext.OpenRecentDbCommand}"
-                            CommandParameter="{Binding}" 
-                             Height="40" 
-                            />
-
-                                <Button Grid.Column="1" 
-                                        Width="35"
-                                        Margin="2 0 2 0"
-                                Command="{Binding 
-                                RelativeSource={RelativeSource AncestorType={x:Type ListBox}},
-                                Path=DataContext.RemoveRecentCommand}" CommandParameter="{Binding}" 
-                                Content="{iconPacks:Entypo SquaredCross}" 
-                                />
-                            </Grid>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </StackPanel>
-        </Border>
-
+        <WrapPanel Grid.Row="3" Grid.Column="1" Width="940" Height="382" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <ItemsControl ItemsSource="{Binding Recents}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <metro:Tile
+                            Margin="3"
+                            Style="{StaticResource LargeTileStyle}"
+                            Title="{Binding}"
+                            Command="{Binding Path=DataContext.OpenRecentDbCommand, 
+                                RelativeSource={RelativeSource Mode=FindAncestor, 
+                                AncestorType={x:Type UserControl}}}"
+                            CommandParameter="{Binding}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </WrapPanel>
     </Grid>
 </UserControl>

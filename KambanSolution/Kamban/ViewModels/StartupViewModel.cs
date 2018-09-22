@@ -20,7 +20,7 @@ namespace Kamban.ViewModels
 {
     public class StartupViewModel : ViewModelBase
     {
-        public ReactiveList<string> BaseList { get; set; }
+        public ReactiveList<string> Recents { get; set; }
         public ReactiveCommand NewFileCommand { get; set; }
         public ReactiveCommand NewBoardCommand { get; set; }
         public ReactiveCommand OpenFileCommand { get; set; }
@@ -42,7 +42,7 @@ namespace Kamban.ViewModels
             this.appModel.LoadConfig();
 
             var recent = this.appModel.GetRecentDocuments();
-            BaseList = new ReactiveList<string>(recent.Take(3));
+            Recents = new ReactiveList<string>(recent.Take(3));
 
             AccentChangeCommand =
                 ReactiveCommand.Create<string>(color=> 
@@ -119,7 +119,7 @@ namespace Kamban.ViewModels
         {
             appModel.RemoveRecent(uri);
             appModel.SaveConfig();
-            BaseList.PublishCollection(appModel.GetRecentDocuments().Take(3));
+            Recents.PublishCollection(appModel.GetRecentDocuments().Take(3));
         }
 
         private void AddRecent(string uri)
@@ -127,10 +127,10 @@ namespace Kamban.ViewModels
             appModel.AddRecent(uri);
             appModel.SaveConfig();
 
-            BaseList.Remove(uri);
-            BaseList.Insert(0, uri);
-            if (BaseList.Count > 3)
-                BaseList.RemoveAt(3);
+            Recents.Remove(uri);
+            Recents.Insert(0, uri);
+            if (Recents.Count > 3)
+                Recents.RemoveAt(3);
         }
 
         private async Task<bool> OpenBoardView(string uri)
