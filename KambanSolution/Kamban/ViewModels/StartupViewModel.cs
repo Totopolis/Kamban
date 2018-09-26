@@ -4,6 +4,7 @@ using System.Reactive;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Input;
 using System.Windows.Threading;
 using Kamban.Model;
 using Kamban.Views;
@@ -31,12 +32,12 @@ namespace Kamban.ViewModels
         [Reactive]
         public bool IsLoading { get; set; }
 
-        private readonly IMainShell shell;
+        private readonly IShell shell;
         private readonly IAppModel appModel;
 
         public StartupViewModel(IShell shell, IAppModel appModel)
         {
-            this.shell = shell as IMainShell;
+            this.shell = shell as IShell;
             this.appModel = appModel;
 
             this.appModel.LoadConfig();
@@ -45,7 +46,7 @@ namespace Kamban.ViewModels
             Recents = new ReactiveList<string>(recent.Take(3));
 
             AccentChangeCommand =
-                ReactiveCommand.Create<string>(color=> 
+                ReactiveCommand.Create<string>(color =>
                     ThemeManager.ChangeAppStyle(Application.Current,
                         ThemeManager.GetAccent(color),
                         ThemeManager.GetAppTheme("baselight")));
@@ -54,7 +55,7 @@ namespace Kamban.ViewModels
             {
                 IsLoading = true;
 
-                if (! await OpenBoardView(uri))
+                if (!await OpenBoardView(uri))
                 {
                     RemoveRecent(uri);
 
@@ -68,7 +69,8 @@ namespace Kamban.ViewModels
             RemoveRecentCommand = ReactiveCommand.Create<string>(RemoveRecent);
 
             NewFileCommand = ReactiveCommand.Create(() =>
-                this.shell.ShowDistinctView<WizardView>("Creating new file", new WizardViewRequest {InExistedFile = false}));
+                this.shell.ShowView<WizardView>(
+                    new WizardViewRequest { ViewId = "Creating new file", InExistedFile = false }));
 
             NewBoardCommand = ReactiveCommand.Create(() =>
             {
@@ -83,8 +85,9 @@ namespace Kamban.ViewModels
                     var uri = dialog.FileName;
 
                     AddRecent(uri);
-                    this.shell.ShowDistinctView<WizardView>($"Creating new board in {uri}", new WizardViewRequest
+                    this.shell.ShowView<WizardView>(new WizardViewRequest
                     {
+                        ViewId = $"Creating new board in {uri}",
                         InExistedFile = true,
                         Uri = uri
                     });
@@ -145,10 +148,10 @@ namespace Kamban.ViewModels
 
             await Task.Delay(200);
 
-            shell.ShowDistinctView<BoardView>(title,
-                viewRequest: new BoardViewRequest {Scope = scope},
-                options: new UiShowOptions {Title = title});
-            
+            shell.ShowView<BoardView>(
+                viewRequest: new BoardViewRequest { ViewId = title, Scope = scope },
+                options: new UiShowOptions { Title = title });
+
             AddRecent(uri);
 
             return true;
@@ -156,9 +159,14 @@ namespace Kamban.ViewModels
 
         public void Initialize(ViewRequest viewRequest)
         {
-            shell.AddGlobalCommand("File", "New db", "NewFileCommand", this);
-            shell.AddGlobalCommand("File", "New board", "NewBoardCommand", this);
-            shell.AddGlobalCommand("File", "Open", "OpenFileCommand", this);
+            shell.AddGlobalCommand("File", "New db", "NewFileCommand", this)
+                .SetHotKey(ModifierKeys.Control, Key.N);
+
+            shell.AddGlobalCommand("File", "New board", "NewBoardCommand", this)
+                .SetHotKey(ModifierKeys.Control | ModifierKeys.Shift, Key.N);
+
+            shell.AddGlobalCommand("File", "Open", "OpenFileCommand", this)
+                .SetHotKey(ModifierKeys.Control, Key.O);
 
             shell.AddGlobalCommand("File", "Exit", null, this);
         }

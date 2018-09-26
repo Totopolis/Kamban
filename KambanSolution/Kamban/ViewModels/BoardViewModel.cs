@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Kamban.Model;
 using MahApps.Metro.Controls.Dialogs;
 using ReactiveUI;
@@ -32,9 +33,6 @@ namespace Kamban.ViewModels
 
         [Reactive] public IssueViewModel IssueViewModel { get; set; }
 
-        public ReactiveList<string> Entities { get; }
-            = new ReactiveList<string>() { "Task", "Column", "Row" };
-
         public ReactiveList<Issue> Issues { get; internal set; }
 
         public ReactiveCommand RefreshCommand { get; set; }
@@ -43,19 +41,16 @@ namespace Kamban.ViewModels
         public ReactiveCommand<object, Unit> UpdateCardCommand { get; set; }
         public ReactiveCommand<object, Unit> UpdateHorizontalHeaderCommand { get; set; }
         public ReactiveCommand<object, Unit> UpdateVerticalHeaderCommand { get; set; }
-        public ReactiveCommand IssueSelectCommand { get; set; }
-        public ReactiveCommand RowHeaderSelectCommand { get; set; }
-        public ReactiveCommand ColumnHeaderSelectCommand { get; set; }
 
         public ReactiveCommand<Unit, Unit> CreateTiketCommand { get; set; }
         public ReactiveCommand<Unit, Unit> CreateColumnCommand { get; set; }
         public ReactiveCommand<Unit, Unit> CreateRowCommand { get; set; }
 
-        private readonly IMainShell shell;
+        private readonly IShell shell;
 
         public BoardViewModel(IShell shell)
         {
-            this.shell = shell as IMainShell;
+            this.shell = shell;
 
             Issues = new ReactiveList<Issue>();
             BoardsInFile = new ReactiveList<BoardInfo>();
@@ -122,36 +117,6 @@ namespace Kamban.ViewModels
 
                     await RefreshContent();
                 });
-
-            /*IssueSelectCommand = ReactiveCommand.Create<object>(o =>
-            {
-                SelectedIssue = o as Issue;
-
-                if (SelectedIssue == null) return;
-
-                SelectedColumn = null;
-                SelectedRow = null;
-            });
-
-            RowHeaderSelectCommand = ReactiveCommand.Create<object>(o =>
-            {
-                SelectedRow = scope.GetSelectedRow(o.ToString());
-
-                if (SelectedRow == null) return;
-
-                SelectedColumn = null;
-                SelectedIssue = null;
-            });
-
-            ColumnHeaderSelectCommand = ReactiveCommand.Create<object>(o =>
-            {
-                SelectedColumn = scope.GetSelectedColumn(o.ToString());
-
-                if (SelectedColumn == null) return;
-
-                SelectedRow = null;
-                SelectedIssue = null;
-            });*/
 
             this.ObservableForProperty(w => w.CurrentBoard)
                 .Where(v => v != null)
@@ -285,7 +250,9 @@ namespace Kamban.ViewModels
 
         public void Initialize(ViewRequest viewRequest)
         {
-            shell.AddVMTypeCommand("Edit", "Add tiket", "CreateTiketCommand", this);
+            shell.AddVMTypeCommand("Edit", "Add tiket", "CreateTiketCommand", this)
+                .SetHotKey(ModifierKeys.Control, Key.T);
+
             shell.AddVMTypeCommand("Edit", "Add column", "CreateColumnCommand", this);
             shell.AddVMTypeCommand("Edit", "Add row", "CreateRowCommand", this);
 
