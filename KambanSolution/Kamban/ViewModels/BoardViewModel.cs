@@ -38,25 +38,25 @@ namespace Kamban.ViewModels
         public ReactiveList<Issue> Issues { get; internal set; }
 
         public ReactiveCommand RefreshCommand { get; set; }
-
         public ReactiveCommand DeleteCommand { get; set; }
 
         public ReactiveCommand<object, Unit> UpdateCardCommand { get; set; }
-
         public ReactiveCommand<object, Unit> UpdateHorizontalHeaderCommand { get; set; }
-
         public ReactiveCommand<object, Unit> UpdateVerticalHeaderCommand { get; set; }
-
-        public ReactiveCommand<string, Unit> AddNewElementCommand { get; set; }
-
         public ReactiveCommand IssueSelectCommand { get; set; }
-
         public ReactiveCommand RowHeaderSelectCommand { get; set; }
-
         public ReactiveCommand ColumnHeaderSelectCommand { get; set; }
 
-        public BoardViewModel()
+        public ReactiveCommand<Unit, Unit> CreateTiketCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> CreateColumnCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> CreateRowCommand { get; set; }
+
+        private readonly IMainShell shell;
+
+        public BoardViewModel(IShell shell)
         {
+            this.shell = shell as IMainShell;
+
             Issues = new ReactiveList<Issue>();
             BoardsInFile = new ReactiveList<BoardInfo>();
 
@@ -81,8 +81,47 @@ namespace Kamban.ViewModels
             UpdateVerticalHeaderCommand = ReactiveCommand
                 .Create<object>(async ob => await UpdateVerticalHeader(ob));
 
-            AddNewElementCommand =
-                ReactiveCommand.CreateFromTask<string>(async name => await AddNewElement(name));
+            //AddNewElementCommand =
+            //    ReactiveCommand.CreateFromTask<string>(async name => await AddNewElement(name));
+
+            CreateTiketCommand = ReactiveCommand
+                .Create( () =>
+                {
+                    IssueViewModel.Initialize(new IssueViewRequest
+                    {
+                        IssueId = 0,
+                        Scope = scope,
+                        Board = CurrentBoard
+                    });
+                });
+
+            CreateColumnCommand = ReactiveCommand
+                .CreateFromTask( async () =>
+                {
+                    var newName = await ShowColumnNameInput();
+
+                    if (!string.IsNullOrEmpty(newName))
+                    {
+                        var newColumn = new ColumnInfo { Name = newName, Board = CurrentBoard };
+                        scope.CreateOrUpdateColumnAsync(newColumn);
+                    }
+
+                    await RefreshContent();
+                });
+
+            CreateRowCommand = ReactiveCommand
+                .CreateFromTask( async () =>
+                {
+                    var newName = await ShowRowNameInput();
+
+                    if (!string.IsNullOrEmpty(newName))
+                    {
+                        var newRow = new RowInfo { Name = newName, Board = CurrentBoard };
+                        scope.CreateOrUpdateRowAsync(newRow);
+                    }
+
+                    await RefreshContent();
+                });
 
             /*IssueSelectCommand = ReactiveCommand.Create<object>(o =>
             {
@@ -218,41 +257,6 @@ namespace Kamban.ViewModels
             await RefreshContent();
         }
 
-        private async Task AddNewElement(string elementName)
-        {
-            if (elementName == "Task")
-            {
-                IssueViewModel.Initialize(new IssueViewRequest
-                {
-                    IssueId = 0,
-                    Scope = scope,
-                    Board = CurrentBoard
-                });
-            }
-            else if (elementName == "Row")
-            {
-                var newName = await ShowRowNameInput();
-
-                if (!string.IsNullOrEmpty(newName))
-                {
-                    var newRow = new RowInfo { Name = newName, Board = CurrentBoard };
-                    scope.CreateOrUpdateRowAsync(newRow);
-                }
-            }
-            else if (elementName == "Column")
-            {
-                var newName = await ShowColumnNameInput();
-
-                if (!string.IsNullOrEmpty(newName))
-                {
-                    var newColumn = new ColumnInfo { Name = newName, Board = CurrentBoard };
-                    scope.CreateOrUpdateColumnAsync(newColumn);
-                }
-            }
-
-            await RefreshContent();
-        }
-
         private async Task<string> ShowColumnNameInput()
         {
             return await dialogCoordinator
@@ -281,6 +285,10 @@ namespace Kamban.ViewModels
 
         public void Initialize(ViewRequest viewRequest)
         {
+            shell.AddVMTypeCommand("Edit", "Add tiket", "CreateTiketCommand", this);
+            shell.AddVMTypeCommand("Edit", "Add column", "CreateColumnCommand", this);
+            shell.AddVMTypeCommand("Edit", "Add row", "CreateRowCommand", this);
+
             var request = viewRequest as BoardViewRequest;
             IssueViewModel = new IssueViewModel();
 

@@ -22,12 +22,12 @@ namespace Kamban
         {
             var builder = new ContainerBuilder();
 
-            builder.RegisterType<DistinctShell>()
+            builder.RegisterType<MainShell>()
                 .As<IShell>()
                 .SingleInstance();
 
             builder
-                .RegisterType<MainWindow>()
+                .RegisterType<Views.MainWindow>()
                 .As<IDockWindow>();
 
             builder

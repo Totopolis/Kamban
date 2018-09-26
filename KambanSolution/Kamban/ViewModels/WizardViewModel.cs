@@ -39,14 +39,14 @@ namespace Kamban.ViewModels
         public ReactiveCommand<LocalDimension, Unit> DeleteRowCommand { get; set; }
 
         private readonly IAppModel appModel;
-        private readonly IDistinctShell shell;
+        private readonly IMainShell shell;
         private readonly IDialogCoordinator dialogCoordinator = DialogCoordinator.Instance;
         private IScopeModel scope;
 
         public WizardViewModel(IAppModel appModel, IShell shell)
         {
             this.appModel = appModel;
-            this.shell = shell as IDistinctShell;
+            this.shell = shell as IMainShell;
             validator = new WizardValidator();
             Title = "Creating new file";
             FullTitle = "Creating new file";

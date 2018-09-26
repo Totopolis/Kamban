@@ -18,7 +18,7 @@ using Application = System.Windows.Application;
 
 namespace Kamban.ViewModels
 {
-    public class StartupViewModel : ViewModelBase
+    public class StartupViewModel : ViewModelBase, IInitializableViewModel
     {
         public ReactiveList<string> Recents { get; set; }
         public ReactiveCommand NewFileCommand { get; set; }
@@ -31,12 +31,12 @@ namespace Kamban.ViewModels
         [Reactive]
         public bool IsLoading { get; set; }
 
-        private readonly IDistinctShell shell;
+        private readonly IMainShell shell;
         private readonly IAppModel appModel;
 
         public StartupViewModel(IShell shell, IAppModel appModel)
         {
-            this.shell = shell as IDistinctShell;
+            this.shell = shell as IMainShell;
             this.appModel = appModel;
 
             this.appModel.LoadConfig();
@@ -112,7 +112,6 @@ namespace Kamban.ViewModels
             });
 
             this.IsLoading = false;
-
         } //ctor
 
         private void RemoveRecent(string uri)
@@ -153,6 +152,15 @@ namespace Kamban.ViewModels
             AddRecent(uri);
 
             return true;
+        }
+
+        public void Initialize(ViewRequest viewRequest)
+        {
+            shell.AddGlobalCommand("File", "New db", "NewFileCommand", this);
+            shell.AddGlobalCommand("File", "New board", "NewBoardCommand", this);
+            shell.AddGlobalCommand("File", "Open", "OpenFileCommand", this);
+
+            shell.AddGlobalCommand("File", "Exit", null, this);
         }
     }
 }

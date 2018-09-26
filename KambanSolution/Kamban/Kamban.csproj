@@ -123,12 +123,6 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="Ui.Wpf.Common, Version=1.0.9.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Ui.Wpf.Common.1.0.9\lib\net462\Ui.Wpf.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="Ui.Wpf.KanbanControl, Version=1.0.9.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Ui.Wpf.KanbanControl.1.0.9\lib\net462\Ui.Wpf.KanbanControl.dll</HintPath>
-    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -161,6 +155,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="MainShell.cs" />
     <Compile Include="Repository\IRepository.cs" />
     <Compile Include="Repository\LiteDbRepository.cs" />
     <Compile Include="Model\BoardInfo.cs" />
@@ -178,6 +173,9 @@
     <Compile Include="Views\IssueView.xaml.cs">
       <DependentUpon>IssueView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\StartupView.xaml.cs">
       <DependentUpon>StartupView.xaml</DependentUpon>
     </Compile>
@@ -190,7 +188,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\AppModel.cs" />
-    <Compile Include="Model\IDistinctShell.cs" />
     <Compile Include="Model\ScopeModel.cs" />
     <Compile Include="Model\ViewRequests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -232,6 +229,10 @@
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
+    <Page Include="Views\MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\StartupView.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
@@ -245,13 +246,22 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\WPF.Tools\Ui.Wpf.Common\Ui.Wpf.Common.csproj">
+      <Project>{fdb62508-affa-4281-8472-8d00fc1403ba}</Project>
+      <Name>Ui.Wpf.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\WPF.Tools\Ui.Wpf.KanbanControl\Ui.Wpf.KanbanControl.csproj">
+      <Project>{7f46f76e-ee01-4e40-9c31-bb61fff33e47}</Project>
+      <Name>Ui.Wpf.KanbanControl</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\Fody.3.2.3\build\Fody.targets" Condition="Exists('..\packages\Fody.3.2.3\build\Fody.targets')" />
+  <Import Project="..\packages\Fody.3.2.4\build\Fody.targets" Condition="Exists('..\packages\Fody.3.2.4\build\Fody.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Fody.3.2.3\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.3.2.3\build\Fody.targets'))" />
+    <Error Condition="!Exists('..\packages\Fody.3.2.4\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.3.2.4\build\Fody.targets'))" />
   </Target>
 </Project>

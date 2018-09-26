@@ -17,11 +17,6 @@
     </UserControl.Resources>
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="30*"/>
             <ColumnDefinition Width="20*"/>
@@ -29,45 +24,7 @@
             <ColumnDefinition Width="30*"/>
         </Grid.ColumnDefinitions>
         
-        <StackPanel
-            Grid.Row="0"
-            Grid.RowSpan="1"
-            Grid.Column="0"
-            Grid.ColumnSpan="4"
-            Orientation="Horizontal"
-            dd:DragDrop.IsDragSource="True"
-            dd:DragDrop.IsDropTarget="True">
-
-            <mah:SplitButton 
-                Height="auto" 
-                ItemsSource="{Binding BoardsInFile}"
-                DisplayMemberPath="Name"
-                SelectedItem="{Binding CurrentBoard}"
-                Margin="5"
-                BorderThickness="1" BorderBrush="{DynamicResource AccentBaseColorBrush}">
-            </mah:SplitButton>
-
-            <mah:DropDownButton 
-                Content="Create"
-                Height="auto" 
-                ItemsSource="{Binding Entities}"
-                Margin="5"
-                BorderThickness="1" BorderBrush="{DynamicResource AccentBaseColorBrush}">
-                <mah:DropDownButton.ItemContainerStyle>
-                    <Style TargetType="MenuItem">
-                        <Setter Property="Command" 
-                                Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=DataContext.AddNewElementCommand}"/>
-                        <Setter Property="CommandParameter" Value="{Binding}"/>
-                    </Style>
-                </mah:DropDownButton.ItemContainerStyle>
-            </mah:DropDownButton>
-
-            <Button Content="Delete" Command="{Binding DeleteCommand}" Margin="5"/>
-        </StackPanel>
-
         <kanbanControl:Kanban
-            Grid.Row="1"
-            Grid.RowSpan="1"
             Grid.Column="0"
             Grid.ColumnSpan="4"
             HorizontalDimension="{Binding HorizontalDimension}" 
@@ -79,14 +36,13 @@
             VerticalHeaderMouseClickCommand="{Binding RowHeaderSelectCommand}"
             HorizontalHeaderDoubleClickCommand="{Binding UpdateHorizontalHeaderCommand}"
             VerticalHeaderDoubleClickCommand="{Binding UpdateVerticalHeaderCommand}"
+            IsTabStop="False"
             />
 
         <mah:Flyout Header="112233"
                     BorderThickness="5" 
                     BorderBrush="{DynamicResource AccentBaseColorBrush}"
                     Position="Top"
-                    Grid.Row="1"
-                    Grid.RowSpan="1"
                     Grid.Column="0"
                     Grid.ColumnSpan="4"
                     CloseButtonVisibility="Hidden"
