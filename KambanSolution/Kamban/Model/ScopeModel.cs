@@ -14,6 +14,8 @@ namespace Kamban.Model
     // TODO: local or server access
     public interface IScopeModel
     {
+        string Uri { get; set; }
+
         Task<IDimension> GetColumnHeadersAsync(int boardId);
         Task<IDimension> GetRowHeadersAsync(int boardId);
 
@@ -47,9 +49,12 @@ namespace Kamban.Model
 
         public ScopeModel(IShell shell, IRepository repository, string uri)
         {
+            Uri = uri;
             repo = repository;
             repo.Initialize(uri);
         }
+
+        public string Uri { get; set; }
 
         #region GettingInfo
 

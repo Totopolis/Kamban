@@ -3,8 +3,10 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Input;
 using Kamban.Model;
+using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -45,6 +47,10 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> CreateTiketCommand { get; set; }
         public ReactiveCommand<Unit, Unit> CreateColumnCommand { get; set; }
         public ReactiveCommand<Unit, Unit> CreateRowCommand { get; set; }
+
+        public ReactiveCommand<Unit, Unit> AddBoardCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> NextBoardCommand { get; set; }
+        public ReactiveCommand<object, Unit> SelectBoardCommand { get; set; }
 
         private readonly IShell shell;
 
@@ -116,6 +122,32 @@ namespace Kamban.ViewModels
                     }
 
                     await RefreshContent();
+                });
+
+            AddBoardCommand = ReactiveCommand.Create(() =>
+            {
+                this.shell.ShowView<WizardView>(new WizardViewRequest
+                {
+                    ViewId = $"Creating new board in {scope.Uri}",
+                    InExistedFile = true,
+                    Uri = scope.Uri
+                });
+            });
+
+            NextBoardCommand = ReactiveCommand.Create(() =>
+            {
+                int indx = BoardsInFile.IndexOf(CurrentBoard);
+
+                CurrentBoard = indx < BoardsInFile.Count - 1 ?
+                    BoardsInFile[indx + 1] :
+                    BoardsInFile[0];
+            });
+
+            SelectBoardCommand = ReactiveCommand
+                .Create((object mi) =>
+                {
+                    string name = ((MenuItem)mi).Header as string;
+                    CurrentBoard = BoardsInFile.Where(x => x.Name == name).First();
                 });
 
             this.ObservableForProperty(w => w.CurrentBoard)
@@ -250,11 +282,17 @@ namespace Kamban.ViewModels
 
         public void Initialize(ViewRequest viewRequest)
         {
-            shell.AddVMTypeCommand("Edit", "Add tiket", "CreateTiketCommand", this)
+            shell.AddVMCommand("Edit", "Add tiket", "CreateTiketCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.T);
 
-            shell.AddVMTypeCommand("Edit", "Add column", "CreateColumnCommand", this);
-            shell.AddVMTypeCommand("Edit", "Add row", "CreateRowCommand", this);
+            shell.AddVMCommand("Edit", "Add column", "CreateColumnCommand", this);
+            shell.AddVMCommand("Edit", "Add row", "CreateRowCommand", this);
+
+            shell.AddVMCommand("Boards", "Add board", "AddBoardCommand", this)
+                .SetHotKey(ModifierKeys.Control | ModifierKeys.Shift, Key.N);
+
+            shell.AddVMCommand("Boards", "Next board", "NextBoardCommand", this)
+                .SetHotKey(ModifierKeys.Control, Key.Q);
 
             var request = viewRequest as BoardViewRequest;
             IssueViewModel = new IssueViewModel();
@@ -266,6 +304,9 @@ namespace Kamban.ViewModels
                 .Subscribe(boards =>
                 {
                     BoardsInFile.PublishCollection(boards);
+
+                    foreach (var brd in boards)
+                        shell.AddInstanceCommand("Boards", brd.Name, "SelectBoardCommand", this);
 
                     CurrentBoard = !string.IsNullOrEmpty(request.SelectedBoardName)
                         ? BoardsInFile.First(board => board.Name == request.SelectedBoardName)

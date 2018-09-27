@@ -23,7 +23,6 @@ namespace Kamban.ViewModels
     {
         public ReactiveList<string> Recents { get; set; }
         public ReactiveCommand NewFileCommand { get; set; }
-        public ReactiveCommand NewBoardCommand { get; set; }
         public ReactiveCommand OpenFileCommand { get; set; }
         public ReactiveCommand<string, Unit> OpenRecentDbCommand { get; set; }
         public ReactiveCommand<string, Unit> RemoveRecentCommand { get; set; }
@@ -71,28 +70,6 @@ namespace Kamban.ViewModels
             NewFileCommand = ReactiveCommand.Create(() =>
                 this.shell.ShowView<WizardView>(
                     new WizardViewRequest { ViewId = "Creating new file", InExistedFile = false }));
-
-            NewBoardCommand = ReactiveCommand.Create(() =>
-            {
-                var dialog = new OpenFileDialog
-                {
-                    Filter = @"Kamban DataBase | *.db",
-                    Title = @"Select exists database"
-                };
-
-                if (dialog.ShowDialog() == DialogResult.OK)
-                {
-                    var uri = dialog.FileName;
-
-                    AddRecent(uri);
-                    this.shell.ShowView<WizardView>(new WizardViewRequest
-                    {
-                        ViewId = $"Creating new board in {uri}",
-                        InExistedFile = true,
-                        Uri = uri
-                    });
-                }
-            });
 
             OpenFileCommand = ReactiveCommand.Create(async () =>
             {
@@ -161,9 +138,6 @@ namespace Kamban.ViewModels
         {
             shell.AddGlobalCommand("File", "New db", "NewFileCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.N);
-
-            shell.AddGlobalCommand("File", "New board", "NewBoardCommand", this)
-                .SetHotKey(ModifierKeys.Control | ModifierKeys.Shift, Key.N);
 
             shell.AddGlobalCommand("File", "Open", "OpenFileCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.O);
