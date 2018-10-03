@@ -47,28 +47,27 @@ namespace Kamban.MatrixControl
         public int Size { get => rowInfo.Height; set => throw new NotImplementedException(); }
     }
 
-    /*public class Cell : ReactiveObject
+    public interface ICard
     {
-        public Cell(Dimension row, Dimension column)
-        {
-            Column = column;
-            Row = row;
+        string Header { get; set; }
+        string Color { get; set; }
 
-            Cards = new ReactiveList<Card>();
+        object ColumnDeterminant { get; set; }
+        object RowDeterminant { get; set; }
+    }
+
+    public class CardViewModel : ReactiveObject, ICard
+    {
+        private readonly Issue issueInfo;
+
+        public CardViewModel(Issue iss)
+        {
+            issueInfo = iss;
         }
 
-        public Dimension Column { get; private set; }
-        public Dimension Row { get; private set; }
-
-        public ReactiveList<Card> Cards { get; set; }
-    }*/
-
-    public class Card : ReactiveObject
-    {
-        [Reactive] public string Header { get; set; }
-        [Reactive] public string Color { get; set; }
-
-        [Reactive] public object ColumnDeterminant { get; set; }
-        [Reactive] public object RowDeterminant { get; set; }
+        public string Header { get => issueInfo.Head; set => throw new NotImplementedException(); }
+        public string Color { get => issueInfo.Color; set => throw new NotImplementedException(); }
+        public object ColumnDeterminant { get => issueInfo.ColumnId; set => throw new NotImplementedException(); }
+        public object RowDeterminant { get => issueInfo.RowId; set => throw new NotImplementedException(); }
     }
 }

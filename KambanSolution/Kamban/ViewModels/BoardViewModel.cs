@@ -28,6 +28,7 @@ namespace Kamban.ViewModels
 
         public ReactiveList<IDim> Columns { get; set; }
         public ReactiveList<IDim> Rows { get; set; }
+        public ReactiveList<ICard> Cards { get; set; }
 
         // Obsolete
 
@@ -68,6 +69,7 @@ namespace Kamban.ViewModels
 
             Columns = new ReactiveList<IDim>();
             Rows = new ReactiveList<IDim>();
+            Cards = new ReactiveList<ICard>();
 
             Issues = new ReactiveList<Issue>();
             BoardsInFile = new ReactiveList<BoardInfo>();
@@ -325,26 +327,21 @@ namespace Kamban.ViewModels
 
                     // Actual
 
+                    
                     Observable.FromAsync(() => scope.GetColumnsByBoardIdAsync(CurrentBoard.Id))
                         .ObserveOnDispatcher()
-                        .Subscribe(columns =>
-                        {
-                            foreach (var it in columns)
-                            {
-                                var cvm = new ColumnViewModel(it);
-                                Columns.Add(cvm);
-                            }
-                        });
+                        .Subscribe(columns => Columns.AddRange(columns.Select(x => new ColumnViewModel(x))));
 
                     Observable.FromAsync(() => scope.GetRowsByBoardIdAsync(CurrentBoard.Id))
                         .ObserveOnDispatcher()
-                        .Subscribe(rows =>
+                        .Subscribe(rows => Rows.AddRange(rows.Select(x => new RowViewModel(x))));
+
+                    Observable.FromAsync(() => scope.GetIssuesByBoardIdAsync(CurrentBoard.Id))
+                        .ObserveOnDispatcher()
+                        .Subscribe(issues => 
                         {
-                            foreach (var it in rows)
-                            {
-                                var rvm = new RowViewModel(it);
-                                Rows.Add(rvm);
-                            }
+                            var toAdd = issues.Select(x => new CardViewModel(x));
+                            Cards.AddRange(toAdd);
                         });
 
                     // Obsolete

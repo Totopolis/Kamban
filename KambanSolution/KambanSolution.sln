@@ -5,10 +5,6 @@ VisualStudioVersion = 15.0.28010.2003
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kamban", "Kamban\Kamban.csproj", "{674D4998-BE6E-46DC-AA12-30373D83CB2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ui.Wpf.KanbanControl", "..\..\WPF.Tools\Ui.Wpf.KanbanControl\Ui.Wpf.KanbanControl.csproj", "{7F46F76E-EE01-4E40-9C31-BB61FFF33E47}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ui.Wpf.Common", "..\..\WPF.Tools\Ui.Wpf.Common\Ui.Wpf.Common.csproj", "{FDB62508-AFFA-4281-8472-8D00FC1403BA}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,14 +15,6 @@ Global
 		{674D4998-BE6E-46DC-AA12-30373D83CB2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{674D4998-BE6E-46DC-AA12-30373D83CB2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{674D4998-BE6E-46DC-AA12-30373D83CB2B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7F46F76E-EE01-4E40-9C31-BB61FFF33E47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7F46F76E-EE01-4E40-9C31-BB61FFF33E47}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7F46F76E-EE01-4E40-9C31-BB61FFF33E47}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7F46F76E-EE01-4E40-9C31-BB61FFF33E47}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FDB62508-AFFA-4281-8472-8D00FC1403BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FDB62508-AFFA-4281-8472-8D00FC1403BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FDB62508-AFFA-4281-8472-8D00FC1403BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FDB62508-AFFA-4281-8472-8D00FC1403BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
