@@ -10,6 +10,7 @@
              xmlns:kanbanControl="clr-namespace:Ui.Wpf.KanbanControl;assembly=Ui.Wpf.KanbanControl"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:viewModels="clr-namespace:Kamban.ViewModels"
+             xmlns:mykanban="clr-namespace:Kamban.MatrixControl"
              mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -23,8 +24,17 @@
             <ColumnDefinition Width="20*"/>
             <ColumnDefinition Width="30*"/>
         </Grid.ColumnDefinitions>
-        
-        <kanbanControl:Kanban
+
+        <mykanban:Matrix
+            Grid.Column="0"
+            Grid.ColumnSpan="4"
+            IsTabStop="False"
+            Columns="{Binding Columns}"
+            Rows="{Binding Rows}"
+            Cards="{Binding Issues}"
+            />
+
+        <!--kanbanControl:Kanban
             Grid.Column="0"
             Grid.ColumnSpan="4"
             HorizontalDimension="{Binding HorizontalDimension}" 
@@ -37,7 +47,7 @@
             HorizontalHeaderDoubleClickCommand="{Binding UpdateHorizontalHeaderCommand}"
             VerticalHeaderDoubleClickCommand="{Binding UpdateVerticalHeaderCommand}"
             IsTabStop="False"
-            />
+            /-->
 
         <mah:Flyout Header="112233"
                     BorderThickness="5" 

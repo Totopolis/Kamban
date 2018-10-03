@@ -17,7 +17,7 @@ namespace Kamban.ViewModels
     public class IssueViewRequest : ViewRequest
     {
         public int? IssueId { get; set; }
-        public IScopeModel Scope { get; set; }
+        public IBoardService Scope { get; set; }
         public BoardInfo Board { get; set; }
     }
 
@@ -42,7 +42,7 @@ namespace Kamban.ViewModels
     public class IssueViewModel : ViewModelBase, IInitializableViewModel
     {
         private readonly IMapper mapper;
-        private IScopeModel scope;
+        private IBoardService scope;
         private BoardInfo board;
 
         public int Id { get; set; }

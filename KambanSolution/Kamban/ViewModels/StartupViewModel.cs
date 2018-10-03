@@ -119,7 +119,7 @@ namespace Kamban.ViewModels
             if (!file.Exists)
                 return false;
 
-            IScopeModel scope = await Task.Run(() => appModel.LoadScope(uri));
+            IBoardService scope = await Task.Run(() => appModel.LoadBoardService(uri));
 
             var title = file.FullName;
 

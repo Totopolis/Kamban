@@ -123,6 +123,12 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="Ui.Wpf.Common, Version=1.0.11.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ui.Wpf.Common.1.0.11\lib\net462\Ui.Wpf.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Ui.Wpf.KanbanControl, Version=1.0.11.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ui.Wpf.KanbanControl.1.0.11\lib\net462\Ui.Wpf.KanbanControl.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -155,12 +161,16 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="MatrixControl\Matrix.xaml.cs">
+      <DependentUpon>Matrix.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MatrixControl\Common.cs" />
     <Compile Include="Repository\IRepository.cs" />
     <Compile Include="Repository\LiteDbRepository.cs" />
-    <Compile Include="Model\BoardInfo.cs" />
-    <Compile Include="Model\ColumnInfo.cs" />
-    <Compile Include="Model\Issue.cs" />
-    <Compile Include="Model\RowInfo.cs" />
+    <Compile Include="Repository\BoardInfo.cs" />
+    <Compile Include="Repository\ColumnInfo.cs" />
+    <Compile Include="Repository\Issue.cs" />
+    <Compile Include="Repository\RowInfo.cs" />
     <Compile Include="ViewModels\BoardDropHandler.cs" />
     <Compile Include="ViewModels\BoardViewModel.cs" />
     <Compile Include="ViewModels\IssueViewModel.cs" />
@@ -184,7 +194,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\AppModel.cs" />
-    <Compile Include="Model\ScopeModel.cs" />
+    <Compile Include="Model\BoardService.cs" />
     <Compile Include="Model\ViewRequests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -217,6 +227,10 @@
     <Resource Include="Tree-256.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="MatrixControl\Matrix.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\BoardView.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
@@ -237,16 +251,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\WPF.Tools\Ui.Wpf.Common\Ui.Wpf.Common.csproj">
-      <Project>{fdb62508-affa-4281-8472-8d00fc1403ba}</Project>
-      <Name>Ui.Wpf.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\WPF.Tools\Ui.Wpf.KanbanControl\Ui.Wpf.KanbanControl.csproj">
-      <Project>{7f46f76e-ee01-4e40-9c31-bb61fff33e47}</Project>
-      <Name>Ui.Wpf.KanbanControl</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.3.2.4\build\Fody.targets" Condition="Exists('..\packages\Fody.3.2.4\build\Fody.targets')" />

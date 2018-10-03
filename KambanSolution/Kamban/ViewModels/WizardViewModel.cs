@@ -41,7 +41,7 @@ namespace Kamban.ViewModels
         private readonly IAppModel appModel;
         private readonly IShell shell;
         private readonly IDialogCoordinator dialogCoordinator = DialogCoordinator.Instance;
-        private IScopeModel scope;
+        private IBoardService scope;
 
         public WizardViewModel(IAppModel appModel, IShell shell)
         {
@@ -190,7 +190,7 @@ namespace Kamban.ViewModels
 
             if (!InExistedFile)
             {
-                scope = appModel.CreateScope(uri);
+                scope = appModel.CreateBoardService(uri);
             }
 
             else
@@ -253,7 +253,7 @@ namespace Kamban.ViewModels
                 FileName = Path.GetFileName(uri);
                 FullTitle = $"Creating new board";
                 FullTitle = $"Creating new board in {uri}";
-                scope = appModel.CreateScope(uri);
+                scope = appModel.CreateBoardService(uri);
                 /*Observable.FromAsync(() => scope.GetAllBoardsInFileAsync())
                     .ObserveOnDispatcher()
                     .Subscribe(boards =>

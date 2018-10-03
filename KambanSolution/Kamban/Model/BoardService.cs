@@ -11,43 +11,48 @@ using Kamban.Repository;
 
 namespace Kamban.Model
 {
-    // TODO: local or server access
-    public interface IScopeModel
+    /// LiteDb or Api access to board by url
+    public interface IBoardService
     {
         string Uri { get; set; }
 
-        Task<IDimension> GetColumnHeadersAsync(int boardId);
-        Task<IDimension> GetRowHeadersAsync(int boardId);
+        // Actual
 
-        Task<List<RowInfo>> GetRowsByBoardIdAsync(int boardId);
-        Task<List<ColumnInfo>> GetColumnsByBoardIdAsync(int boardId);
-        Task<IEnumerable<Issue>> GetIssuesByBoardIdAsync(int boardId);
         Task<List<BoardInfo>> GetAllBoardsInFileAsync();
-
-        CardContent GetCardContent();
-        RowInfo GetSelectedRow(string rowName);
-        ColumnInfo GetSelectedColumn(string colName);
-
-        void DeleteIssueAsync(int issueId);
-        void DeleteRowAsync(int rowId);
-        void DeleteColumnAsync(int columnId);
-
         BoardInfo CreateOrUpdateBoardAsync(BoardInfo board);
+
+        Task<List<ColumnInfo>> GetColumnsByBoardIdAsync(int boardId);
+        Task<List<RowInfo>> GetRowsByBoardIdAsync(int boardId);
+        Task<IEnumerable<Issue>> GetIssuesByBoardIdAsync(int boardId);
+
         void CreateOrUpdateColumnAsync(ColumnInfo column);
         void CreateOrUpdateRowAsync(RowInfo row);
         void CreateOrUpdateIssueAsync(Issue issue);
 
+        void DeleteColumnAsync(int columnId);
+        void DeleteRowAsync(int rowId);
+        void DeleteIssueAsync(int issueId);
+
+        // Obsolete
+
+        Task<IDimension> GetColumnHeadersAsync(int boardId);
+        Task<IDimension> GetRowHeadersAsync(int boardId);
+        
+        CardContent GetCardContent();
+        RowInfo GetSelectedRow(string rowName);
+        ColumnInfo GetSelectedColumn(string colName);
+
         Task<Issue> LoadOrCreateIssueAsync(int? issueId);
     }
 
-    public class ScopeModel : IScopeModel
+    public class BoardService : IBoardService
     {
         private readonly IRepository repo;
 
         private List<RowInfo> rows = new List<RowInfo>();
         private List<ColumnInfo> columns = new List<ColumnInfo>();
 
-        public ScopeModel(IShell shell, IRepository repository, string uri)
+        public BoardService(IShell shell, IRepository repository, string uri)
         {
             Uri = uri;
             repo = repository;
@@ -56,12 +61,62 @@ namespace Kamban.Model
 
         public string Uri { get; set; }
 
-        #region GettingInfo
-
         public async Task<List<BoardInfo>> GetAllBoardsInFileAsync()
         {
             return await Task.Run(() => repo.GetAllBoardsInFile());
         }
+
+        public BoardInfo CreateOrUpdateBoardAsync(BoardInfo board)
+        {
+            return repo.CreateOrUpdateBoardInfo(board);
+        }
+
+        public async Task<List<ColumnInfo>> GetColumnsByBoardIdAsync(int boardId)
+        {
+            return await Task.Run(() => repo.GetColumns(boardId));
+        }
+
+        public async Task<List<RowInfo>> GetRowsByBoardIdAsync(int boardId)
+        {
+            return await Task.Run(() => repo.GetRows(boardId));
+        }
+
+        public async Task<IEnumerable<Issue>> GetIssuesByBoardIdAsync(int boardId)
+        {
+            return await Task.Run(() => repo.GetIssuesByBoardId(boardId));
+        }
+
+        public void CreateOrUpdateColumnAsync(ColumnInfo column)
+        {
+            repo.CreateOrUpdateColumn(column);
+        }
+
+        public void CreateOrUpdateRowAsync(RowInfo row)
+        {
+            repo.CreateOrUpdateRow(row);
+        }
+
+        public void CreateOrUpdateIssueAsync(Issue issue)
+        {
+            repo.CreateOrUpdateIssue(issue);
+        }
+
+        public void DeleteColumnAsync(int columnId)
+        {
+            repo.DeleteColumn(columnId);
+        }
+
+        public void DeleteRowAsync(int rowId)
+        {
+            repo.DeleteRow(rowId);
+        }
+
+        public void DeleteIssueAsync(int issueId)
+        {
+            repo.DeleteIssue(issueId);
+        }
+
+        #region Obsolete
 
         public async Task<IDimension> GetColumnHeadersAsync(int boardId)
         {
@@ -120,11 +175,6 @@ namespace Kamban.Model
             );
         }
 
-        public async Task<IEnumerable<Issue>> GetIssuesByBoardIdAsync(int boardId)
-        {
-            return await Task.Run(() => repo.GetIssuesByBoardId(boardId));
-        }
-
         public CardContent GetCardContent()
         {
             return new CardContent(new ICardContentItem[]
@@ -144,16 +194,7 @@ namespace Kamban.Model
             return columns.FirstOrDefault(c => c.Name == colName);
         }
 
-        public async Task<List<RowInfo>> GetRowsByBoardIdAsync(int boardId)
-        {
-            return await Task.Run(() => repo.GetRows(boardId));
-        }
-
-        public async Task<List<ColumnInfo>> GetColumnsByBoardIdAsync(int boardId)
-        {
-            return await Task.Run(() => repo.GetColumns(boardId));
-        }
-
+        
         public async Task<Issue> LoadOrCreateIssueAsync(int? issueId)
         {
             var t = new Issue();
@@ -165,47 +206,5 @@ namespace Kamban.Model
 
         #endregion
 
-        #region DeletingInfo
-
-        public void DeleteIssueAsync(int issueId)
-        {
-            repo.DeleteIssue(issueId);
-        }
-
-        public void DeleteRowAsync(int rowId)
-        {
-            repo.DeleteRow(rowId);
-        }
-
-        public void DeleteColumnAsync(int columnId)
-        {
-            repo.DeleteColumn(columnId);
-        }
-
-        #endregion
-
-        #region SavingInfo
-
-        public BoardInfo CreateOrUpdateBoardAsync(BoardInfo board)
-        {
-            return repo.CreateOrUpdateBoardInfo(board);
-        }
-
-        public void CreateOrUpdateColumnAsync(ColumnInfo column)
-        {
-            repo.CreateOrUpdateColumn(column);
-        }
-
-        public void CreateOrUpdateRowAsync(RowInfo row)
-        {
-            repo.CreateOrUpdateRow(row);
-        }
-
-        public void CreateOrUpdateIssueAsync(Issue issue)
-        {
-            repo.CreateOrUpdateIssue(issue);
-        }
-
-        #endregion
     }//end of class
 }

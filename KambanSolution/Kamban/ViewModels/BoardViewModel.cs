@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Kamban.MatrixControl;
 using Kamban.Model;
 using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
@@ -19,9 +20,16 @@ namespace Kamban.ViewModels
 {
     public class BoardViewModel : ViewModelBase, IInitializableViewModel
     {
-        private IScopeModel scope;
+        private IBoardService scope;
 
         private readonly IDialogCoordinator dialogCoordinator = DialogCoordinator.Instance;
+
+        // Actual
+
+        public ReactiveList<IDim> Columns { get; set; }
+        public ReactiveList<IDim> Rows { get; set; }
+
+        // Obsolete
 
         //[Reactive] private Issue SelectedIssue { get; set; }
         [Reactive] private RowInfo SelectedRow { get; set; }
@@ -58,6 +66,9 @@ namespace Kamban.ViewModels
         {
             this.shell = shell;
 
+            Columns = new ReactiveList<IDim>();
+            Rows = new ReactiveList<IDim>();
+
             Issues = new ReactiveList<Issue>();
             BoardsInFile = new ReactiveList<BoardInfo>();
 
@@ -86,43 +97,43 @@ namespace Kamban.ViewModels
             //    ReactiveCommand.CreateFromTask<string>(async name => await AddNewElement(name));
 
             CreateTiketCommand = ReactiveCommand
-                .Create( () =>
-                {
-                    IssueViewModel.Initialize(new IssueViewRequest
-                    {
-                        IssueId = 0,
-                        Scope = scope,
-                        Board = CurrentBoard
-                    });
-                });
+                .Create(() =>
+               {
+                   IssueViewModel.Initialize(new IssueViewRequest
+                   {
+                       IssueId = 0,
+                       Scope = scope,
+                       Board = CurrentBoard
+                   });
+               });
 
             CreateColumnCommand = ReactiveCommand
-                .CreateFromTask( async () =>
-                {
-                    var newName = await ShowColumnNameInput();
+                .CreateFromTask(async () =>
+               {
+                   var newName = await ShowColumnNameInput();
 
-                    if (!string.IsNullOrEmpty(newName))
-                    {
-                        var newColumn = new ColumnInfo { Name = newName, Board = CurrentBoard };
-                        scope.CreateOrUpdateColumnAsync(newColumn);
-                    }
+                   if (!string.IsNullOrEmpty(newName))
+                   {
+                       var newColumn = new ColumnInfo { Name = newName, Board = CurrentBoard };
+                       scope.CreateOrUpdateColumnAsync(newColumn);
+                   }
 
-                    await RefreshContent();
-                });
+                   await RefreshContent();
+               });
 
             CreateRowCommand = ReactiveCommand
-                .CreateFromTask( async () =>
-                {
-                    var newName = await ShowRowNameInput();
+                .CreateFromTask(async () =>
+               {
+                   var newName = await ShowRowNameInput();
 
-                    if (!string.IsNullOrEmpty(newName))
-                    {
-                        var newRow = new RowInfo { Name = newName, Board = CurrentBoard };
-                        scope.CreateOrUpdateRowAsync(newRow);
-                    }
+                   if (!string.IsNullOrEmpty(newName))
+                   {
+                       var newRow = new RowInfo { Name = newName, Board = CurrentBoard };
+                       scope.CreateOrUpdateRowAsync(newRow);
+                   }
 
-                    await RefreshContent();
-                });
+                   await RefreshContent();
+               });
 
             AddBoardCommand = ReactiveCommand.Create(() =>
             {
@@ -283,7 +294,7 @@ namespace Kamban.ViewModels
         public void Initialize(ViewRequest viewRequest)
         {
             shell.AddVMCommand("Edit", "Add tiket", "CreateTiketCommand", this)
-                .SetHotKey(ModifierKeys.Control, Key.T);
+                .SetHotKey(ModifierKeys.Control, Key.W);
 
             shell.AddVMCommand("Edit", "Add column", "CreateColumnCommand", this);
             shell.AddVMCommand("Edit", "Add row", "CreateRowCommand", this);
@@ -311,6 +322,32 @@ namespace Kamban.ViewModels
                     CurrentBoard = !string.IsNullOrEmpty(request.SelectedBoardName)
                         ? BoardsInFile.First(board => board.Name == request.SelectedBoardName)
                         : BoardsInFile.First();
+
+                    // Actual
+
+                    Observable.FromAsync(() => scope.GetColumnsByBoardIdAsync(CurrentBoard.Id))
+                        .ObserveOnDispatcher()
+                        .Subscribe(columns =>
+                        {
+                            foreach (var it in columns)
+                            {
+                                var cvm = new ColumnViewModel(it);
+                                Columns.Add(cvm);
+                            }
+                        });
+
+                    Observable.FromAsync(() => scope.GetRowsByBoardIdAsync(CurrentBoard.Id))
+                        .ObserveOnDispatcher()
+                        .Subscribe(rows =>
+                        {
+                            foreach (var it in rows)
+                            {
+                                var rvm = new RowViewModel(it);
+                                Rows.Add(rvm);
+                            }
+                        });
+
+                    // Obsolete
 
                     Issues.Clear();
 

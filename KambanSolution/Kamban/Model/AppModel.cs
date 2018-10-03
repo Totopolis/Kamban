@@ -19,8 +19,8 @@ namespace Kamban.Model
         void LoadConfig();
         void SaveConfig();
 
-        IScopeModel CreateScope(string uri);
-        IScopeModel LoadScope(string uri);
+        IBoardService CreateBoardService(string uri);
+        IBoardService LoadBoardService(string uri);
     }
 
     public class AppConfig
@@ -89,20 +89,20 @@ namespace Kamban.Model
             File.WriteAllText(path, data);
         }
 
-        public IScopeModel CreateScope(string uri)
+        public IBoardService CreateBoardService(string uri)
         {
             var scope = shell
                 .Container
-                .Resolve<IScopeModel>(new NamedParameter("uri", uri));
+                .Resolve<IBoardService>(new NamedParameter("uri", uri));
 
             return scope;
         }
 
-        public IScopeModel LoadScope(string uri)//future? taking from env too?
+        public IBoardService LoadBoardService(string uri)//future? taking from env too?
         {
             var scope = shell
                 .Container
-                .Resolve<IScopeModel>(new NamedParameter("uri", uri));
+                .Resolve<IBoardService>(new NamedParameter("uri", uri));
 
             return scope;
         }

@@ -35,8 +35,8 @@ namespace Kamban
                 .As<IRepository>();
 
             builder
-                .RegisterType<ScopeModel>()
-                .As<IScopeModel>();
+                .RegisterType<BoardService>()
+                .As<IBoardService>();
 
             builder
                 .RegisterType<AppModel>()
