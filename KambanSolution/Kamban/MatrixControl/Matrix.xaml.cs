@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Windows;
 using System.Windows.Controls;
 using Ui.Wpf.KanbanControl;
@@ -38,7 +39,7 @@ namespace Kamban.MatrixControl
             var mx = obj as Matrix;
             mx.Cards
                 .Changed
-                .Subscribe(_ => mx.RebuildCards());
+                .Subscribe(_ => mx.RebuildGrid());
         }
 
         public ReactiveList<IDim> Columns
@@ -56,7 +57,6 @@ namespace Kamban.MatrixControl
 
         public static void OnColumnsPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
-            return;
             var mx = obj as Matrix;
             mx.Columns
                 .Changed
@@ -78,8 +78,6 @@ namespace Kamban.MatrixControl
 
         public static void OnRowsPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
-            return;
-
             var mx = obj as Matrix;
             mx.Rows
                 .Changed
@@ -152,6 +150,7 @@ namespace Kamban.MatrixControl
                 for (int j = 0; j < Rows.Count; j++)
                 {
                     Intersection cell = new Intersection();
+
                     int hash = GetHash(Columns[i].Determinant, Rows[j].Determinant);
 
                     cells.Add(hash, cell);
@@ -162,6 +161,8 @@ namespace Kamban.MatrixControl
                     Grid.SetRow(cell, j + 1);
                     Grid.SetRowSpan(cell, 1);
                 }
+
+            RebuildCards();
         }
 
         private Dictionary<int, Intersection> cells;

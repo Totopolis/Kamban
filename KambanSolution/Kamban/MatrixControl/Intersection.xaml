@@ -7,25 +7,39 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <Border
-            Margin="-1,-1,0,0"
-            BorderBrush="#E1E1E1"
-            BorderThickness="5"/>
-        <ScrollViewer
-            Focusable="False"
-            Margin="6"
-            VerticalScrollBarVisibility="Auto"
-            HorizontalScrollBarVisibility="Disabled">
-            <ListView ItemsSource="{Binding Cards}">
+
+            <ListView
+                Margin="0"
+                BorderThickness="0"
+                ItemsSource="{Binding Path=Cards, 
+                                RelativeSource={RelativeSource Mode=FindAncestor, 
+                                AncestorType={x:Type UserControl}}}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Margin="5">
-                            <TextBlock FontSize="16" Text="{Binding Path=Header}" HorizontalAlignment="Center" />
-                            <TextBlock FontSize="16" Text="{Binding Path=Color}" HorizontalAlignment="Center" />
-                        </StackPanel>
+
+                        <Border 
+                            BorderBrush="#FED22F"
+                            Background="#FFFFE0"
+                            BorderThickness="1,1,1,1" 
+                            CornerRadius="4"
+                            Margin="2, 4, 3, 0">
+                            <StackPanel Margin="5">
+                                <TextBlock
+                                    FontSize="14"
+                                    Margin="3, 0, 3, 0"
+                                    Text="{Binding Path=Header}"
+                                    HorizontalAlignment="Left"/>
+                                <TextBlock
+                                    FontSize="14"
+                                    Margin="3, 0, 3, 0"
+                                    Text="{Binding Path=Color}"
+                                    HorizontalAlignment="Left"/>
+                            </StackPanel>
+                        </Border>
+                        
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-        </ScrollViewer>
+
     </Grid>
 </UserControl>

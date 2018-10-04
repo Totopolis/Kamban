@@ -327,7 +327,6 @@ namespace Kamban.ViewModels
 
                     // Actual
 
-                    
                     Observable.FromAsync(() => scope.GetColumnsByBoardIdAsync(CurrentBoard.Id))
                         .ObserveOnDispatcher()
                         .Subscribe(columns => Columns.AddRange(columns.Select(x => new ColumnViewModel(x))));
