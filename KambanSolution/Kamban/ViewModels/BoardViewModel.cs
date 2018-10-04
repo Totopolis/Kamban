@@ -174,6 +174,21 @@ namespace Kamban.ViewModels
 
         private async Task RefreshContent()
         {
+            // Actual
+
+            var columns = await scope.GetColumnsByBoardIdAsync(CurrentBoard.Id);
+            var rows = await scope.GetRowsByBoardIdAsync(CurrentBoard.Id);
+            var issues = await scope.GetIssuesByBoardIdAsync(CurrentBoard.Id);
+
+            Columns.Clear();
+            Rows.Clear();
+            Cards.Clear();
+
+            Columns.AddRange(columns.Select(x => new ColumnViewModel(x)));
+            Rows.AddRange(rows.Select(x => new RowViewModel(x)));
+            Cards.AddRange(issues.Select(x => new CardViewModel(x)));
+
+            // Obsolete
             Issues.Clear();
 
             VerticalDimension = null;

@@ -54,8 +54,11 @@ namespace Kamban.MatrixControl
 
         object ColumnDeterminant { get; set; }
         object RowDeterminant { get; set; }
+
+        bool ShowDescription { get; set; }
     }
 
+    // def back color "#FFFFE0"
     public class CardViewModel : ReactiveObject, ICard
     {
         private readonly Issue issueInfo;
@@ -69,5 +72,7 @@ namespace Kamban.MatrixControl
         public string Color { get => issueInfo.Color; set => throw new NotImplementedException(); }
         public object ColumnDeterminant { get => issueInfo.ColumnId; set => throw new NotImplementedException(); }
         public object RowDeterminant { get => issueInfo.RowId; set => throw new NotImplementedException(); }
+
+        public bool ShowDescription { get => !string.IsNullOrEmpty(issueInfo.Body); set => throw new NotImplementedException(); }
     }
 }

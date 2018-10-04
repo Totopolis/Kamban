@@ -227,6 +227,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="FodyWeavers.xml" />
+    <Resource Include="Images\letter.jpg" />
     <Resource Include="Tree-256.ico" />
   </ItemGroup>
   <ItemGroup>

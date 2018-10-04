@@ -4,42 +4,54 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Kamban.MatrixControl"
+             xmlns:conv="clr-namespace:Kamban.Views.WpfResources"
+             xmlns:props="clr-namespace:Kamban.Properties"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
 
-            <ListView
+    <UserControl.Resources>
+        <conv:ColorNameToSolidColorBrushValueConverter x:Key="ColorCvt"/>
+        <BooleanToVisibilityConverter x:Key="BoolCvt" />
+    </UserControl.Resources>
+
+    <Grid>
+        
+        <ListView
                 Margin="0"
                 BorderThickness="0"
                 ItemsSource="{Binding Path=Cards, 
                                 RelativeSource={RelativeSource Mode=FindAncestor, 
                                 AncestorType={x:Type UserControl}}}">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
+            <ListView.ItemTemplate>
+                <DataTemplate>
 
-                        <Border 
+                    <Border 
                             BorderBrush="#FED22F"
-                            Background="#FFFFE0"
+                            Background="{Binding Color, Converter={StaticResource ColorCvt}}"
                             BorderThickness="1,1,1,1" 
                             CornerRadius="4"
                             Margin="2, 4, 3, 0">
-                            <StackPanel Margin="5">
-                                <TextBlock
+                        <StackPanel Margin="5">
+                            <TextBlock
                                     FontSize="14"
                                     Margin="3, 0, 3, 0"
                                     Text="{Binding Path=Header}"
                                     HorizontalAlignment="Left"/>
-                                <TextBlock
-                                    FontSize="14"
-                                    Margin="3, 0, 3, 0"
-                                    Text="{Binding Path=Color}"
-                                    HorizontalAlignment="Left"/>
+                            <StackPanel
+                                Visibility="{Binding ShowDescription, Converter={StaticResource BoolCvt}}"
+                                Margin="3, 5, 3, 3"
+                                Orientation="Horizontal">
+                                <Image
+                                    RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                    Stretch="None"
+                                    Source="/images/letter.jpg"/>
                             </StackPanel>
-                        </Border>
-                        
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                        </StackPanel>
+                    </Border>
+
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
 
     </Grid>
 </UserControl>
