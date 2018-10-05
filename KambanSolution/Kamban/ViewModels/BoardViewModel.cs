@@ -30,24 +30,17 @@ namespace Kamban.ViewModels
         public ReactiveList<IDim> Rows { get; set; }
         public ReactiveList<ICard> Cards { get; set; }
 
+        public ReactiveCommand<CardViewModel, Unit> CardClickCommand { get; set; }
+
         // Obsolete
 
-        //[Reactive] private Issue SelectedIssue { get; set; }
         [Reactive] private RowInfo SelectedRow { get; set; }
         [Reactive] private ColumnInfo SelectedColumn { get; set; }
 
-        [Reactive] public IDimension VerticalDimension { get; internal set; }
-        [Reactive] public IDimension HorizontalDimension { get; internal set; }
         [Reactive] public ReactiveList<BoardInfo> BoardsInFile { get; set; }
         [Reactive] public BoardInfo CurrentBoard { get; set; }
-        [Reactive] public ICardContent CardContent { get; private set; }
 
         [Reactive] public IssueViewModel IssueViewModel { get; set; }
-
-        public ReactiveList<Issue> Issues { get; internal set; }
-
-        public ReactiveCommand RefreshCommand { get; set; }
-        public ReactiveCommand DeleteCommand { get; set; }
 
         public ReactiveCommand<object, Unit> UpdateCardCommand { get; set; }
         public ReactiveCommand<object, Unit> UpdateHorizontalHeaderCommand { get; set; }
@@ -71,11 +64,8 @@ namespace Kamban.ViewModels
             Rows = new ReactiveList<IDim>();
             Cards = new ReactiveList<ICard>();
 
-            Issues = new ReactiveList<Issue>();
             BoardsInFile = new ReactiveList<BoardInfo>();
-
-            RefreshCommand =
-                ReactiveCommand.Create(RefreshContent);
+            IssueViewModel = new IssueViewModel();
 
             /*var isSelectedEditable = this.WhenAnyValue(t => t.SelectedIssue, t => t.SelectedColumn,
                 t => t.SelectedRow,
@@ -86,6 +76,8 @@ namespace Kamban.ViewModels
             //TODO :add selectcommand when click uneditable with nulling all "selected" fields
 
             //DeleteCommand = ReactiveCommand.CreateFromTask(DeleteElement, isSelectedEditable);
+
+            CardClickCommand = ReactiveCommand.Create<CardViewModel>(CardClickCommandExecute);
 
             UpdateCardCommand = ReactiveCommand.Create<object>(UpdateCard);
 
@@ -176,30 +168,41 @@ namespace Kamban.ViewModels
         {
             // Actual
 
-            var columns = await scope.GetColumnsByBoardIdAsync(CurrentBoard.Id);
-            var rows = await scope.GetRowsByBoardIdAsync(CurrentBoard.Id);
-            var issues = await scope.GetIssuesByBoardIdAsync(CurrentBoard.Id);
+            try
+            {
+                var columns = await scope.GetColumnsByBoardIdAsync(CurrentBoard.Id);
+                var rows = await scope.GetRowsByBoardIdAsync(CurrentBoard.Id);
+                var issues = await scope.GetIssuesByBoardIdAsync(CurrentBoard.Id);
 
-            Columns.Clear();
-            Rows.Clear();
-            Cards.Clear();
+                Columns.Clear();
+                Rows.Clear();
+                Cards.Clear();
 
-            Columns.AddRange(columns.Select(x => new ColumnViewModel(x)));
-            Rows.AddRange(rows.Select(x => new RowViewModel(x)));
-            Cards.AddRange(issues.Select(x => new CardViewModel(x)));
+                Columns.AddRange(columns.Select(x => new ColumnViewModel(x)));
+                Rows.AddRange(rows.Select(x => new RowViewModel(x)));
+                Cards.AddRange(issues.Select(x => new CardViewModel(x)));
+            }
+            catch(Exception ex)
+            {
+                Title = ex.Message;
+            }
+        }
 
-            // Obsolete
-            Issues.Clear();
-
-            VerticalDimension = null;
-            VerticalDimension = await scope.GetRowHeadersAsync(CurrentBoard.Id);
-
-            HorizontalDimension = null;
-            HorizontalDimension = await scope.GetColumnHeadersAsync(CurrentBoard.Id);
-
-            CardContent = scope.GetCardContent();
-
-            Issues.PublishCollection(await scope.GetIssuesByBoardIdAsync(CurrentBoard.Id));
+        public void CardClickCommandExecute(CardViewModel cvm)
+        {
+            try
+            {
+                IssueViewModel.Initialize(new IssueViewRequest
+                {
+                    IssueId = cvm.Id,
+                    Scope = scope,
+                    Board = CurrentBoard
+                });
+            }
+            catch(Exception ex)
+            {
+                Title = ex.Message;
+            }
         }
 
         /*private async Task DeleteElement()
@@ -323,7 +326,6 @@ namespace Kamban.ViewModels
                 .SetHotKey(ModifierKeys.Control, Key.Q);
 
             var request = viewRequest as BoardViewRequest;
-            IssueViewModel = new IssueViewModel();
 
             scope = request.Scope;
 
@@ -336,46 +338,9 @@ namespace Kamban.ViewModels
                     foreach (var brd in boards)
                         shell.AddInstanceCommand("Boards", brd.Name, "SelectBoardCommand", this);
 
-                    CurrentBoard = !string.IsNullOrEmpty(request.SelectedBoardName)
-                        ? BoardsInFile.First(board => board.Name == request.SelectedBoardName)
+                    CurrentBoard = !string.IsNullOrEmpty(request.NeededBoardName)
+                        ? BoardsInFile.First(board => board.Name == request.NeededBoardName)
                         : BoardsInFile.First();
-
-                    // Actual
-
-                    Observable.FromAsync(() => scope.GetColumnsByBoardIdAsync(CurrentBoard.Id))
-                        .ObserveOnDispatcher()
-                        .Subscribe(columns => Columns.AddRange(columns.Select(x => new ColumnViewModel(x))));
-
-                    Observable.FromAsync(() => scope.GetRowsByBoardIdAsync(CurrentBoard.Id))
-                        .ObserveOnDispatcher()
-                        .Subscribe(rows => Rows.AddRange(rows.Select(x => new RowViewModel(x))));
-
-                    Observable.FromAsync(() => scope.GetIssuesByBoardIdAsync(CurrentBoard.Id))
-                        .ObserveOnDispatcher()
-                        .Subscribe(issues => 
-                        {
-                            var toAdd = issues.Select(x => new CardViewModel(x));
-                            Cards.AddRange(toAdd);
-                        });
-
-                    // Obsolete
-
-                    Issues.Clear();
-
-                    Observable.FromAsync(() => scope.GetRowHeadersAsync(CurrentBoard.Id))
-                        .ObserveOnDispatcher()
-                        .Subscribe(vert => VerticalDimension = vert);
-
-                    Observable.FromAsync(() => scope.GetColumnHeadersAsync(CurrentBoard.Id))
-                        .ObserveOnDispatcher()
-                        .Subscribe(horiz => HorizontalDimension = horiz);
-
-                    CardContent = scope.GetCardContent();
-
-                    Observable.FromAsync(() => scope.GetIssuesByBoardIdAsync(CurrentBoard.Id))
-                        .ObserveOnDispatcher()
-                        .Subscribe(issues =>
-                            Issues.AddRange(issues));
                 });
         }
     }//end of class

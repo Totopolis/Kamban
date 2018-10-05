@@ -52,14 +52,14 @@
                       BorderThickness="0"
                       Background="{Binding Background}"
                       BorderBrush="{DynamicResource AccentBaseColorBrush}"
-                      ItemsSource="{Binding AwailableRows}"
+                      ItemsSource="{Binding AvailableRows}"
                       DisplayMemberPath="Name"
                       SelectedItem="{Binding Row}"
                       />
 
             <ComboBox Foreground="Gray"
                       Background="{Binding Background}"
-                      ItemsSource="{Binding AwailableColumns}"
+                      ItemsSource="{Binding AvailableColumns}"
                       SelectedItem="{Binding Column}"
                       BorderThickness="0"
                       BorderBrush="{DynamicResource AccentBaseColorBrush}"

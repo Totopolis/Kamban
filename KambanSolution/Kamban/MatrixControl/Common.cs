@@ -68,6 +68,7 @@ namespace Kamban.MatrixControl
             issueInfo = iss;
         }
 
+        public int Id { get => issueInfo.Id; set => throw new NotImplementedException(); }
         public string Header { get => issueInfo.Head; set => throw new NotImplementedException(); }
         public string Color { get => issueInfo.Color; set => throw new NotImplementedException(); }
         public object ColumnDeterminant { get => issueInfo.ColumnId; set => throw new NotImplementedException(); }

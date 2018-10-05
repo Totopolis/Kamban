@@ -236,7 +236,7 @@ namespace Kamban.ViewModels
             Close();
 
             shell.ShowView<BoardView>(
-                viewRequest: new BoardViewRequest { ViewId = uri, Scope = scope, SelectedBoardName = BoardName },
+                viewRequest: new BoardViewRequest { ViewId = uri, Scope = scope, NeededBoardName = BoardName },
                 options: new UiShowOptions { Title = uri });
         }
 

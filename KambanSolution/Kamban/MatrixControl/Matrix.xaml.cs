@@ -3,8 +3,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Reactive;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Ui.Wpf.KanbanControl;
 
 namespace Kamban.MatrixControl
@@ -14,6 +16,9 @@ namespace Kamban.MatrixControl
     /// </summary>
     public partial class Matrix : UserControl
     {
+        private static readonly DefaultTemplates defaultTemplates = new DefaultTemplates();
+        private Dictionary<int, Intersection> cells;
+
         public Matrix()
         {
             InitializeComponent();
@@ -84,7 +89,18 @@ namespace Kamban.MatrixControl
                 .Subscribe(_ => mx.RebuildGrid());
         }
 
-        private static readonly DefaultTemplates defaultTemplates = new DefaultTemplates();
+        public ReactiveCommand<CardViewModel, Unit> CardClickCommand
+        {
+            get => (ReactiveCommand<CardViewModel, Unit>)GetValue(CardClickCommandProperty);
+            set => SetValue(CardClickCommandProperty, value);
+        }
+
+        public static readonly DependencyProperty CardClickCommandProperty =
+            DependencyProperty.Register(
+                "CardClickCommand",
+                typeof(ReactiveCommand<CardViewModel, Unit>),
+                typeof(Matrix),
+                new PropertyMetadata(null));
 
         public void RebuildGrid()
         {
@@ -150,8 +166,9 @@ namespace Kamban.MatrixControl
                 for (int j = 0; j < Rows.Count; j++)
                 {
                     Intersection cell = new Intersection();
+                    cell.DataContext = this;
 
-                    int hash = GetHash(Columns[i].Determinant, Rows[j].Determinant);
+                    int hash = GetHashValue(Columns[i].Determinant, Rows[j].Determinant);
 
                     cells.Add(hash, cell);
 
@@ -165,13 +182,9 @@ namespace Kamban.MatrixControl
             RebuildCards();
         }
 
-        private Dictionary<int, Intersection> cells;
-
-        private int GetHash(object a, object b)
+        private int GetHashValue(object a, object b)
         {
-            HashBuilder hb = new HashBuilder();
-            hb.AddItems(a, b);
-            return hb.Result;
+            return new { a, b }.GetHashCode();
         }
 
         private void RebuildCards()
@@ -181,7 +194,7 @@ namespace Kamban.MatrixControl
             ////////////////
             foreach (var it in Cards)
             {
-                int hash = GetHash(it.ColumnDeterminant, it.RowDeterminant);
+                int hash = GetHashValue(it.ColumnDeterminant, it.RowDeterminant);
                 cells[hash].Cards.Add(it);
             }
         }
@@ -221,76 +234,4 @@ namespace Kamban.MatrixControl
         }
 
     }//end of class
-
-    internal class HashBuilder
-    {
-        private const int Prime1 = 17;
-        private const int Prime2 = 23;
-        private int result = Prime1;
-
-        public HashBuilder()
-        {
-        }
-
-        public HashBuilder(int startHash)
-        {
-            this.result = startHash;
-        }
-
-        public int Result
-        {
-            get
-            {
-                return this.result;
-            }
-        }
-
-        public void AddItem<T>(T item)
-        {
-            unchecked
-            {
-                this.result = this.result * Prime2 + item.GetHashCode();
-            }
-        }
-
-        public void AddItems<T1, T2>(T1 item1, T2 item2)
-        {
-            this.AddItem(item1);
-            this.AddItem(item2);
-        }
-
-        public void AddItems<T1, T2, T3>(T1 item1, T2 item2, T3 item3)
-        {
-            this.AddItem(item1);
-            this.AddItem(item2);
-            this.AddItem(item3);
-        }
-
-        public void AddItems<T1, T2, T3, T4>(T1 item1, T2 item2, T3 item3,
-            T4 item4)
-        {
-            this.AddItem(item1);
-            this.AddItem(item2);
-            this.AddItem(item3);
-            this.AddItem(item4);
-        }
-
-        public void AddItems<T1, T2, T3, T4, T5>(T1 item1, T2 item2, T3 item3,
-            T4 item4, T5 item5)
-        {
-            this.AddItem(item1);
-            this.AddItem(item2);
-            this.AddItem(item3);
-            this.AddItem(item4);
-            this.AddItem(item5);
-        }
-
-        public void AddItems<T>(params T[] items)
-        {
-            foreach (T item in items)
-            {
-                this.AddItem(item);
-            }
-        }
-    }
 }

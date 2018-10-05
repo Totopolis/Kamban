@@ -5,11 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
              dialogs:DialogParticipation.Register="{Binding}"
-             xmlns:local="clr-namespace:Kamban.Views"
-             xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
-             xmlns:kanbanControl="clr-namespace:Ui.Wpf.KanbanControl;assembly=Ui.Wpf.KanbanControl"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-             xmlns:viewModels="clr-namespace:Kamban.ViewModels"
              xmlns:mykanban="clr-namespace:Kamban.MatrixControl"
              mc:Ignorable="d">
 
@@ -29,6 +25,7 @@
             Grid.Column="0"
             Grid.ColumnSpan="4"
             IsTabStop="False"
+            CardClickCommand="{Binding CardClickCommand}"
             Columns="{Binding Columns}"
             Rows="{Binding Rows}"
             Cards="{Binding Cards}"

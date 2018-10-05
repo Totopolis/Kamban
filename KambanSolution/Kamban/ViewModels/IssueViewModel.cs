@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using System.Windows.Media;
 using AutoMapper;
 using Kamban.Model;
@@ -16,7 +17,7 @@ namespace Kamban.ViewModels
 {
     public class IssueViewRequest : ViewRequest
     {
-        public int? IssueId { get; set; }
+        public int IssueId { get; set; }
         public IBoardService Scope { get; set; }
         public BoardInfo Board { get; set; }
     }
@@ -48,11 +49,8 @@ namespace Kamban.ViewModels
         public int Id { get; set; }
         public DateTime Created { get; set; }
 
-        public ReactiveList<RowInfo> AwailableRows { get; set; } =
-            new ReactiveList<RowInfo>();
-
-        public ReactiveList<ColumnInfo> AwailableColumns { get; set; } =
-            new ReactiveList<ColumnInfo>();
+        public ReactiveList<RowInfo> AvailableRows { get; set; }
+        public ReactiveList<ColumnInfo> AvailableColumns { get; set; }
 
         [Reactive] public string Head { get; set; }
         [Reactive] public string Body { get; set; }
@@ -83,9 +81,12 @@ namespace Kamban.ViewModels
         {
             mapper = CreateMapper();
 
+            AvailableColumns = new ReactiveList<ColumnInfo>();
+            AvailableRows = new ReactiveList<RowInfo>();
+
             var issueFilled = this.WhenAnyValue(
                 t => t.Head, t => t.Row, t => t.Column, t => t.Color,
-                (sh, sr, sc, cc) => 
+                (sh, sr, sc, cc) =>
                 sr != null && sc != null && !string.IsNullOrEmpty(sh) && !string.IsNullOrEmpty(cc));
 
             SaveCommand = ReactiveCommand.Create(() =>
@@ -108,6 +109,14 @@ namespace Kamban.ViewModels
             CancelCommand = ReactiveCommand.Create(() => IsOpened = false);
 
             DeleteCommand = ReactiveCommand.Create(Delete);
+
+            this.WhenAnyValue(x => x.SelectedColor)
+                        .Where(x => x != null)
+                        .Subscribe(_ =>
+                        {
+                            Background = SelectedColor.Brush;
+                            Color = SelectedColor.Brush.Color.ToString();
+                        });
         }
 
         public void Delete()
@@ -118,56 +127,50 @@ namespace Kamban.ViewModels
             IsOpened = false;
         }
 
+        public async Task UpdateViewModel()
+        {
+            var columns = await scope.GetColumnsByBoardIdAsync(board.Id);
+            var rows = await scope.GetRowsByBoardIdAsync(board.Id);
+            
+            AvailableColumns.PublishCollection(columns);
+            Column = AvailableColumns.First();
+            AvailableRows.PublishCollection(rows);
+            Row = AvailableRows.First();
+
+            if (Id == 0)
+            {
+                mapper.Map(new Issue(), this);
+                SelectedColor = ColorItems.First();
+            }
+            else
+            {
+                var issue = await scope.LoadOrCreateIssueAsync(Id);
+                mapper.Map(issue, this);
+
+                Row = AvailableRows.First(r => r.Id == issue.RowId);
+                Column = AvailableColumns.First(c => c.Id == issue.ColumnId);
+
+                SelectedColor = 
+                    ColorItems.FirstOrDefault(c => c.Brush.Color.ToString() == issue.Color)
+                    ?? ColorItems.First();
+            }
+        }
+
         public void Initialize(ViewRequest viewRequest)
         {
-            if (viewRequest is IssueViewRequest request)
-            {
-                scope = request.Scope;
-                board = request.Board;
+            var request = viewRequest as IssueViewRequest;
+            if (request == null)
+                return;
 
-                mapper.Map(new Issue(), this);
+            scope = request.Scope;
+            board = request.Board;
+            Id = request.IssueId;
 
-                SelectedColor = ColorItems.First();
+            IssueChanged = false;
 
-                IssueChanged = false;
-
-                Observable.FromAsync(() => scope.GetRowsByBoardIdAsync(board.Id))
-                    .ObserveOnDispatcher()
-                    .Subscribe(rows =>
-                    {
-                        AwailableRows.PublishCollection(rows);
-                        Row = AwailableRows.First();
-                    });
-
-                Observable.FromAsync(() => scope.GetColumnsByBoardIdAsync(board.Id))
-                    .ObserveOnDispatcher()
-                    .Subscribe(columns =>
-                    {
-                        AwailableColumns.PublishCollection(columns);
-                        Column = AwailableColumns.First();
-                    });
-
-                var issueId = request.IssueId;
-
-                if (issueId != null && issueId > 0)
-                    Observable.FromAsync(() => scope.LoadOrCreateIssueAsync(issueId))
-                        .ObserveOnDispatcher()
-                        .Subscribe(issue =>
-                        {
-                            mapper.Map(issue, this);
-                            Row = AwailableRows.First(r => r.Id == issue.RowId);
-                            Column = AwailableColumns.First(c => c.Id == issue.ColumnId);
-                            SelectedColor = ColorItems.FirstOrDefault(c => c.Brush.Color.ToString() == issue.Color);
-                        });
-
-                this.WhenAnyValue(x => x.SelectedColor)
-                    .Where(x => x != null)
-                    .Subscribe(_ =>
-                    {
-                        Background = SelectedColor.Brush;
-                        Color = SelectedColor.Brush.Color.ToString();
-                    });
-            }
+            Observable.FromAsync(() => UpdateViewModel())
+                .ObserveOnDispatcher()
+                .Subscribe();
 
             Title = $"Issue edit {Head}";
             IsOpened = true;
@@ -186,7 +189,6 @@ namespace Kamban.ViewModels
             public MapperProfileSqliteRepos()
             {
                 CreateMap<Issue, IssueViewModel>();
-
                 CreateMap<IssueViewModel, Issue>();
             }
         }
