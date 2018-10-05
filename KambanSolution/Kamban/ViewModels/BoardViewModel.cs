@@ -96,7 +96,7 @@ namespace Kamban.ViewModels
                {
                    IssueViewModel.Initialize(new IssueViewRequest
                    {
-                       IssueId = 0,
+                       Card = null,
                        Scope = scope,
                        Board = CurrentBoard
                    });
@@ -197,10 +197,10 @@ namespace Kamban.ViewModels
                 .ObserveOnDispatcher()
                 .Subscribe(async _ => await RefreshContent());
 
-            this.ObservableForProperty(w => w.IssueViewModel.IssueChanged)
-                .Where(ch => ch.Value == true)
-                .ObserveOnDispatcher()
-                .Subscribe(async _ => await RefreshContent());
+            //this.ObservableForProperty(w => w.IssueViewModel.IssueChanged)
+              //  .Where(ch => ch.Value == true)
+                //.ObserveOnDispatcher()
+                //.Subscribe(async _ => await RefreshContent());
         }
 
         private async Task RefreshContent()
@@ -211,8 +211,13 @@ namespace Kamban.ViewModels
                 var rows = await scope.GetRowsByBoardIdAsync(CurrentBoard.Id);
                 var issues = await scope.GetIssuesByBoardIdAsync(CurrentBoard.Id);
 
+                //var toDel = issues.Where(x => x.ColumnId == 0 || x.RowId == 0).ToArray();
+                //foreach (var it in toDel)
+                //    scope.DeleteIssueAsync(it.Id);
+
                 Columns.ChangeTrackingEnabled = false;
                 Rows.ChangeTrackingEnabled = false;
+                Cards.ChangeTrackingEnabled = false;
 
                 Columns.Clear();
                 Rows.Clear();
@@ -220,11 +225,11 @@ namespace Kamban.ViewModels
 
                 Columns.AddRange(columns.Select(x => new ColumnViewModel(x)));
                 Rows.AddRange(rows.Select(x => new RowViewModel(x)));
+                Cards.AddRange(issues.Select(x => new CardViewModel(x)));
 
+                Cards.ChangeTrackingEnabled = true;
                 Rows.ChangeTrackingEnabled = true;
                 Columns.ChangeTrackingEnabled = true;
-
-                Cards.AddRange(issues.Select(x => new CardViewModel(x)));
             }
             catch(Exception ex)
             {
@@ -238,14 +243,14 @@ namespace Kamban.ViewModels
             {
                 IssueViewModel.Initialize(new IssueViewRequest
                 {
-                    IssueId = cvm.Id,
+                    Card = cvm,
                     Scope = scope,
                     Board = CurrentBoard
                 });
             }
             catch(Exception ex)
             {
-                Title = ex.Message;
+                Title = "CardClickCommandExecute:" + ex.Message;
             }
         }
 
@@ -273,7 +278,7 @@ namespace Kamban.ViewModels
 
         private void UpdateCard(object o)
         {
-            var iss = o as Issue;
+            /*var iss = o as Issue;
 
             if (iss != null)
                 IssueViewModel.Initialize(new IssueViewRequest
@@ -283,7 +288,7 @@ namespace Kamban.ViewModels
                     Board = CurrentBoard
                 });
 
-            /*if (o is Issue)
+            if (o is Issue)
                 IssueViewModel.Initialize(new IssueViewRequest
                 {
                     IssueId = SelectedIssue.Id,

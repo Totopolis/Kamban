@@ -78,14 +78,26 @@ namespace Kamban.MatrixControl
         public CardViewModel(Issue iss)
         {
             issueInfo = iss;
+
+            Id = iss.Id;
+            Header = iss.Head;
+            Color = iss.Color;
+            ColumnDeterminant = iss.ColumnId;
+            RowDeterminant = iss.RowId;
+            Body = iss.Body;
+            Created = iss.Created;
+            Modified = iss.Modified;
+            ShowDescription = !string.IsNullOrEmpty(issueInfo.Body);
         }
 
-        public int Id { get => issueInfo.Id; set => throw new NotImplementedException(); }
-        public string Header { get => issueInfo.Head; set => throw new NotImplementedException(); }
-        public string Color { get => issueInfo.Color; set => throw new NotImplementedException(); }
-        public object ColumnDeterminant { get => issueInfo.ColumnId; set => throw new NotImplementedException(); }
-        public object RowDeterminant { get => issueInfo.RowId; set => throw new NotImplementedException(); }
-
-        public bool ShowDescription { get => !string.IsNullOrEmpty(issueInfo.Body); set => throw new NotImplementedException(); }
+        [Reactive] public int Id { get; set; }
+        [Reactive] public string Header { get; set; }
+        [Reactive] public string Color { get; set; }
+        [Reactive] public object ColumnDeterminant { get; set; }
+        [Reactive] public object RowDeterminant { get; set; }
+        [Reactive] public string Body { get; set; }
+        [Reactive] public DateTime Created { get; set; }
+        [Reactive] public DateTime Modified { get; set; }
+        [Reactive] public bool ShowDescription { get; set; }
     }
 }

@@ -19,6 +19,7 @@ namespace Kamban.MatrixControl
     {
         private static readonly DefaultTemplates defaultTemplates = new DefaultTemplates();
         private Dictionary<int, Intersection> cells;
+        private Dictionary<ICard, Intersection> cardPointers;
 
         public Matrix()
         {
@@ -43,9 +44,28 @@ namespace Kamban.MatrixControl
         public static void OnCardsPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
             var mx = obj as Matrix;
-            mx.Cards
+
+            mx.RebuildGrid();
+
+            mx.Cards?
                 .Changed
                 .Subscribe(_ => mx.RebuildGrid());
+
+            mx.Cards?
+                .ItemChanged
+                .Subscribe((x) =>
+                {
+                    var card = x.Sender;
+                    var oldInter = mx.cardPointers[card];
+                    var newInter = mx.cells[mx.GetHashValue(card.ColumnDeterminant, card.RowDeterminant)];
+
+                    if (oldInter != newInter)
+                    {
+                        oldInter.Cards.Remove(card);
+                        newInter.Cards.Add(card);
+                        mx.cardPointers[card] = newInter;
+                    }
+                });
         }
 
         public ReactiveList<IDim> Columns
@@ -115,7 +135,7 @@ namespace Kamban.MatrixControl
         void ColumnResize_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (columnWidthChanging != null)
-                GridColumnsToPercents();
+                UpdateGridColumnsModel();
         }
 
         private RowDefinition rowHeightChanging = null;
@@ -130,7 +150,7 @@ namespace Kamban.MatrixControl
         void RowResize_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (rowHeightChanging != null)
-                GridRowsToPercents();
+                UpdateGridRowsModel();
         }
 
         public ReactiveCommand<Unit, Unit> NormalizeGridCommand
@@ -160,7 +180,7 @@ namespace Kamban.MatrixControl
             });
         }
 
-        private void GridColumnsToPercents()
+        private void UpdateGridColumnsModel()
         {
             var cd = MainGrid.ColumnDefinitions;
             for (int i = 1; i < cd.Count; i++)
@@ -183,7 +203,7 @@ namespace Kamban.MatrixControl
             }
         }
 
-        private void GridRowsToPercents()
+        private void UpdateGridRowsModel()
         {
             var rd = MainGrid.RowDefinitions;
             for (int i = 1; i < rd.Count; i++)
@@ -280,6 +300,7 @@ namespace Kamban.MatrixControl
             // 3. Fill Intersections
             ////////////////////////
             cells = new Dictionary<int, Intersection>();
+            cardPointers = new Dictionary<ICard, Intersection>();
 
             for (int i = 0; i < Columns.Count; i++)
                 for (int j = 0; j < Rows.Count; j++)
@@ -308,13 +329,15 @@ namespace Kamban.MatrixControl
 
         private void RebuildCards()
         {
-            ////////////////
-            // 4. Fill Cards
-            ////////////////
             foreach (var it in Cards)
             {
                 int hash = GetHashValue(it.ColumnDeterminant, it.RowDeterminant);
+
+                if (!cells.ContainsKey(hash))
+                    continue;
+
                 cells[hash].Cards.Add(it);
+                cardPointers.Add(it, cells[hash]);
             }
         }
 

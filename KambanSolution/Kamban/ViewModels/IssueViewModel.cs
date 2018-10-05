@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using AutoMapper;
+using Kamban.MatrixControl;
 using Kamban.Model;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -17,7 +18,7 @@ namespace Kamban.ViewModels
 {
     public class IssueViewRequest : ViewRequest
     {
-        public int IssueId { get; set; }
+        public CardViewModel Card { get; set; }
         public IBoardService Scope { get; set; }
         public BoardInfo Board { get; set; }
     }
@@ -26,6 +27,8 @@ namespace Kamban.ViewModels
     {
         public SolidColorBrush Brush { get; set; }
         public string Name { get; set; }
+
+        public string SystemName => Brush.Color.ToString();
 
         public static ColorItem I(string colorName)
         {
@@ -42,21 +45,18 @@ namespace Kamban.ViewModels
     
     public class IssueViewModel : ViewModelBase, IInitializableViewModel
     {
-        private readonly IMapper mapper;
         private IBoardService scope;
         private BoardInfo board;
 
-        public int Id { get; set; }
-        public DateTime Created { get; set; }
+        public CardViewModel Card;
 
         public ReactiveList<RowInfo> AvailableRows { get; set; }
         public ReactiveList<ColumnInfo> AvailableColumns { get; set; }
 
         [Reactive] public string Head { get; set; }
         [Reactive] public string Body { get; set; }
-        [Reactive] public RowInfo Row { get; set; }
-        [Reactive] public ColumnInfo Column { get; set; }
-        [Reactive] public string Color { get; set; }
+        [Reactive] public RowInfo SelectedRow { get; set; }
+        [Reactive] public ColumnInfo SelectedColumn { get; set; }
 
         public ReactiveCommand CancelCommand { get; set; }
         public ReactiveCommand SaveCommand { get; set; }
@@ -79,28 +79,40 @@ namespace Kamban.ViewModels
 
         public IssueViewModel()
         {
-            mapper = CreateMapper();
-
             AvailableColumns = new ReactiveList<ColumnInfo>();
             AvailableRows = new ReactiveList<RowInfo>();
 
             var issueFilled = this.WhenAnyValue(
-                t => t.Head, t => t.Row, t => t.Column, t => t.Color,
+                t => t.Head, t => t.SelectedRow, t => t.SelectedColumn, t => t.SelectedColor,
                 (sh, sr, sc, cc) =>
-                sr != null && sc != null && !string.IsNullOrEmpty(sh) && !string.IsNullOrEmpty(cc));
+                sr != null && sc != null && !string.IsNullOrEmpty(sh) && cc != null);
 
             SaveCommand = ReactiveCommand.Create(() =>
             {
-                var editedIssue = new Issue() { BoardId = board.Id };
-
-                mapper.Map(this, editedIssue);
-
-                if (editedIssue.Id == 0)
-                    editedIssue.Created = DateTime.Now;
-
-                editedIssue.Modified = DateTime.Now;
+                var editedIssue = new Issue
+                {
+                    Id = Card == null ? 0 : Card.Id,
+                    Head = Head,
+                    ColumnId = SelectedColumn.Id,
+                    RowId = SelectedRow.Id,
+                    Color = SelectedColor.SystemName,
+                    Body = Body,
+                    Created = Card == null ? DateTime.Now : Card.Created,
+                    Modified = DateTime.Now,
+                    BoardId = board.Id
+                };
 
                 scope.CreateOrUpdateIssueAsync(editedIssue);
+
+                // crash if new
+                if (Card != null)
+                {
+                    Card.Header = Head;
+                    Card.Body = Body;
+                    Card.ColumnDeterminant = SelectedColumn.Id;
+                    Card.RowDeterminant = SelectedRow.Id;
+                    Card.Color = SelectedColor.SystemName;
+                }
 
                 IsOpened = false;
                 IssueChanged = true;
@@ -112,18 +124,15 @@ namespace Kamban.ViewModels
 
             this.WhenAnyValue(x => x.SelectedColor)
                         .Where(x => x != null)
-                        .Subscribe(_ => UpdateColor());
-        }
-
-        private void UpdateColor()
-        {
-            Background = SelectedColor.Brush;
-            Color = SelectedColor.Brush.Color.ToString();
+                        .Subscribe(_ => Background = SelectedColor.Brush);
         }
 
         public void Delete()
         {
-            scope.DeleteIssueAsync(Id);
+            if (Card == null)
+                return;
+
+            scope.DeleteIssueAsync(Card.Id);
 
             IssueChanged = true;
             IsOpened = false;
@@ -133,28 +142,28 @@ namespace Kamban.ViewModels
         {
             var columns = await scope.GetColumnsByBoardIdAsync(board.Id);
             var rows = await scope.GetRowsByBoardIdAsync(board.Id);
-            
-            AvailableColumns.PublishCollection(columns);
-            Column = AvailableColumns.First();
-            AvailableRows.PublishCollection(rows);
-            Row = AvailableRows.First();
 
-            if (Id == 0)
+            AvailableColumns.PublishCollection(columns);
+            SelectedColumn = AvailableColumns.First();
+            AvailableRows.PublishCollection(rows);
+            SelectedRow = AvailableRows.First();
+
+            if (Card == null)
             {
-                mapper.Map(new Issue(), this);
                 SelectedColor = ColorItems.First();
-                UpdateColor();
             }
             else
             {
-                var issue = await scope.LoadOrCreateIssueAsync(Id);
-                mapper.Map(issue, this);
+                Head = Card.Header;
+                Body = Card.Body;
 
-                Row = AvailableRows.First(r => r.Id == issue.RowId);
-                Column = AvailableColumns.First(c => c.Id == issue.ColumnId);
+                SelectedColumn = AvailableColumns
+                    .First(c => c.Id == (int)Card.ColumnDeterminant);
+                SelectedRow = AvailableRows
+                    .First(r => r.Id == (int)Card.RowDeterminant);
 
-                SelectedColor = 
-                    ColorItems.FirstOrDefault(c => c.Brush.Color.ToString() == issue.Color)
+                SelectedColor = ColorItems.
+                    FirstOrDefault(c => c.SystemName == Card.Color)
                     ?? ColorItems.First();
             }
         }
@@ -167,7 +176,7 @@ namespace Kamban.ViewModels
 
             scope = request.Scope;
             board = request.Board;
-            Id = request.IssueId;
+            Card = request.Card;
 
             IssueChanged = false;
 
@@ -177,23 +186,6 @@ namespace Kamban.ViewModels
 
             Title = $"Issue edit {Head}";
             IsOpened = true;
-        }
-
-        private IMapper CreateMapper()
-        {
-            var mapperConfig = new MapperConfiguration(cfg =>
-                cfg.AddProfile(typeof(MapperProfileSqliteRepos)));
-
-            return mapperConfig.CreateMapper();
-        }
-
-        private class MapperProfileSqliteRepos : Profile
-        {
-            public MapperProfileSqliteRepos()
-            {
-                CreateMap<Issue, IssueViewModel>();
-                CreateMap<IssueViewModel, Issue>();
-            }
         }
     }//end of class
 }
