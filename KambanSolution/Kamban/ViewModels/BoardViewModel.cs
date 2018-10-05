@@ -31,6 +31,7 @@ namespace Kamban.ViewModels
         public ReactiveList<ICard> Cards { get; set; }
 
         public ReactiveCommand<CardViewModel, Unit> CardClickCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> NormalizeGridCommand { get; set; }
 
         // Obsolete
 
@@ -155,24 +156,63 @@ namespace Kamban.ViewModels
                     CurrentBoard = BoardsInFile.Where(x => x.Name == name).First();
                 });
 
+            Columns
+                .ItemChanged
+                .Subscribe(ob => 
+                {
+                    var cvm = ob.Sender as ColumnViewModel;
+
+                    var ci = new ColumnInfo
+                    {
+                        Id = cvm.Id,
+                        Board = CurrentBoard,
+                        Name = cvm.Caption,
+                        Width = cvm.Size
+                    };
+
+                    scope.CreateOrUpdateColumnAsync(ci);
+                });
+
+            Rows
+                .ItemChanged
+                .Subscribe(ob =>
+                {
+                    var rvm = ob.Sender as RowViewModel;
+
+                    var ri = new RowInfo
+                    {
+                        Id = rvm.Id,
+                        Board = CurrentBoard,
+                        Name = rvm.Caption,
+                        Height = rvm.Size
+                    };
+
+                    scope.CreateOrUpdateRowAsync(ri);
+                });
+
+            NormalizeGridCommand = ReactiveCommand.Create(() => { });
+
             this.ObservableForProperty(w => w.CurrentBoard)
                 .Where(v => v != null)
+                .ObserveOnDispatcher()
                 .Subscribe(async _ => await RefreshContent());
 
             this.ObservableForProperty(w => w.IssueViewModel.IssueChanged)
                 .Where(ch => ch.Value == true)
+                .ObserveOnDispatcher()
                 .Subscribe(async _ => await RefreshContent());
         }
 
         private async Task RefreshContent()
         {
-            // Actual
-
             try
             {
                 var columns = await scope.GetColumnsByBoardIdAsync(CurrentBoard.Id);
                 var rows = await scope.GetRowsByBoardIdAsync(CurrentBoard.Id);
                 var issues = await scope.GetIssuesByBoardIdAsync(CurrentBoard.Id);
+
+                Columns.ChangeTrackingEnabled = false;
+                Rows.ChangeTrackingEnabled = false;
 
                 Columns.Clear();
                 Rows.Clear();
@@ -180,11 +220,15 @@ namespace Kamban.ViewModels
 
                 Columns.AddRange(columns.Select(x => new ColumnViewModel(x)));
                 Rows.AddRange(rows.Select(x => new RowViewModel(x)));
+
+                Rows.ChangeTrackingEnabled = true;
+                Columns.ChangeTrackingEnabled = true;
+
                 Cards.AddRange(issues.Select(x => new CardViewModel(x)));
             }
             catch(Exception ex)
             {
-                Title = ex.Message;
+                Title = "RefreshContent: " + ex.Message;
             }
         }
 
@@ -318,6 +362,9 @@ namespace Kamban.ViewModels
 
             shell.AddVMCommand("Edit", "Add column", "CreateColumnCommand", this);
             shell.AddVMCommand("Edit", "Add row", "CreateRowCommand", this);
+
+            shell.AddVMCommand("Edit", "Normalize Grid", "NormalizeGridCommand", this)
+                .SetHotKey(ModifierKeys.Control, Key.G);
 
             shell.AddVMCommand("Boards", "Add board", "AddBoardCommand", this)
                 .SetHotKey(ModifierKeys.Control | ModifierKeys.Shift, Key.N);

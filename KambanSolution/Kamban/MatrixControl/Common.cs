@@ -26,11 +26,17 @@ namespace Kamban.MatrixControl
         public ColumnViewModel(ColumnInfo ci)
         {
             columnInfo = ci;
+
+            Id = ci.Id;
+            Caption = ci.Name;
+            Determinant = ci.Id;
+            Size = ci.Width;
         }
 
-        public string Caption { get { return columnInfo.Name; } set { columnInfo.Name = value; } }
-        public object Determinant { get => columnInfo.Id; set => throw new NotImplementedException(); }
-        public int Size { get => columnInfo.Height; set => throw new NotImplementedException(); }
+        [Reactive] public int Id { get; set; }
+        [Reactive] public string Caption { get; set; }
+        [Reactive] public object Determinant { get; set; }
+        [Reactive] public int Size { get; set; }
     }
 
     public class RowViewModel : ReactiveObject, IDim
@@ -40,11 +46,17 @@ namespace Kamban.MatrixControl
         public RowViewModel(RowInfo ri)
         {
             rowInfo = ri;
+
+            Id = ri.Id;
+            Caption = ri.Name;
+            Determinant = ri.Id;
+            Size = ri.Height;
         }
 
-        public string Caption { get { return rowInfo.Name; } set { rowInfo.Name = value; } }
-        public object Determinant { get => rowInfo.Id; set => throw new NotImplementedException(); }
-        public int Size { get => rowInfo.Height; set => throw new NotImplementedException(); }
+        [Reactive] public int Id { get; set; }
+        [Reactive] public string Caption { get; set; }
+        [Reactive] public object Determinant { get; set; }
+        [Reactive] public int Size { get; set; }
     }
 
     public interface ICard

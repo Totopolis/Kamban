@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Numerics;
 using System.Reactive;
 using System.Windows;
@@ -102,6 +103,109 @@ namespace Kamban.MatrixControl
                 typeof(Matrix),
                 new PropertyMetadata(null));
 
+        private ColumnDefinition columnWidthChanging = null;
+        private void ColumnWidthPropertyChanged(object sender, EventArgs e)
+        {
+            // listen for when the mouse is released
+            columnWidthChanging = sender as ColumnDefinition;
+            if (sender != null)
+                Mouse.AddPreviewMouseUpHandler(this, ColumnResize_MouseLeftButtonUp);
+        }
+
+        void ColumnResize_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (columnWidthChanging != null)
+                GridColumnsToPercents();
+        }
+
+        private RowDefinition rowHeightChanging = null;
+        private void RowWidthPropertyChanged(object sender, EventArgs e)
+        {
+            // listen for when the mouse is released
+            rowHeightChanging = sender as RowDefinition;
+            if (sender != null)
+                Mouse.AddPreviewMouseUpHandler(this, RowResize_MouseLeftButtonUp);
+        }
+
+        void RowResize_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (rowHeightChanging != null)
+                GridRowsToPercents();
+        }
+
+        public ReactiveCommand<Unit, Unit> NormalizeGridCommand
+        {
+            get => (ReactiveCommand<Unit, Unit>)GetValue(NormalizeGridCommandProperty);
+            set => SetValue(NormalizeGridCommandProperty, value);
+        }
+
+        public static readonly DependencyProperty NormalizeGridCommandProperty =
+            DependencyProperty.Register(
+                "NormalizeGridCommand",
+                typeof(ReactiveCommand<Unit, Unit>),
+                typeof(Matrix),
+                new PropertyMetadata(null, new PropertyChangedCallback(NormalizeGridCommandPropertyChanged)));
+
+        public static void NormalizeGridCommandPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
+        {
+            var self = obj as Matrix;
+            var cmd = args.NewValue as ReactiveCommand<Unit, Unit>;
+            if (cmd == null)
+                return;
+
+            cmd.Subscribe(_ =>
+            {
+                self.GridColumnsReset();
+                self.GridRowsReset();
+            });
+        }
+
+        private void GridColumnsToPercents()
+        {
+            var cd = MainGrid.ColumnDefinitions;
+            for (int i = 1; i < cd.Count; i++)
+                Columns[i - 1].Size = (int)cd[i].Width.Value;
+        }
+
+        private void GridColumnsReset()
+        {
+            if (Columns.Count <= 1)
+                return;
+
+            double colSize = 100 / (Columns.Count - 1);
+
+            var colDefs = MainGrid.ColumnDefinitions;
+            for (int i = 1; i < colDefs.Count; i++)
+            {
+                var len = new GridLength(colSize, GridUnitType.Star);
+                colDefs[i].Width = len;
+                Columns[i - 1].Size = (int)len.Value * 10;
+            }
+        }
+
+        private void GridRowsToPercents()
+        {
+            var rd = MainGrid.RowDefinitions;
+            for (int i = 1; i < rd.Count; i++)
+                Rows[i - 1].Size = (int)rd[i].Height.Value;
+        }
+
+        private void GridRowsReset()
+        {
+            if (Rows.Count <= 1)
+                return;
+
+            double rowSize = 100 / (Rows.Count - 1);
+
+            var rowDefs = MainGrid.RowDefinitions;
+            for (int i = 1; i < rowDefs.Count; i++)
+            {
+                var len = new GridLength(rowSize, GridUnitType.Star);
+                rowDefs[i].Height = len;
+                Rows[i - 1].Size = (int)len.Value * 10;
+            }
+        }
+
         public void RebuildGrid()
         {
             MainGrid.Children.Clear();
@@ -114,13 +218,21 @@ namespace Kamban.MatrixControl
             //////////////////
             MainGrid.ColumnDefinitions.Clear();
             // rows header
-            MainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            MainGrid.ColumnDefinitions.Add(
+                new ColumnDefinition { Width = new GridLength(30, GridUnitType.Pixel) });
+
             // columns
             for (int i = 0; i < Columns.Count; i++)
             {
                 var it = Columns[i];
 
-                MainGrid.ColumnDefinitions.Add(new ColumnDefinition());
+                var cd = new ColumnDefinition();
+                cd.DataContext = it;
+                cd.Width = new GridLength(it.Size / 10, GridUnitType.Star);
+                MainGrid.ColumnDefinitions.Add(cd);
+
+                PropertyDescriptor pd = DependencyPropertyDescriptor.FromProperty(ColumnDefinition.WidthProperty, typeof(ColumnDefinition));
+                pd.AddValueChanged(cd, new EventHandler(ColumnWidthPropertyChanged));
 
                 ContentControl cc = new ContentControl();
                 cc.Content = it;
@@ -138,13 +250,20 @@ namespace Kamban.MatrixControl
             ///////////////
             MainGrid.RowDefinitions.Clear();
             // columns header
-            MainGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            MainGrid.RowDefinitions.Add(
+                new RowDefinition { Height = new GridLength(30, GridUnitType.Pixel) });
             // rows
             for (int i = 0; i < Rows.Count; i++)
             {
                 var it = Rows[i];
 
-                MainGrid.RowDefinitions.Add(new RowDefinition());
+                var rd = new RowDefinition();
+                rd.DataContext = it;
+                rd.Height = new GridLength(it.Size / 10, GridUnitType.Star);
+                MainGrid.RowDefinitions.Add(rd);
+
+                PropertyDescriptor pd = DependencyPropertyDescriptor.FromProperty(RowDefinition.HeightProperty, typeof(RowDefinition));
+                pd.AddValueChanged(rd, new EventHandler(RowWidthPropertyChanged));
 
                 ContentControl cc = new ContentControl();
                 cc.Content = it;

@@ -112,11 +112,13 @@ namespace Kamban.ViewModels
 
             this.WhenAnyValue(x => x.SelectedColor)
                         .Where(x => x != null)
-                        .Subscribe(_ =>
-                        {
-                            Background = SelectedColor.Brush;
-                            Color = SelectedColor.Brush.Color.ToString();
-                        });
+                        .Subscribe(_ => UpdateColor());
+        }
+
+        private void UpdateColor()
+        {
+            Background = SelectedColor.Brush;
+            Color = SelectedColor.Brush.Color.ToString();
         }
 
         public void Delete()
@@ -141,6 +143,7 @@ namespace Kamban.ViewModels
             {
                 mapper.Map(new Issue(), this);
                 SelectedColor = ColorItems.First();
+                UpdateColor();
             }
             else
             {

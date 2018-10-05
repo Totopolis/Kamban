@@ -25,6 +25,7 @@
             Grid.Column="0"
             Grid.ColumnSpan="4"
             IsTabStop="False"
+            NormalizeGridCommand="{Binding NormalizeGridCommand}"
             CardClickCommand="{Binding CardClickCommand}"
             Columns="{Binding Columns}"
             Rows="{Binding Rows}"
