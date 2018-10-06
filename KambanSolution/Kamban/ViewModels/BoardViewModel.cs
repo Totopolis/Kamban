@@ -30,8 +30,9 @@ namespace Kamban.ViewModels
         public ReactiveList<IDim> Rows { get; set; }
         public ReactiveList<ICard> Cards { get; set; }
 
-        public ReactiveCommand<CardViewModel, Unit> CardClickCommand { get; set; }
+        public ReactiveCommand<ICard, Unit> CardClickCommand { get; set; }
         public ReactiveCommand<Unit, Unit> NormalizeGridCommand { get; set; }
+        public ReactiveCommand<ICard, Unit> DropCardCommand { get; set; }
 
         // Obsolete
 
@@ -43,7 +44,6 @@ namespace Kamban.ViewModels
 
         [Reactive] public IssueViewModel IssueViewModel { get; set; }
 
-        public ReactiveCommand<object, Unit> UpdateCardCommand { get; set; }
         public ReactiveCommand<object, Unit> UpdateHorizontalHeaderCommand { get; set; }
         public ReactiveCommand<object, Unit> UpdateVerticalHeaderCommand { get; set; }
 
@@ -68,19 +68,9 @@ namespace Kamban.ViewModels
             BoardsInFile = new ReactiveList<BoardInfo>();
             IssueViewModel = new IssueViewModel();
 
-            /*var isSelectedEditable = this.WhenAnyValue(t => t.SelectedIssue, t => t.SelectedColumn,
-                t => t.SelectedRow,
-                (si, sc, sr) =>
-                    si != null || sc != null ||
-                    sr != null); 
-            */
-            //TODO :add selectcommand when click uneditable with nulling all "selected" fields
-
-            //DeleteCommand = ReactiveCommand.CreateFromTask(DeleteElement, isSelectedEditable);
-
-            CardClickCommand = ReactiveCommand.Create<CardViewModel>(CardClickCommandExecute);
-
-            UpdateCardCommand = ReactiveCommand.Create<object>(UpdateCard);
+            CardClickCommand = ReactiveCommand.Create<ICard>(CardClickCommandExecute);
+            NormalizeGridCommand = ReactiveCommand.Create(() => { });
+            DropCardCommand = ReactiveCommand.Create<ICard>(DropCardCommandExecute);
 
             UpdateHorizontalHeaderCommand = ReactiveCommand
                 .Create<object>(async ob => await UpdateHorizontalHeader(ob));
@@ -190,8 +180,6 @@ namespace Kamban.ViewModels
                     scope.CreateOrUpdateRowAsync(ri);
                 });
 
-            NormalizeGridCommand = ReactiveCommand.Create(() => { });
-
             this.ObservableForProperty(w => w.CurrentBoard)
                 .Where(v => v != null)
                 .ObserveOnDispatcher()
@@ -204,6 +192,24 @@ namespace Kamban.ViewModels
             this.ObservableForProperty(w => w.IssueViewModel.Result)
                 .Where(x => x.Value == IssueEditResult.Deleted)
                 .Subscribe(_ => Cards.Remove(IssueViewModel.Card));
+        }
+
+        private void DropCardCommandExecute(ICard cvm)
+        {
+            var editedIssue = new Issue
+            {
+                Id = cvm.Id,
+                Head = cvm.Header,
+                ColumnId = (int)cvm.ColumnDeterminant,
+                RowId = (int)cvm.RowDeterminant,
+                Color = cvm.Color,
+                Body = cvm.Body,
+                Created = cvm.Created,
+                Modified = cvm.Modified,
+                BoardId = cvm.BoardId
+            };
+
+            scope.CreateOrUpdateIssueAsync(editedIssue);
         }
 
         private async Task RefreshContent()
@@ -240,13 +246,13 @@ namespace Kamban.ViewModels
             }
         }
 
-        public void CardClickCommandExecute(CardViewModel cvm)
+        public void CardClickCommandExecute(ICard cvm)
         {
             try
             {
                 IssueViewModel.Initialize(new IssueViewRequest
                 {
-                    Card = cvm,
+                    Card = cvm as CardViewModel,
                     Scope = scope,
                     Board = CurrentBoard
                 });
@@ -279,9 +285,9 @@ namespace Kamban.ViewModels
             await RefreshContent();
         }*/
 
-        private void UpdateCard(object o)
+        /*private void UpdateCard(object o)
         {
-            /*var iss = o as Issue;
+            var iss = o as Issue;
 
             if (iss != null)
                 IssueViewModel.Initialize(new IssueViewRequest
@@ -304,8 +310,8 @@ namespace Kamban.ViewModels
                     IssueId = 0,
                     Scope = scope,
                     Board = CurrentBoard
-                });*/
-        }
+                });
+        }*/
 
         private async Task UpdateHorizontalHeader(object o)
         {

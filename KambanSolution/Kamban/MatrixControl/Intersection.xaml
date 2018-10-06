@@ -7,6 +7,7 @@
              xmlns:conv="clr-namespace:Kamban.Views.WpfResources"
              xmlns:props="clr-namespace:Kamban.Properties"
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:dd="urn:gong-wpf-dragdrop"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 
@@ -27,15 +28,18 @@
     </UserControl.Resources>
 
     <Grid>
-        
+
         <ListView
             Name="mainListView"
-                Margin="0"
-                BorderThickness="0"
-                ItemsSource="{Binding Path=Cards, 
+            Margin="0"
+            BorderThickness="0"
+            dd:DragDrop.IsDragSource="True"
+            dd:DragDrop.IsDropTarget="True"
+            dd:DragDrop.DropHandler="{Binding}"
+            ItemsSource="{Binding Path=Cards, 
                                 RelativeSource={RelativeSource Mode=FindAncestor, 
                                 AncestorType={x:Type UserControl}}}">
-            
+
 
             <ListView.ItemTemplate>
                 <DataTemplate>
@@ -55,7 +59,7 @@
                                     CommandParameter="{Binding}"/>
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
-                        
+
                         <StackPanel Margin="5">
                             <TextBlock
                                     FontSize="14"

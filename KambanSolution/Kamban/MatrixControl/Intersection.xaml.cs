@@ -28,6 +28,9 @@ namespace Kamban.MatrixControl
             Cards = new ReactiveList<ICard>();
         }
 
+        public object ColumnDeterminant { get; set; }
+        public object RowDeterminant { get; set; }
+
         public ReactiveList<ICard> Cards { get; set; }
     }//end of control
 }

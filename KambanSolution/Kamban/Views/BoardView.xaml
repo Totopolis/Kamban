@@ -27,6 +27,7 @@
             IsTabStop="False"
             NormalizeGridCommand="{Binding NormalizeGridCommand}"
             CardClickCommand="{Binding CardClickCommand}"
+            DropCardCommand="{Binding DropCardCommand}"
             Columns="{Binding Columns}"
             Rows="{Binding Rows}"
             Cards="{Binding Cards}"

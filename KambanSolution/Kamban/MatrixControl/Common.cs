@@ -61,12 +61,18 @@ namespace Kamban.MatrixControl
 
     public interface ICard
     {
+        int Id { get; set; }
         string Header { get; set; }
         string Color { get; set; }
 
         object ColumnDeterminant { get; set; }
         object RowDeterminant { get; set; }
 
+        string Body { get; set; }
+        DateTime Created { get; set; }
+        DateTime Modified { get; set; }
+
+        int BoardId { get; set; }
         bool ShowDescription { get; set; }
     }
 
@@ -88,6 +94,7 @@ namespace Kamban.MatrixControl
             Created = iss.Created;
             Modified = iss.Modified;
             ShowDescription = !string.IsNullOrEmpty(issueInfo.Body);
+            BoardId = iss.BoardId;
         }
 
         [Reactive] public int Id { get; set; }
@@ -98,6 +105,7 @@ namespace Kamban.MatrixControl
         [Reactive] public string Body { get; set; }
         [Reactive] public DateTime Created { get; set; }
         [Reactive] public DateTime Modified { get; set; }
+        [Reactive] public int BoardId { get; set; }
         [Reactive] public bool ShowDescription { get; set; }
     }
 }

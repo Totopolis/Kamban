@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using GongSolutions.Wpf.DragDrop;
+using ReactiveUI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace Kamban.MatrixControl
     /// <summary>
     /// Interaction logic for Kanban.xaml
     /// </summary>
-    public partial class Matrix : UserControl
+    public partial class Matrix : UserControl, IDropTarget
     {
         private static readonly DefaultTemplates defaultTemplates = new DefaultTemplates();
         private Dictionary<int, Intersection> cells;
@@ -57,14 +58,14 @@ namespace Kamban.MatrixControl
                 .Subscribe((x) =>
                 {
                     var card = x.Sender;
-                    var oldInter = mx.cardPointers[card];
-                    var newInter = mx.cells[mx.GetHashValue(card.ColumnDeterminant, card.RowDeterminant)];
+                    var oldIntersec = mx.cardPointers[card];
+                    var newIntersec = mx.cells[mx.GetHashValue(card.ColumnDeterminant, card.RowDeterminant)];
 
-                    if (oldInter != newInter)
+                    if (oldIntersec != newIntersec)
                     {
-                        oldInter.Cards.Remove(card);
-                        newInter.Cards.Add(card);
-                        mx.cardPointers[card] = newInter;
+                        oldIntersec.Cards.Remove(card);
+                        newIntersec.Cards.Add(card);
+                        mx.cardPointers[card] = newIntersec;
                     }
                 });
         }
@@ -111,16 +112,16 @@ namespace Kamban.MatrixControl
                 .Subscribe(_ => mx.RebuildGrid());
         }
 
-        public ReactiveCommand<CardViewModel, Unit> CardClickCommand
+        public ReactiveCommand<ICard, Unit> CardClickCommand
         {
-            get => (ReactiveCommand<CardViewModel, Unit>)GetValue(CardClickCommandProperty);
+            get => (ReactiveCommand<ICard, Unit>)GetValue(CardClickCommandProperty);
             set => SetValue(CardClickCommandProperty, value);
         }
 
         public static readonly DependencyProperty CardClickCommandProperty =
             DependencyProperty.Register(
                 "CardClickCommand",
-                typeof(ReactiveCommand<CardViewModel, Unit>),
+                typeof(ReactiveCommand<ICard, Unit>),
                 typeof(Matrix),
                 new PropertyMetadata(null));
 
@@ -306,8 +307,12 @@ namespace Kamban.MatrixControl
             for (int i = 0; i < Columns.Count; i++)
                 for (int j = 0; j < Rows.Count; j++)
                 {
-                    Intersection cell = new Intersection();
-                    cell.DataContext = this;
+                    Intersection cell = new Intersection
+                    {
+                        DataContext = this,
+                        ColumnDeterminant = Columns[i].Determinant,
+                        RowDeterminant = Rows[j].Determinant
+                    };
 
                     int hash = GetHashValue(Columns[i].Determinant, Rows[j].Determinant);
 
@@ -376,5 +381,43 @@ namespace Kamban.MatrixControl
             return newSpliter;
         }
 
+        public ReactiveCommand<ICard, Unit> DropCardCommand
+        {
+            get => (ReactiveCommand<ICard, Unit>)GetValue(DropCardCommandProperty);
+            set => SetValue(DropCardCommandProperty, value);
+        }
+
+        public static readonly DependencyProperty DropCardCommandProperty =
+            DependencyProperty.Register(
+                "DropCardCommand",
+                typeof(ReactiveCommand<ICard, Unit>),
+                typeof(Matrix),
+                new PropertyMetadata(null));
+
+        void IDropTarget.DragOver(IDropInfo dropInfo)
+        {
+            dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
+            dropInfo.Effects = DragDropEffects.Move;
+        }
+
+        void IDropTarget.Drop(IDropInfo dropInfo)
+        {
+            var card = dropInfo.Data as CardViewModel;
+
+            var srcIntersec = cardPointers[card];
+
+            // dirty fingers
+            var targetIntersec = ((dropInfo.VisualTarget as ListView)
+                .Parent as Grid)
+                .Parent as Intersection;
+
+            if (targetIntersec != srcIntersec)
+            {
+                card.ColumnDeterminant = targetIntersec.ColumnDeterminant;
+                card.RowDeterminant = targetIntersec.RowDeterminant;
+
+                DropCardCommand?.Execute(card).Subscribe();
+            }
+        }
     }//end of class
 }
