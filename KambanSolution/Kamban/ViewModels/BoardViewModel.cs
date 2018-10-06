@@ -158,7 +158,7 @@ namespace Kamban.ViewModels
 
             Columns
                 .ItemChanged
-                .Subscribe(ob => 
+                .Subscribe(ob =>
                 {
                     var cvm = ob.Sender as ColumnViewModel;
 
@@ -197,10 +197,13 @@ namespace Kamban.ViewModels
                 .ObserveOnDispatcher()
                 .Subscribe(async _ => await RefreshContent());
 
-            //this.ObservableForProperty(w => w.IssueViewModel.IssueChanged)
-              //  .Where(ch => ch.Value == true)
-                //.ObserveOnDispatcher()
-                //.Subscribe(async _ => await RefreshContent());
+            this.ObservableForProperty(w => w.IssueViewModel.Result)
+                .Where(x => x.Value == IssueEditResult.Created)
+                .Subscribe(_ => Cards.Add(IssueViewModel.Card));
+
+            this.ObservableForProperty(w => w.IssueViewModel.Result)
+                .Where(x => x.Value == IssueEditResult.Deleted)
+                .Subscribe(_ => Cards.Remove(IssueViewModel.Card));
         }
 
         private async Task RefreshContent()

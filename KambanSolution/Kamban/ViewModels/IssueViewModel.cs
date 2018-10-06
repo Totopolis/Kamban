@@ -25,9 +25,8 @@ namespace Kamban.ViewModels
 
     public class ColorItem
     {
-        public SolidColorBrush Brush { get; set; }
-        public string Name { get; set; }
-
+        public SolidColorBrush Brush { get; private set; }
+        public string Name { get; private set; }
         public string SystemName => Brush.Color.ToString();
 
         public static ColorItem I(string colorName)
@@ -43,12 +42,21 @@ namespace Kamban.ViewModels
         }
     }
     
+    public enum IssueEditResult
+    {
+        None,
+        Created,
+        Deleted,
+        Modified
+    }
+
     public class IssueViewModel : ViewModelBase, IInitializableViewModel
     {
         private IBoardService scope;
         private BoardInfo board;
 
-        public CardViewModel Card;
+        [Reactive] public CardViewModel Card { get; set; }
+        [Reactive] public IssueEditResult Result { get; set; }
 
         public ReactiveList<RowInfo> AvailableRows { get; set; }
         public ReactiveList<ColumnInfo> AvailableColumns { get; set; }
@@ -60,10 +68,9 @@ namespace Kamban.ViewModels
 
         public ReactiveCommand CancelCommand { get; set; }
         public ReactiveCommand SaveCommand { get; set; }
-        [Reactive] public bool IsOpened { get; set; }
-        [Reactive] public bool IssueChanged { get; set; }
-
         public ReactiveCommand DeleteCommand { get; set; }
+
+        [Reactive] public bool IsOpened { get; set; }
 
         [Reactive] public Brush Background { get; set; }
 
@@ -79,6 +86,9 @@ namespace Kamban.ViewModels
 
         public IssueViewModel()
         {
+            Card = null;
+            Result = IssueEditResult.None;
+
             AvailableColumns = new ReactiveList<ColumnInfo>();
             AvailableRows = new ReactiveList<RowInfo>();
 
@@ -104,18 +114,24 @@ namespace Kamban.ViewModels
 
                 scope.CreateOrUpdateIssueAsync(editedIssue);
 
-                // crash if new
-                if (Card != null)
+                if (Card == null)
+                {
+                    Card = new CardViewModel(editedIssue);
+                    Result = IssueEditResult.Created;
+                }
+                else
                 {
                     Card.Header = Head;
                     Card.Body = Body;
                     Card.ColumnDeterminant = SelectedColumn.Id;
                     Card.RowDeterminant = SelectedRow.Id;
                     Card.Color = SelectedColor.SystemName;
+                    Card.Modified = DateTime.Now;
+
+                    Result = IssueEditResult.Modified;
                 }
 
                 IsOpened = false;
-                IssueChanged = true;
             }, issueFilled);
 
             CancelCommand = ReactiveCommand.Create(() => IsOpened = false);
@@ -134,7 +150,7 @@ namespace Kamban.ViewModels
 
             scope.DeleteIssueAsync(Card.Id);
 
-            IssueChanged = true;
+            Result = IssueEditResult.Deleted;
             IsOpened = false;
         }
 
@@ -150,6 +166,8 @@ namespace Kamban.ViewModels
 
             if (Card == null)
             {
+                Head = null;
+                Body = null;
                 SelectedColor = ColorItems.First();
             }
             else
@@ -177,8 +195,7 @@ namespace Kamban.ViewModels
             scope = request.Scope;
             board = request.Board;
             Card = request.Card;
-
-            IssueChanged = false;
+            Result = IssueEditResult.None;
 
             Observable.FromAsync(() => UpdateViewModel())
                 .ObserveOnDispatcher()

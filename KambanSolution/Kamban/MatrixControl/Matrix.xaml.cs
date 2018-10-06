@@ -47,6 +47,7 @@ namespace Kamban.MatrixControl
 
             mx.RebuildGrid();
 
+            // TODO: concrete add or remove
             mx.Cards?
                 .Changed
                 .Subscribe(_ => mx.RebuildGrid());
