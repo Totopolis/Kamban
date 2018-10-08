@@ -30,9 +30,17 @@ namespace Kamban.ViewModels
         public ReactiveList<IDim> Rows { get; set; }
         public ReactiveList<ICard> Cards { get; set; }
 
+        [Reactive] public ICard IssueOfContextMenu { get; set; }
+
         public ReactiveCommand<ICard, Unit> CardClickCommand { get; set; }
         public ReactiveCommand<Unit, Unit> NormalizeGridCommand { get; set; }
         public ReactiveCommand<ICard, Unit> DropCardCommand { get; set; }
+
+        public ReactiveCommand<ICard, Unit> MoveIssueCommand { get; set; }
+        public ReactiveCommand<ICard, Unit> DeleteIssueCommand { get; set; }
+
+        [Reactive] public IssueViewModel IssueFlyout { get; set; }
+        [Reactive] public MoveViewModel MoveFlyout { get; set; }
 
         // Obsolete
 
@@ -41,8 +49,6 @@ namespace Kamban.ViewModels
 
         [Reactive] public ReactiveList<BoardInfo> BoardsInFile { get; set; }
         [Reactive] public BoardInfo CurrentBoard { get; set; }
-
-        [Reactive] public IssueViewModel IssueViewModel { get; set; }
 
         public ReactiveCommand<object, Unit> UpdateHorizontalHeaderCommand { get; set; }
         public ReactiveCommand<object, Unit> UpdateVerticalHeaderCommand { get; set; }
@@ -66,31 +72,22 @@ namespace Kamban.ViewModels
             Cards = new ReactiveList<ICard>();
 
             BoardsInFile = new ReactiveList<BoardInfo>();
-            IssueViewModel = new IssueViewModel();
+            IssueFlyout = new IssueViewModel();
+            MoveFlyout = new MoveViewModel();
 
-            CardClickCommand = ReactiveCommand.Create<ICard>(CardClickCommandExecute);
+            CardClickCommand = ReactiveCommand.Create<ICard>(c => ShowFlyout(IssueFlyout, c));
             NormalizeGridCommand = ReactiveCommand.Create(() => { });
             DropCardCommand = ReactiveCommand.Create<ICard>(DropCardCommandExecute);
 
-            UpdateHorizontalHeaderCommand = ReactiveCommand
-                .Create<object>(async ob => await UpdateHorizontalHeader(ob));
+            MoveIssueCommand = ReactiveCommand.Create<ICard>(c => ShowFlyout(MoveFlyout, c));
 
-            UpdateVerticalHeaderCommand = ReactiveCommand
-                .Create<object>(async ob => await UpdateVerticalHeader(ob));
+            DeleteIssueCommand = ReactiveCommand
+                .Create<ICard>(async card => await DeleteCardCommandExecuteAsync(card));
 
-            //AddNewElementCommand =
-            //    ReactiveCommand.CreateFromTask<string>(async name => await AddNewElement(name));
+            UpdateHorizontalHeaderCommand = ReactiveCommand.Create<object>(async ob => await UpdateHorizontalHeader(ob));
+            UpdateVerticalHeaderCommand = ReactiveCommand.Create<object>(async ob => await UpdateVerticalHeader(ob));
 
-            CreateTiketCommand = ReactiveCommand
-                .Create(() =>
-               {
-                   IssueViewModel.Initialize(new IssueViewRequest
-                   {
-                       Card = null,
-                       Scope = scope,
-                       Board = CurrentBoard
-                   });
-               });
+            CreateTiketCommand = ReactiveCommand.Create(() => ShowFlyout(IssueFlyout, null));
 
             CreateColumnCommand = ReactiveCommand
                 .CreateFromTask(async () =>
@@ -185,15 +182,29 @@ namespace Kamban.ViewModels
                 .ObserveOnDispatcher()
                 .Subscribe(async _ => await RefreshContent());
 
-            this.ObservableForProperty(w => w.IssueViewModel.Result)
+            this.ObservableForProperty(w => w.IssueFlyout.Result)
                 .Where(x => x.Value == IssueEditResult.Created)
-                .Subscribe(_ => Cards.Add(IssueViewModel.Card));
+                .Subscribe(_ => Cards.Add(IssueFlyout.Card));
 
-            this.ObservableForProperty(w => w.IssueViewModel.Result)
+            this.ObservableForProperty(w => w.IssueFlyout.Result)
                 .Where(x => x.Value == IssueEditResult.Deleted)
-                .Subscribe(_ => Cards.Remove(IssueViewModel.Card));
+                .Subscribe(_ => Cards.Remove(IssueFlyout.Card));
         }
 
+        private async Task DeleteCardCommandExecuteAsync(ICard cvm)
+        {
+            var ts = await dialogCoordinator.ShowMessageAsync(this, "Warning",
+                $"Are you shure to delete issue '{cvm.Header}'?"
+                , MessageDialogStyle.AffirmativeAndNegative);
+
+            if (ts == MessageDialogResult.Negative)
+                return;
+
+            scope.DeleteIssueAsync(cvm.Id);
+            Cards.Remove(cvm);
+        }
+
+        // !!! save at drag&drop !!!
         private void DropCardCommandExecute(ICard cvm)
         {
             var editedIssue = new Issue
@@ -246,21 +257,14 @@ namespace Kamban.ViewModels
             }
         }
 
-        public void CardClickCommandExecute(ICard cvm)
+        private void ShowFlyout(IInitializableViewModel vm, ICard cvm)
         {
-            try
+            vm.Initialize(new IssueViewRequest
             {
-                IssueViewModel.Initialize(new IssueViewRequest
-                {
-                    Card = cvm as CardViewModel,
-                    Scope = scope,
-                    Board = CurrentBoard
-                });
-            }
-            catch(Exception ex)
-            {
-                Title = "CardClickCommandExecute:" + ex.Message;
-            }
+                Card = cvm as CardViewModel,
+                Scope = scope,
+                Board = CurrentBoard
+            });
         }
 
         /*private async Task DeleteElement()

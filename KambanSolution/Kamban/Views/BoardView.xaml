@@ -7,6 +7,7 @@
              dialogs:DialogParticipation.Register="{Binding}"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:mykanban="clr-namespace:Kamban.MatrixControl"
+             x:Name="boardUserControl"
              mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -31,22 +32,23 @@
             Columns="{Binding Columns}"
             Rows="{Binding Rows}"
             Cards="{Binding Cards}"
-            />
+            CardOfContextMenu="{Binding IssueOfContextMenu, Mode=TwoWay}"
+            mykanban:ContextMenuServiceExtensions.DataContext="{Binding}">
 
-        <!--kanbanControl:Kanban
-            Grid.Column="0"
-            Grid.ColumnSpan="4"
-            HorizontalDimension="{Binding HorizontalDimension}" 
-            VerticalDimension="{Binding VerticalDimension}"
-            Cards="{Binding Issues}"
-            CardMouseClickCommand="{Binding UpdateCardCommand}"
-            CardContent="{Binding CardContent}"
-            HorizontalHeaderMouseClickCommand="{Binding ColumnHeaderSelectCommand}"
-            VerticalHeaderMouseClickCommand="{Binding RowHeaderSelectCommand}"
-            HorizontalHeaderDoubleClickCommand="{Binding UpdateHorizontalHeaderCommand}"
-            VerticalHeaderDoubleClickCommand="{Binding UpdateVerticalHeaderCommand}"
-            IsTabStop="False"
-            /-->
+            <mykanban:Matrix.CardContextMenu>
+                <ContextMenu>
+                    <MenuItem 
+                        Header="Move"
+                        CommandParameter="{Binding IssueOfContextMenu}"
+                        Command="{Binding MoveIssueCommand}"/>
+                    <MenuItem
+                        Header="Delete"
+                        CommandParameter="{Binding IssueOfContextMenu}"
+                        Command="{Binding DeleteIssueCommand}"/>
+                </ContextMenu>
+            </mykanban:Matrix.CardContextMenu>
+
+        </mykanban:Matrix>
 
         <mah:Flyout Header="112233"
                     BorderThickness="5" 
@@ -56,10 +58,26 @@
                     Grid.ColumnSpan="4"
                     CloseButtonVisibility="Hidden"
                     TitleVisibility="Hidden"
-                    IsOpen="{Binding IssueViewModel.IsOpened}"
+                    IsOpen="{Binding IssueFlyout.IsOpened}"
                     Theme="Adapt"
                     IsModal="True"
-                    Content="{Binding IssueViewModel}"
+                    Content="{Binding IssueFlyout}"
+                    AnimateOpacity="True"
+                    Width="600"
+                    />
+        
+        <mah:Flyout Header="445566"
+                    BorderThickness="5" 
+                    BorderBrush="{DynamicResource AccentBaseColorBrush}"
+                    Position="Top"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="4"
+                    CloseButtonVisibility="Hidden"
+                    TitleVisibility="Hidden"
+                    IsOpen="{Binding MoveFlyout.IsOpened}"
+                    Theme="Adapt"
+                    IsModal="True"
+                    Content="{Binding MoveFlyout}"
                     AnimateOpacity="True"
                     Width="600"
                     />

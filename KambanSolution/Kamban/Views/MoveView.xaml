@@ -1,0 +1,67 @@
+﻿<UserControl x:Class="Kamban.Views.MoveView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Kamban.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             Background="{Binding Background}">
+
+    <UserControl.InputBindings>
+        <KeyBinding Command="{Binding CancelCommand}" Key="Esc" />
+    </UserControl.InputBindings>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" MinHeight="20"/>
+            <RowDefinition Height="Auto" MinHeight="20"/>
+            <RowDefinition Height="Auto" MinHeight="200"/>
+            <RowDefinition Height="Auto" MinHeight="40"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Vertical">
+            <TextBlock>Move issue to...</TextBlock>
+            <TextBlock>File</TextBlock>
+
+            <ComboBox Foreground="Gray"
+                      Background="{Binding Background}"
+                      ItemsSource="{Binding AvailableBoards}"
+                      SelectedItem="{Binding SelectedBoard}"
+                      BorderThickness="0"
+                      BorderBrush="{DynamicResource AccentBaseColorBrush}"
+                      DisplayMemberPath="Name"/>
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="1"
+            Grid.RowSpan="1"
+            Orientation="Horizontal">
+            <ComboBox Foreground="Gray"
+                      Background="{Binding Background}"
+                      ItemsSource="{Binding AvailableColumns}"
+                      SelectedItem="{Binding SelectedColumn}"
+                      BorderThickness="0"
+                      BorderBrush="{DynamicResource AccentBaseColorBrush}"
+                      DisplayMemberPath="Name"/>
+            <ComboBox Foreground="Gray"
+                      BorderThickness="0"
+                      Background="{Binding Background}"
+                      BorderBrush="{DynamicResource AccentBaseColorBrush}"
+                      ItemsSource="{Binding AvailableRows}"
+                      DisplayMemberPath="Name"
+                      SelectedItem="{Binding SelectedRow}"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="4"
+                    Grid.RowSpan="1" 
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button Content="MoveTo" Width="60" Margin="10" Padding="5" TabIndex="3"
+                    Command="{Binding SaveCommand}" Background="{Binding Background}"/>
+            <Button Content="Cancel" Width="60" Margin="10" Padding="5"
+                    Command="{Binding CancelCommand}" Background="{Binding Background}"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

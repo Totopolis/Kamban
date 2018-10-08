@@ -16,13 +16,6 @@ using WpfColor = System.Windows.Media.Color;
 
 namespace Kamban.ViewModels
 {
-    public class IssueViewRequest : ViewRequest
-    {
-        public CardViewModel Card { get; set; }
-        public IBoardService Scope { get; set; }
-        public BoardInfo Board { get; set; }
-    }
-
     public class ColorItem
     {
         public SolidColorBrush Brush { get; private set; }
@@ -58,8 +51,8 @@ namespace Kamban.ViewModels
         [Reactive] public CardViewModel Card { get; set; }
         [Reactive] public IssueEditResult Result { get; set; }
 
-        public ReactiveList<RowInfo> AvailableRows { get; set; }
         public ReactiveList<ColumnInfo> AvailableColumns { get; set; }
+        public ReactiveList<RowInfo> AvailableRows { get; set; }
 
         [Reactive] public string Head { get; set; }
         [Reactive] public string Body { get; set; }

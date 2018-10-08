@@ -164,6 +164,7 @@
     <Compile Include="MatrixControl\Intersection.xaml.cs">
       <DependentUpon>Intersection.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MatrixControl\Matrix.cs" />
     <Compile Include="MatrixControl\Matrix.xaml.cs">
       <DependentUpon>Matrix.xaml</DependentUpon>
     </Compile>
@@ -177,6 +178,8 @@
     <Compile Include="ViewModels\BoardDropHandler.cs" />
     <Compile Include="ViewModels\BoardViewModel.cs" />
     <Compile Include="ViewModels\IssueViewModel.cs" />
+    <Compile Include="ViewModels\IssueViewRequest.cs" />
+    <Compile Include="ViewModels\MoveViewModel.cs" />
     <Compile Include="ViewModels\StartupViewModel.cs" />
     <Compile Include="ViewModels\WizardViewModel.cs" />
     <Compile Include="Views\BoardView.xaml.cs">
@@ -184,6 +187,9 @@
     </Compile>
     <Compile Include="Views\IssueView.xaml.cs">
       <DependentUpon>IssueView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MoveView.xaml.cs">
+      <DependentUpon>MoveView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\StartupView.xaml.cs">
       <DependentUpon>StartupView.xaml</DependentUpon>
@@ -246,6 +252,10 @@
     <Page Include="Views\IssueView.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="Views\MoveView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\StartupView.xaml">
       <SubType>Designer</SubType>

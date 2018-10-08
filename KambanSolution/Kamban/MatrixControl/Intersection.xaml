@@ -27,7 +27,7 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid>
+    <Grid MouseMove="Grid_MouseMove">
 
         <ListView
             Name="mainListView"
@@ -36,10 +36,22 @@
             dd:DragDrop.IsDragSource="True"
             dd:DragDrop.IsDropTarget="True"
             dd:DragDrop.DropHandler="{Binding}"
-            ItemsSource="{Binding Path=Cards, 
-                                RelativeSource={RelativeSource Mode=FindAncestor, 
+            ContextMenuOpening="ContextMenu_ContextMenuOpening"
+            ContextMenu="{Binding CardContextMenu}"
+            ItemsSource="{Binding Path=SelfCards, 
+                                RelativeSource={RelativeSource Mode=FindAncestor,
                                 AncestorType={x:Type UserControl}}}">
 
+            <!--ListView.ContextMenu>
+                <ContextMenu FontSize="12">
+                    <MenuItem Header="Move"/>
+                    <MenuItem
+                        Header="Delete"
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu},
+                              Path=PlacementTarget.Parent.Parent.SelectedCard}"
+                        Command="{Binding NeedDeleteCardCommand}"/>
+                </ContextMenu>
+            </ListView.ContextMenu-->
 
             <ListView.ItemTemplate>
                 <DataTemplate>
@@ -54,8 +66,8 @@
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="MouseLeftButtonUp">
                                 <i:InvokeCommandAction 
-                                    Command="{Binding DataContext.CardClickCommand
-                                    , ElementName=mainListView}" 
+                                    Command="{Binding Path=DataContext.CardClickCommand,
+                                    ElementName=mainListView}" 
                                     CommandParameter="{Binding}"/>
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
