@@ -26,6 +26,8 @@ namespace Kamban.ViewModels
 
         // Actual
 
+        [Reactive] public BoardInfo CurrentBoard { get; set; }
+
         public ReactiveList<IDim> Columns { get; set; }
         public ReactiveList<IDim> Rows { get; set; }
         public ReactiveList<ICard> Cards { get; set; }
@@ -48,7 +50,7 @@ namespace Kamban.ViewModels
         [Reactive] private ColumnInfo SelectedColumn { get; set; }
 
         [Reactive] public ReactiveList<BoardInfo> BoardsInFile { get; set; }
-        [Reactive] public BoardInfo CurrentBoard { get; set; }
+        
 
         public ReactiveCommand<object, Unit> UpdateHorizontalHeaderCommand { get; set; }
         public ReactiveCommand<object, Unit> UpdateVerticalHeaderCommand { get; set; }
@@ -59,6 +61,7 @@ namespace Kamban.ViewModels
 
         public ReactiveCommand<Unit, Unit> AddBoardCommand { get; set; }
         public ReactiveCommand<Unit, Unit> NextBoardCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> RenameBoardCommand { get; set; }
         public ReactiveCommand<object, Unit> SelectBoardCommand { get; set; }
 
         private readonly IShell shell;
@@ -134,6 +137,26 @@ namespace Kamban.ViewModels
                 CurrentBoard = indx < BoardsInFile.Count - 1 ?
                     BoardsInFile[indx + 1] :
                     BoardsInFile[0];
+            });
+
+            RenameBoardCommand = ReactiveCommand.CreateFromTask(async () =>
+            {
+                var str = $"Enter new board name for \"{CurrentBoard.Name}\"";
+                var ts = await dialogCoordinator
+                .ShowInputAsync(this, "Board rename", str,
+                    new MetroDialogSettings()
+                    {
+                        AffirmativeButtonText = "OK",
+                        NegativeButtonText = "Cancel",
+                        DefaultText = SelectedColumn?.Name
+                    });
+
+                if (string.IsNullOrEmpty(ts))
+                    return;
+
+                CurrentBoard.Name = ts;
+                prjService.CreateOrUpdateBoardAsync(CurrentBoard);
+                Title = ts;
             });
 
             SelectBoardCommand = ReactiveCommand
@@ -227,6 +250,9 @@ namespace Kamban.ViewModels
         {
             try
             {
+                Title = CurrentBoard.Name;
+                FullTitle = prjService.Uri;
+
                 var columns = await prjService.GetColumnsByBoardIdAsync(CurrentBoard.Id);
                 var rows = await prjService.GetRowsByBoardIdAsync(CurrentBoard.Id);
                 var issues = await prjService.GetIssuesByBoardIdAsync(CurrentBoard.Id);
@@ -387,6 +413,8 @@ namespace Kamban.ViewModels
 
             shell.AddVMCommand("Boards", "Add board", "AddBoardCommand", this)
                 .SetHotKey(ModifierKeys.Control | ModifierKeys.Shift, Key.N);
+
+            shell.AddVMCommand("Boards", "Rename board", "RenameBoardCommand", this);
 
             shell.AddVMCommand("Boards", "Next board", "NextBoardCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.Q);
