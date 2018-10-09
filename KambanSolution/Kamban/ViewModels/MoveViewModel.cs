@@ -16,7 +16,7 @@ namespace Kamban.ViewModels
 {
     public class MoveViewModel : ViewModelBase, IInitializableViewModel
     {
-        private IBoardService scope;
+        private IProjectService prjService;
         private CardViewModel card;
 
         [Reactive] public Brush Background { get; set; }
@@ -52,10 +52,10 @@ namespace Kamban.ViewModels
 
         }
 
-        private async Task ChangeScope(IBoardService bs)
+        private async Task ChangeScope(IProjectService ps)
         {
-            scope = bs;
-            var boards = await bs.GetAllBoardsInFileAsync();
+            prjService = ps;
+            var boards = await ps.GetAllBoardsInFileAsync();
             AvailableBoards.Clear();
             AvailableBoards.AddRange(boards);
 
@@ -66,12 +66,12 @@ namespace Kamban.ViewModels
         {
             SelectedBoard = bi;
 
-            var columns = await scope.GetColumnsByBoardIdAsync(SelectedBoard.Id);
+            var columns = await prjService.GetColumnsByBoardIdAsync(SelectedBoard.Id);
             AvailableColumns.Clear();
             AvailableColumns.AddRange(columns);
             SelectedColumn = AvailableColumns.First();
 
-            var rows = await scope.GetRowsByBoardIdAsync(SelectedBoard.Id);
+            var rows = await prjService.GetRowsByBoardIdAsync(SelectedBoard.Id);
             AvailableRows.Clear();
             AvailableRows.AddRange(rows);
             SelectedRow = AvailableRows.First();
@@ -85,7 +85,7 @@ namespace Kamban.ViewModels
 
             card = request.Card;
 
-            Observable.FromAsync(() => ChangeScope(request.Scope))
+            Observable.FromAsync(() => ChangeScope(request.PrjService))
                 .ObserveOnDispatcher()
                 .Subscribe();
 

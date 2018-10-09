@@ -12,7 +12,7 @@ namespace Kamban.ViewModels
     public class IssueViewRequest : ViewRequest
     {
         public CardViewModel Card { get; set; }
-        public IBoardService Scope { get; set; }
+        public IProjectService PrjService { get; set; }
         public BoardInfo Board { get; set; }
     }
 }

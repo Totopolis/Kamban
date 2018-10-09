@@ -19,8 +19,8 @@ namespace Kamban.Model
         void LoadConfig();
         void SaveConfig();
 
-        IBoardService CreateBoardService(string uri);
-        IBoardService LoadBoardService(string uri);
+        IProjectService CreateProjectService(string uri);
+        IProjectService LoadProjectService(string uri);
     }
 
     public class AppConfig
@@ -89,20 +89,20 @@ namespace Kamban.Model
             File.WriteAllText(path, data);
         }
 
-        public IBoardService CreateBoardService(string uri)
+        public IProjectService CreateProjectService(string uri)
         {
             var scope = shell
                 .Container
-                .Resolve<IBoardService>(new NamedParameter("uri", uri));
+                .Resolve<IProjectService>(new NamedParameter("uri", uri));
 
             return scope;
         }
 
-        public IBoardService LoadBoardService(string uri)//future? taking from env too?
+        public IProjectService LoadProjectService(string uri)//future? taking from env too?
         {
             var scope = shell
                 .Container
-                .Resolve<IBoardService>(new NamedParameter("uri", uri));
+                .Resolve<IProjectService>(new NamedParameter("uri", uri));
 
             return scope;
         }

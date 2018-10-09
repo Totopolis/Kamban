@@ -10,7 +10,7 @@ namespace Kamban.Model
 
     public class BoardViewRequest : ViewRequest
     {
-        public IBoardService Scope { get; set; }
+        public IProjectService PrjService { get; set; }
         public string NeededBoardName { get; set; }
     }
 }

@@ -45,7 +45,7 @@ namespace Kamban.ViewModels
 
     public class IssueViewModel : ViewModelBase, IInitializableViewModel
     {
-        private IBoardService scope;
+        private IProjectService prjService;
         private BoardInfo board;
 
         [Reactive] public CardViewModel Card { get; set; }
@@ -105,7 +105,7 @@ namespace Kamban.ViewModels
                     BoardId = board.Id
                 };
 
-                scope.CreateOrUpdateIssueAsync(editedIssue);
+                prjService.CreateOrUpdateIssueAsync(editedIssue);
 
                 if (Card == null)
                 {
@@ -141,7 +141,7 @@ namespace Kamban.ViewModels
             if (Card == null)
                 return;
 
-            scope.DeleteIssueAsync(Card.Id);
+            prjService.DeleteIssueAsync(Card.Id);
 
             Result = IssueEditResult.Deleted;
             IsOpened = false;
@@ -149,8 +149,8 @@ namespace Kamban.ViewModels
 
         public async Task UpdateViewModel()
         {
-            var columns = await scope.GetColumnsByBoardIdAsync(board.Id);
-            var rows = await scope.GetRowsByBoardIdAsync(board.Id);
+            var columns = await prjService.GetColumnsByBoardIdAsync(board.Id);
+            var rows = await prjService.GetRowsByBoardIdAsync(board.Id);
 
             AvailableColumns.PublishCollection(columns);
             SelectedColumn = AvailableColumns.First();
@@ -185,7 +185,7 @@ namespace Kamban.ViewModels
             if (request == null)
                 return;
 
-            scope = request.Scope;
+            prjService = request.PrjService;
             board = request.Board;
             Card = request.Card;
             Result = IssueEditResult.None;

@@ -26,6 +26,7 @@ namespace Kamban.ViewModels
         [Reactive] public string FileName { get; set; }
         [Reactive] public bool InExistedFile { get; set; }
         [Reactive] public bool CanCreate { get; set; }
+
         public ReactiveList<LocalDimension> ColumnList { get; set; }
         public ReactiveList<LocalDimension> RowList { get; set; }
         public ReactiveList<string> BoardsInFile { get; set; }
@@ -41,12 +42,13 @@ namespace Kamban.ViewModels
         private readonly IAppModel appModel;
         private readonly IShell shell;
         private readonly IDialogCoordinator dialogCoordinator = DialogCoordinator.Instance;
-        private IBoardService scope;
+        private IProjectService prjService;
 
         public WizardViewModel(IAppModel appModel, IShell shell)
         {
             this.appModel = appModel;
             this.shell = shell;
+
             validator = new WizardValidator();
             Title = "Creating new file";
             FullTitle = "Creating new file";
@@ -190,12 +192,12 @@ namespace Kamban.ViewModels
 
             if (!InExistedFile)
             {
-                scope = appModel.CreateBoardService(uri);
+                prjService = appModel.CreateProjectService(uri);
             }
 
             else
             {
-                var boards = await scope.GetAllBoardsInFileAsync();
+                var boards = await prjService.GetAllBoardsInFileAsync();
                 BoardsInFile.PublishCollection(boards.Select(board => board.Name));
 
                 if (BoardsInFile.Contains(BoardName))
@@ -217,17 +219,17 @@ namespace Kamban.ViewModels
                 Modified = DateTime.Now
             };
 
-            newBoard = scope.CreateOrUpdateBoardAsync(newBoard);
+            newBoard = prjService.CreateOrUpdateBoardAsync(newBoard);
 
             foreach (var colName in ColumnList.Select(column => column.Name))
-                scope.CreateOrUpdateColumnAsync(new ColumnInfo
+                prjService.CreateOrUpdateColumnAsync(new ColumnInfo
                 {
                     Name = colName,
                     Board = newBoard
                 });
 
             foreach (var rowName in RowList.Select(row => row.Name))
-                scope.CreateOrUpdateRowAsync(new RowInfo
+                prjService.CreateOrUpdateRowAsync(new RowInfo
                 {
                     Name = rowName,
                     Board = newBoard
@@ -236,7 +238,7 @@ namespace Kamban.ViewModels
             Close();
 
             shell.ShowView<BoardView>(
-                viewRequest: new BoardViewRequest { ViewId = uri, Scope = scope, NeededBoardName = BoardName },
+                viewRequest: new BoardViewRequest { ViewId = uri, PrjService = prjService, NeededBoardName = BoardName },
                 options: new UiShowOptions { Title = uri });
         }
 
@@ -253,7 +255,7 @@ namespace Kamban.ViewModels
                 FileName = Path.GetFileName(uri);
                 FullTitle = $"Creating new board";
                 FullTitle = $"Creating new board in {uri}";
-                scope = appModel.CreateBoardService(uri);
+                prjService = appModel.CreateProjectService(uri);
                 /*Observable.FromAsync(() => scope.GetAllBoardsInFileAsync())
                     .ObserveOnDispatcher()
                     .Subscribe(boards =>

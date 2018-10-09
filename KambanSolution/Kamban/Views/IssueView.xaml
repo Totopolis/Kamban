@@ -49,6 +49,14 @@
             Grid.RowSpan="1"
             Orientation="Horizontal">
             <ComboBox Foreground="Gray"
+                      Background="{Binding Background}"
+                      ItemsSource="{Binding AvailableColumns}"
+                      SelectedItem="{Binding SelectedColumn}"
+                      BorderThickness="0"
+                      BorderBrush="{DynamicResource AccentBaseColorBrush}"
+                      DisplayMemberPath="Name"/>
+            
+            <ComboBox Foreground="Gray"
                       BorderThickness="0"
                       Background="{Binding Background}"
                       BorderBrush="{DynamicResource AccentBaseColorBrush}"
@@ -56,14 +64,6 @@
                       DisplayMemberPath="Name"
                       SelectedItem="{Binding SelectedRow}"
                       />
-
-            <ComboBox Foreground="Gray"
-                      Background="{Binding Background}"
-                      ItemsSource="{Binding AvailableColumns}"
-                      SelectedItem="{Binding SelectedColumn}"
-                      BorderThickness="0"
-                      BorderBrush="{DynamicResource AccentBaseColorBrush}"
-                      DisplayMemberPath="Name"/>
 
             <ComboBox
                 MinWidth="60"

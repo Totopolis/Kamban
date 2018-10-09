@@ -119,14 +119,14 @@ namespace Kamban.ViewModels
             if (!file.Exists)
                 return false;
 
-            IBoardService scope = await Task.Run(() => appModel.LoadBoardService(uri));
+            IProjectService service = await Task.Run(() => appModel.LoadProjectService(uri));
 
             var title = file.FullName;
 
             await Task.Delay(200);
 
             shell.ShowView<BoardView>(
-                viewRequest: new BoardViewRequest { ViewId = title, Scope = scope },
+                viewRequest: new BoardViewRequest { ViewId = title, PrjService = service },
                 options: new UiShowOptions { Title = title });
 
             AddRecent(uri);

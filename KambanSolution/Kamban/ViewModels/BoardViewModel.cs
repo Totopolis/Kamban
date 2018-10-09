@@ -20,7 +20,7 @@ namespace Kamban.ViewModels
 {
     public class BoardViewModel : ViewModelBase, IInitializableViewModel
     {
-        private IBoardService scope;
+        private IProjectService prjService;
 
         private readonly IDialogCoordinator dialogCoordinator = DialogCoordinator.Instance;
 
@@ -97,7 +97,7 @@ namespace Kamban.ViewModels
                    if (!string.IsNullOrEmpty(newName))
                    {
                        var newColumn = new ColumnInfo { Name = newName, Board = CurrentBoard };
-                       scope.CreateOrUpdateColumnAsync(newColumn);
+                       prjService.CreateOrUpdateColumnAsync(newColumn);
                    }
 
                    await RefreshContent();
@@ -111,7 +111,7 @@ namespace Kamban.ViewModels
                    if (!string.IsNullOrEmpty(newName))
                    {
                        var newRow = new RowInfo { Name = newName, Board = CurrentBoard };
-                       scope.CreateOrUpdateRowAsync(newRow);
+                       prjService.CreateOrUpdateRowAsync(newRow);
                    }
 
                    await RefreshContent();
@@ -121,9 +121,9 @@ namespace Kamban.ViewModels
             {
                 this.shell.ShowView<WizardView>(new WizardViewRequest
                 {
-                    ViewId = $"Creating new board in {scope.Uri}",
+                    ViewId = $"Creating new board in {prjService.Uri}",
                     InExistedFile = true,
-                    Uri = scope.Uri
+                    Uri = prjService.Uri
                 });
             });
 
@@ -157,7 +157,7 @@ namespace Kamban.ViewModels
                         Width = cvm.Size
                     };
 
-                    scope.CreateOrUpdateColumnAsync(ci);
+                    prjService.CreateOrUpdateColumnAsync(ci);
                 });
 
             Rows
@@ -174,7 +174,7 @@ namespace Kamban.ViewModels
                         Height = rvm.Size
                     };
 
-                    scope.CreateOrUpdateRowAsync(ri);
+                    prjService.CreateOrUpdateRowAsync(ri);
                 });
 
             this.ObservableForProperty(w => w.CurrentBoard)
@@ -200,7 +200,7 @@ namespace Kamban.ViewModels
             if (ts == MessageDialogResult.Negative)
                 return;
 
-            scope.DeleteIssueAsync(cvm.Id);
+            prjService.DeleteIssueAsync(cvm.Id);
             Cards.Remove(cvm);
         }
 
@@ -220,16 +220,16 @@ namespace Kamban.ViewModels
                 BoardId = cvm.BoardId
             };
 
-            scope.CreateOrUpdateIssueAsync(editedIssue);
+            prjService.CreateOrUpdateIssueAsync(editedIssue);
         }
 
         private async Task RefreshContent()
         {
             try
             {
-                var columns = await scope.GetColumnsByBoardIdAsync(CurrentBoard.Id);
-                var rows = await scope.GetRowsByBoardIdAsync(CurrentBoard.Id);
-                var issues = await scope.GetIssuesByBoardIdAsync(CurrentBoard.Id);
+                var columns = await prjService.GetColumnsByBoardIdAsync(CurrentBoard.Id);
+                var rows = await prjService.GetRowsByBoardIdAsync(CurrentBoard.Id);
+                var issues = await prjService.GetIssuesByBoardIdAsync(CurrentBoard.Id);
 
                 //var toDel = issues.Where(x => x.ColumnId == 0 || x.RowId == 0).ToArray();
                 //foreach (var it in toDel)
@@ -262,7 +262,7 @@ namespace Kamban.ViewModels
             vm.Initialize(new IssueViewRequest
             {
                 Card = cvm as CardViewModel,
-                Scope = scope,
+                PrjService = prjService,
                 Board = CurrentBoard
             });
         }
@@ -321,12 +321,12 @@ namespace Kamban.ViewModels
         {
             var newName = await ShowColumnNameInput();
 
-            var column = scope.GetSelectedColumn(o.ToString());
+            var column = prjService.GetSelectedColumn(o.ToString());
 
             if (!string.IsNullOrEmpty(newName))
             {
                 column.Name = newName;
-                scope.CreateOrUpdateColumnAsync(column);
+                prjService.CreateOrUpdateColumnAsync(column);
             }
 
             await RefreshContent();
@@ -336,12 +336,12 @@ namespace Kamban.ViewModels
         {
             var newName = await ShowRowNameInput();
 
-            var row = scope.GetSelectedRow(o.ToString());
+            var row = prjService.GetSelectedRow(o.ToString());
 
             if (!string.IsNullOrEmpty(newName))
             {
                 row.Name = newName;
-                scope.CreateOrUpdateRowAsync(row);
+                prjService.CreateOrUpdateRowAsync(row);
             }
 
             await RefreshContent();
@@ -392,9 +392,9 @@ namespace Kamban.ViewModels
 
             var request = viewRequest as BoardViewRequest;
 
-            scope = request.Scope;
+            prjService = request.PrjService;
 
-            Observable.FromAsync(() => scope.GetAllBoardsInFileAsync())
+            Observable.FromAsync(() => prjService.GetAllBoardsInFileAsync())
                 .ObserveOnDispatcher()
                 .Subscribe(boards =>
                 {

@@ -203,7 +203,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\AppModel.cs" />
-    <Compile Include="Model\BoardService.cs" />
+    <Compile Include="Model\ProjectService.cs" />
     <Compile Include="Model\ViewRequests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

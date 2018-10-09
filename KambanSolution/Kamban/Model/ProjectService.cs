@@ -12,7 +12,7 @@ using Kamban.Repository;
 namespace Kamban.Model
 {
     /// LiteDb or Api access to board by url
-    public interface IBoardService
+    public interface IProjectService
     {
         string Uri { get; set; }
 
@@ -45,14 +45,14 @@ namespace Kamban.Model
         Task<Issue> LoadOrCreateIssueAsync(int? issueId);
     }
 
-    public class BoardService : IBoardService
+    public class ProjectService : IProjectService
     {
         private readonly IRepository repo;
 
         private List<RowInfo> rows = new List<RowInfo>();
         private List<ColumnInfo> columns = new List<ColumnInfo>();
 
-        public BoardService(IShell shell, IRepository repository, string uri)
+        public ProjectService(IShell shell, IRepository repository, string uri)
         {
             Uri = uri;
             repo = repository;
