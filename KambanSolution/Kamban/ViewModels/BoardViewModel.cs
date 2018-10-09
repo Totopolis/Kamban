@@ -263,6 +263,7 @@ namespace Kamban.ViewModels
             {
                 Card = cvm as CardViewModel,
                 PrjService = prjService,
+                BoardVM = this,
                 Board = CurrentBoard
             });
         }

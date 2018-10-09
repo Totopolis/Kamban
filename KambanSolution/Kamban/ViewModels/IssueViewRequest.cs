@@ -13,6 +13,7 @@ namespace Kamban.ViewModels
     {
         public CardViewModel Card { get; set; }
         public IProjectService PrjService { get; set; }
+        public BoardViewModel BoardVM { get; set; }
         public BoardInfo Board { get; set; }
     }
 }
