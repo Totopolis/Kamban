@@ -164,6 +164,7 @@
     <Compile Include="MatrixControl\Intersection.xaml.cs">
       <DependentUpon>Intersection.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MatrixControl\Matrix.Build.cs" />
     <Compile Include="MatrixControl\Matrix.cs" />
     <Compile Include="MatrixControl\Matrix.xaml.cs">
       <DependentUpon>Matrix.xaml</DependentUpon>
@@ -176,6 +177,7 @@
     <Compile Include="Repository\Issue.cs" />
     <Compile Include="Repository\RowInfo.cs" />
     <Compile Include="ViewModels\BoardDropHandler.cs" />
+    <Compile Include="ViewModels\BoardViewModel.Commands.cs" />
     <Compile Include="ViewModels\BoardViewModel.cs" />
     <Compile Include="ViewModels\IssueViewModel.cs" />
     <Compile Include="ViewModels\IssueViewRequest.cs" />

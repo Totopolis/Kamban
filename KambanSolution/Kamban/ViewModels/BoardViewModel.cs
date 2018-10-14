@@ -18,7 +18,7 @@ using Ui.Wpf.KanbanControl.Elements.CardElement;
 
 namespace Kamban.ViewModels
 {
-    public class BoardViewModel : ViewModelBase, IInitializableViewModel
+    public partial class BoardViewModel : ViewModelBase, IInitializableViewModel
     {
         private IProjectService prjService;
 
@@ -36,7 +36,6 @@ namespace Kamban.ViewModels
 
         public ReactiveCommand<ICard, Unit> CardClickCommand { get; set; }
         public ReactiveCommand<Unit, Unit> NormalizeGridCommand { get; set; }
-        public ReactiveCommand<ICard, Unit> DropCardCommand { get; set; }
 
         public ReactiveCommand<ICard, Unit> MoveIssueCommand { get; set; }
         public ReactiveCommand<ICard, Unit> DeleteIssueCommand { get; set; }
@@ -44,20 +43,21 @@ namespace Kamban.ViewModels
         [Reactive] public IssueViewModel IssueFlyout { get; set; }
         [Reactive] public MoveViewModel MoveFlyout { get; set; }
 
+        [Reactive] public object HeadOfContextMenu { get; set; }
+
+        public ReactiveCommand<IDim, Unit> HeadRenameCommand { get; set; }
+        public ReactiveCommand<IDim, Unit> HeadDeleteCommand { get; set; }
+        public ReactiveCommand<IDim, Unit> InsertHeadBeforeCommand { get; set; }
+        public ReactiveCommand<IDim, Unit> InsertHeadAfterCommand { get; set; }
+
         // Obsolete
 
         [Reactive] private RowInfo SelectedRow { get; set; }
         [Reactive] private ColumnInfo SelectedColumn { get; set; }
 
         [Reactive] public ReactiveList<BoardInfo> BoardsInFile { get; set; }
-        
-
-        public ReactiveCommand<object, Unit> UpdateHorizontalHeaderCommand { get; set; }
-        public ReactiveCommand<object, Unit> UpdateVerticalHeaderCommand { get; set; }
 
         public ReactiveCommand<Unit, Unit> CreateTiketCommand { get; set; }
-        public ReactiveCommand<Unit, Unit> CreateColumnCommand { get; set; }
-        public ReactiveCommand<Unit, Unit> CreateRowCommand { get; set; }
 
         public ReactiveCommand<Unit, Unit> AddBoardCommand { get; set; }
         public ReactiveCommand<Unit, Unit> NextBoardCommand { get; set; }
@@ -80,45 +80,25 @@ namespace Kamban.ViewModels
 
             CardClickCommand = ReactiveCommand.Create<ICard>(c => ShowFlyout(IssueFlyout, c));
             NormalizeGridCommand = ReactiveCommand.Create(() => { });
-            DropCardCommand = ReactiveCommand.Create<ICard>(DropCardCommandExecute);
 
             MoveIssueCommand = ReactiveCommand.Create<ICard>(c => ShowFlyout(MoveFlyout, c));
 
             DeleteIssueCommand = ReactiveCommand
                 .Create<ICard>(async card => await DeleteCardCommandExecuteAsync(card));
 
-            UpdateHorizontalHeaderCommand = ReactiveCommand.Create<object>(async ob => await UpdateHorizontalHeader(ob));
-            UpdateVerticalHeaderCommand = ReactiveCommand.Create<object>(async ob => await UpdateVerticalHeader(ob));
+            HeadRenameCommand = ReactiveCommand
+                .Create<IDim>(async head => await HeadRenameCommandExecute(head));
+
+            HeadDeleteCommand = ReactiveCommand
+                .Create<IDim>(async head => await HeadDeleteCommandExecute(head));
+
+            InsertHeadBeforeCommand = ReactiveCommand
+                .Create<IDim>(async head => await InsertHeadBeforeCommandExecute(head));
+
+            InsertHeadAfterCommand = ReactiveCommand
+                .Create<IDim>(async head => await InsertHeadAfterCommandExecute(head));
 
             CreateTiketCommand = ReactiveCommand.Create(() => ShowFlyout(IssueFlyout, null));
-
-            CreateColumnCommand = ReactiveCommand
-                .CreateFromTask(async () =>
-               {
-                   var newName = await ShowColumnNameInput();
-
-                   if (!string.IsNullOrEmpty(newName))
-                   {
-                       var newColumn = new ColumnInfo { Name = newName, Board = CurrentBoard };
-                       prjService.CreateOrUpdateColumnAsync(newColumn);
-                   }
-
-                   await RefreshContent();
-               });
-
-            CreateRowCommand = ReactiveCommand
-                .CreateFromTask(async () =>
-               {
-                   var newName = await ShowRowNameInput();
-
-                   if (!string.IsNullOrEmpty(newName))
-                   {
-                       var newRow = new RowInfo { Name = newName, Board = CurrentBoard };
-                       prjService.CreateOrUpdateRowAsync(newRow);
-                   }
-
-                   await RefreshContent();
-               });
 
             AddBoardCommand = ReactiveCommand.Create(() =>
             {
@@ -139,25 +119,7 @@ namespace Kamban.ViewModels
                     BoardsInFile[0];
             });
 
-            RenameBoardCommand = ReactiveCommand.CreateFromTask(async () =>
-            {
-                var str = $"Enter new board name for \"{CurrentBoard.Name}\"";
-                var ts = await dialogCoordinator
-                .ShowInputAsync(this, "Board rename", str,
-                    new MetroDialogSettings()
-                    {
-                        AffirmativeButtonText = "OK",
-                        NegativeButtonText = "Cancel",
-                        DefaultText = SelectedColumn?.Name
-                    });
-
-                if (string.IsNullOrEmpty(ts))
-                    return;
-
-                CurrentBoard.Name = ts;
-                prjService.CreateOrUpdateBoardAsync(CurrentBoard);
-                Title = ts;
-            });
+            RenameBoardCommand = ReactiveCommand.CreateFromTask(async () => await RenameBoardCommandExecute());
 
             SelectBoardCommand = ReactiveCommand
                 .Create((object mi) =>
@@ -171,16 +133,7 @@ namespace Kamban.ViewModels
                 .Subscribe(ob =>
                 {
                     var cvm = ob.Sender as ColumnViewModel;
-
-                    var ci = new ColumnInfo
-                    {
-                        Id = cvm.Id,
-                        Board = CurrentBoard,
-                        Name = cvm.Caption,
-                        Width = cvm.Size
-                    };
-
-                    prjService.CreateOrUpdateColumnAsync(ci);
+                    prjService.CreateOrUpdateColumnAsync(cvm.Info);
                 });
 
             Rows
@@ -188,16 +141,15 @@ namespace Kamban.ViewModels
                 .Subscribe(ob =>
                 {
                     var rvm = ob.Sender as RowViewModel;
+                    prjService.CreateOrUpdateRowAsync(rvm.Info);
+                });
 
-                    var ri = new RowInfo
-                    {
-                        Id = rvm.Id,
-                        Board = CurrentBoard,
-                        Name = rvm.Caption,
-                        Height = rvm.Size
-                    };
-
-                    prjService.CreateOrUpdateRowAsync(ri);
+            Cards
+                .ItemChanged
+                .Subscribe(ob =>
+                {
+                    var cvm = ob.Sender as CardViewModel;
+                    prjService.CreateOrUpdateIssueAsync(cvm.Issue);
                 });
 
             this.ObservableForProperty(w => w.CurrentBoard)
@@ -205,47 +157,16 @@ namespace Kamban.ViewModels
                 .ObserveOnDispatcher()
                 .Subscribe(async _ => await RefreshContent());
 
-            this.ObservableForProperty(w => w.IssueFlyout.Result)
-                .Where(x => x.Value == IssueEditResult.Created)
-                .Subscribe(_ => Cards.Add(IssueFlyout.Card));
-
-            this.ObservableForProperty(w => w.IssueFlyout.Result)
-                .Where(x => x.Value == IssueEditResult.Deleted)
-                .Subscribe(_ => Cards.Remove(IssueFlyout.Card));
+            this.ObservableForProperty(w => w.IssueFlyout.IsOpened)
+                .Where(x => x.Value == false && IssueFlyout.Result == IssueEditResult.Created)
+                .Subscribe(_ =>
+                {
+                    var card = IssueFlyout.Card;
+                    prjService.CreateOrUpdateIssueAsync(card.Issue);
+                    Cards.Add(card);
+                });
         }
-
-        private async Task DeleteCardCommandExecuteAsync(ICard cvm)
-        {
-            var ts = await dialogCoordinator.ShowMessageAsync(this, "Warning",
-                $"Are you shure to delete issue '{cvm.Header}'?"
-                , MessageDialogStyle.AffirmativeAndNegative);
-
-            if (ts == MessageDialogResult.Negative)
-                return;
-
-            prjService.DeleteIssueAsync(cvm.Id);
-            Cards.Remove(cvm);
-        }
-
-        // !!! save at drag&drop !!!
-        private void DropCardCommandExecute(ICard cvm)
-        {
-            var editedIssue = new Issue
-            {
-                Id = cvm.Id,
-                Head = cvm.Header,
-                ColumnId = (int)cvm.ColumnDeterminant,
-                RowId = (int)cvm.RowDeterminant,
-                Color = cvm.Color,
-                Body = cvm.Body,
-                Created = cvm.Created,
-                Modified = cvm.Modified,
-                BoardId = cvm.BoardId
-            };
-
-            prjService.CreateOrUpdateIssueAsync(editedIssue);
-        }
-
+        
         private async Task RefreshContent()
         {
             try
@@ -254,7 +175,11 @@ namespace Kamban.ViewModels
                 FullTitle = prjService.Uri;
 
                 var columns = await prjService.GetColumnsByBoardIdAsync(CurrentBoard.Id);
+                columns.Sort((x, y) => x.Order.CompareTo(y.Order));
+
                 var rows = await prjService.GetRowsByBoardIdAsync(CurrentBoard.Id);
+                rows.Sort((x, y) => x.Order.CompareTo(y.Order));
+
                 var issues = await prjService.GetIssuesByBoardIdAsync(CurrentBoard.Id);
 
                 //var toDel = issues.Where(x => x.ColumnId == 0 || x.RowId == 0).ToArray();
@@ -293,112 +218,6 @@ namespace Kamban.ViewModels
                 Board = CurrentBoard
             });
         }
-
-        /*private async Task DeleteElement()
-        {
-            var element = SelectedIssue != null ? "задачу" :
-                SelectedColumn          != null ? "весь столбец" : "всю строку";
-
-            var ts = await dialogCoordinator.ShowMessageAsync(this, "Warning",
-                $"Вы действительно хотите удалить {element}?"
-                , MessageDialogStyle.AffirmativeAndNegative);
-
-            if (ts == MessageDialogResult.Negative)
-                return;
-
-            if (SelectedIssue != null)
-                scope.DeleteIssueAsync(SelectedIssue.Id);
-            else if (SelectedRow != null)
-                scope.DeleteRowAsync(SelectedRow.Id);
-            else if (SelectedColumn != null)
-                scope.DeleteColumnAsync(SelectedColumn.Id);
-
-            await RefreshContent();
-        }*/
-
-        /*private void UpdateCard(object o)
-        {
-            var iss = o as Issue;
-
-            if (iss != null)
-                IssueViewModel.Initialize(new IssueViewRequest
-                {
-                    IssueId = iss.Id,
-                    Scope = scope,
-                    Board = CurrentBoard
-                });
-
-            if (o is Issue)
-                IssueViewModel.Initialize(new IssueViewRequest
-                {
-                    IssueId = SelectedIssue.Id,
-                    Scope = scope,
-                    Board = CurrentBoard
-                });
-            else if (o is null)
-                IssueViewModel.Initialize(new IssueViewRequest
-                {
-                    IssueId = 0,
-                    Scope = scope,
-                    Board = CurrentBoard
-                });
-        }*/
-
-        private async Task UpdateHorizontalHeader(object o)
-        {
-            var newName = await ShowColumnNameInput();
-
-            var column = prjService.GetSelectedColumn(o.ToString());
-
-            if (!string.IsNullOrEmpty(newName))
-            {
-                column.Name = newName;
-                prjService.CreateOrUpdateColumnAsync(column);
-            }
-
-            await RefreshContent();
-        }
-
-        private async Task UpdateVerticalHeader(object o)
-        {
-            var newName = await ShowRowNameInput();
-
-            var row = prjService.GetSelectedRow(o.ToString());
-
-            if (!string.IsNullOrEmpty(newName))
-            {
-                row.Name = newName;
-                prjService.CreateOrUpdateRowAsync(row);
-            }
-
-            await RefreshContent();
-        }
-
-        private async Task<string> ShowColumnNameInput()
-        {
-            return await dialogCoordinator
-                .ShowInputAsync(this, "ColumnRed", "Input column name",
-                    new MetroDialogSettings()
-                    {
-                        AffirmativeButtonText = "OK",
-                        NegativeButtonText = "Cancel",
-                        DefaultText = SelectedColumn?.Name
-                    });
-        }
-
-        private async Task<string> ShowRowNameInput()
-        {
-            return await dialogCoordinator
-                .ShowInputAsync(this, "RowRed", "Input row name",
-                    new MetroDialogSettings()
-                    {
-                        AffirmativeButtonText = "OK",
-                        NegativeButtonText = "Cancel",
-                        DefaultText = SelectedRow?.Name,
-                        DialogResultOnCancel = MessageDialogResult.Negative
-
-                    });
-        } //TODO: add some logic preventing empty name
 
         public void Initialize(ViewRequest viewRequest)
         {

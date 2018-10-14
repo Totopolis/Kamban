@@ -146,5 +146,30 @@ namespace Kamban.MatrixControl
                 typeof(Matrix),
                 new PropertyMetadata(null));
 
+        public ContextMenu HeadContextMenu
+        {
+            get => (ContextMenu)GetValue(HeadContextMenuProperty);
+            set => SetValue(HeadContextMenuProperty, value);
+        }
+
+        public static readonly DependencyProperty HeadContextMenuProperty =
+            DependencyProperty.Register(
+                "HeadContextMenu",
+                typeof(ContextMenu),
+                typeof(Matrix),
+                new PropertyMetadata(null));
+
+        public object HeadOfContextMenu
+        {
+            get => (object)GetValue(HeadOfContextMenuProperty);
+            set => SetValue(HeadOfContextMenuProperty, value);
+        }
+
+        public static readonly DependencyProperty HeadOfContextMenuProperty =
+            DependencyProperty.Register("HeadOfContextMenu",
+                typeof(object),
+                typeof(Matrix),
+                new PropertyMetadata(null));
+
     }//end of class
 }

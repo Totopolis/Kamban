@@ -20,11 +20,13 @@ namespace Kamban.MatrixControl
         string Caption { get; set; }
         object Determinant { get; set; }
         int Size { get; set; }
+        int Order { get; set; }
     }
 
     public class ColumnViewModel : ReactiveObject, IDim
     {
         private readonly ColumnInfo columnInfo;
+        public ColumnInfo Info => columnInfo;
 
         public ColumnViewModel(ColumnInfo ci)
         {
@@ -34,17 +36,24 @@ namespace Kamban.MatrixControl
             Caption = ci.Name;
             Determinant = ci.Id;
             Size = ci.Width;
+            Order = ci.Order;
+
+            this.WhenAnyValue(x => x.Size).Subscribe(x => columnInfo.Width = x);
+            this.WhenAnyValue(x => x.Caption).Subscribe(x => columnInfo.Name = x);
+            this.WhenAnyValue(x => x.Order).Subscribe(x => columnInfo.Order = x);
         }
 
         [Reactive] public int Id { get; set; }
         [Reactive] public string Caption { get; set; }
         [Reactive] public object Determinant { get; set; }
         [Reactive] public int Size { get; set; }
+        [Reactive] public int Order { get; set; }
     }
 
     public class RowViewModel : ReactiveObject, IDim
     {
         private readonly RowInfo rowInfo;
+        public RowInfo Info => rowInfo;
 
         public RowViewModel(RowInfo ri)
         {
@@ -54,12 +63,18 @@ namespace Kamban.MatrixControl
             Caption = ri.Name;
             Determinant = ri.Id;
             Size = ri.Height;
+            Order = ri.Order;
+
+            this.WhenAnyValue(x => x.Size).Subscribe(x => rowInfo.Height = x);
+            this.WhenAnyValue(x => x.Caption).Subscribe(x => rowInfo.Name = x);
+            this.WhenAnyValue(x => x.Order).Subscribe(x => rowInfo.Order = x);
         }
 
         [Reactive] public int Id { get; set; }
         [Reactive] public string Caption { get; set; }
         [Reactive] public object Determinant { get; set; }
         [Reactive] public int Size { get; set; }
+        [Reactive] public int Order { get; set; }
     }
 
     public interface ICard
@@ -83,6 +98,7 @@ namespace Kamban.MatrixControl
     public class CardViewModel : ReactiveObject, ICard
     {
         private readonly Issue issueInfo;
+        public Issue Issue => issueInfo;
 
         public CardViewModel(Issue iss)
         {
@@ -98,6 +114,19 @@ namespace Kamban.MatrixControl
             Modified = iss.Modified;
             ShowDescription = !string.IsNullOrEmpty(issueInfo.Body);
             BoardId = iss.BoardId;
+
+            this.WhenAnyValue(x => x.Header).Subscribe(x => issueInfo.Head = x);
+            this.WhenAnyValue(x => x.Color).Subscribe(x => issueInfo.Color = x);
+
+            this.WhenAnyValue(x => x.Body).Subscribe(x =>
+            {
+                ShowDescription = !string.IsNullOrEmpty(x);
+                issueInfo.Body = x;
+            });
+
+            this.WhenAnyValue(x => x.ColumnDeterminant).Subscribe(x => issueInfo.ColumnId = (int)x);
+            this.WhenAnyValue(x => x.RowDeterminant).Subscribe(x => issueInfo.RowId = (int)x);
+            this.WhenAnyValue(x => x.Modified).Subscribe(x => issueInfo.Modified = x);
         }
 
         [Reactive] public int Id { get; set; }
@@ -139,6 +168,9 @@ namespace Kamban.MatrixControl
 
             if (m.CardContextMenu != null)
                 m.CardContextMenu.DataContext = parent.DataContext; //GetDataContext(parent);
+
+            if (m.HeadContextMenu != null)
+                m.HeadContextMenu.DataContext = parent.DataContext;
         }
     }//end of class
 }

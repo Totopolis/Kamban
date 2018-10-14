@@ -28,11 +28,11 @@
             IsTabStop="False"
             NormalizeGridCommand="{Binding NormalizeGridCommand}"
             CardClickCommand="{Binding CardClickCommand}"
-            DropCardCommand="{Binding DropCardCommand}"
             Columns="{Binding Columns}"
             Rows="{Binding Rows}"
             Cards="{Binding Cards}"
             CardOfContextMenu="{Binding IssueOfContextMenu, Mode=TwoWay}"
+            HeadOfContextMenu="{Binding HeadOfContextMenu, Mode=TwoWay}"
             mykanban:ContextMenuServiceExtensions.DataContext="{Binding}">
 
             <mykanban:Matrix.CardContextMenu>
@@ -47,6 +47,27 @@
                         Command="{Binding DeleteIssueCommand}"/>
                 </ContextMenu>
             </mykanban:Matrix.CardContextMenu>
+
+            <mykanban:Matrix.HeadContextMenu>
+                <ContextMenu>
+                    <MenuItem 
+                        Header="Rename"
+                        CommandParameter="{Binding HeadOfContextMenu}"
+                        Command="{Binding HeadRenameCommand}"/>
+                    <MenuItem
+                        Header="Insert Before"
+                        CommandParameter="{Binding HeadOfContextMenu}"
+                        Command="{Binding InsertHeadBeforeCommand}"/>
+                    <MenuItem
+                        Header="Insert After"
+                        CommandParameter="{Binding HeadOfContextMenu}"
+                        Command="{Binding InsertHeadAfterCommand}"/>
+                    <MenuItem
+                        Header="Delete"
+                        CommandParameter="{Binding HeadOfContextMenu}"
+                        Command="{Binding HeadDeleteCommand}"/>
+                </ContextMenu>
+            </mykanban:Matrix.HeadContextMenu>
 
         </mykanban:Matrix>
 
