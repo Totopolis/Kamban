@@ -34,7 +34,7 @@ namespace Kamban.MatrixControl
                 {
                     var card = x.Sender;
 
-                    // TODO: CRASH AT REMOVE COLUMN WITH CARDS !!!!!!!!!!!
+                    // CRASH AT REMOVE COLUMN WITH CARDS IF OLD CELLS DELETED BY COL_ROW DELETE COMMAND!!!!!!!!!!!
                     var oldIntersec = mx.cardPointers[card];
                     var newIntersec = mx.cells[mx.GetHashValue(card.ColumnDeterminant, card.RowDeterminant)];
 

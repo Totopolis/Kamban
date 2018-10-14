@@ -201,6 +201,7 @@
     </Compile>
     <Compile Include="Views\WpfResources\ControlElements.cs" />
     <Compile Include="Views\WpfResources\Converters.cs" />
+    <Compile Include="Views\WpfResources\SelectionBindingTextBox.cs" />
     <Compile Include="Views\WpfResources\Validators.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -101,14 +101,6 @@
 
                 </ComboBox.ItemTemplate>
             </ComboBox>
-
-            <!--xctk:ColorPicker ShowTabHeaders="True"
-                              Foreground="Gray"
-                          BorderThickness="0" 
-                          BorderBrush="{DynamicResource AccentBaseColorBrush}"
-                          DisplayColorAndName="True"
-                          DisplayColorTooltip="False"
-                          SelectedColor="{Binding Color}"/-->
         </StackPanel>
 
         <Label
@@ -120,19 +112,24 @@
             HorizontalAlignment="Left"
             BorderThickness="0">Description</Label>
 
-        <TextBox TabIndex="2"
-                 Background="{Binding Background}"
-                 Grid.Row="3"
-                 Grid.RowSpan="1"
-                 Text="{Binding Body,UpdateSourceTrigger=PropertyChanged}" 
-                 TextWrapping="Wrap"
-                 AcceptsReturn="True"
-                 mah:TextBoxHelper.Watermark="Type description..."
-                 mah:TextBoxHelper.ClearTextButton="True">
-            <TextBox.InputBindings>
+        <wpfresources:SelectionBindingTextBox 
+            BorderThickness="0"
+            FontSize="16"
+            TabIndex="2"
+            Background="{Binding Background}"
+            BindableSelectionStart="{Binding BodySelectionStart, Mode=TwoWay}"
+            Grid.Row="3"
+            Grid.RowSpan="1"
+            Text="{Binding Body,UpdateSourceTrigger=PropertyChanged}" 
+            TextWrapping="Wrap"
+            AcceptsReturn="True"
+            mah:TextBoxHelper.Watermark="Type description..."
+            mah:TextBoxHelper.ClearTextButton="True">
+            <wpfresources:SelectionBindingTextBox.InputBindings>
                 <KeyBinding Command="{Binding SaveCommand}" Modifiers="Ctrl" Key="Return" />
-            </TextBox.InputBindings>
-        </TextBox>
+                <KeyBinding Command="{Binding EnterCommand}" Modifiers="Shift" Key="Return" />
+            </wpfresources:SelectionBindingTextBox.InputBindings>
+        </wpfresources:SelectionBindingTextBox>
 
         <StackPanel Grid.Row="4"
                     Grid.RowSpan="1" 

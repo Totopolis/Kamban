@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -60,8 +61,10 @@ namespace Kamban.ViewModels
 
         public ReactiveCommand CancelCommand { get; set; }
         public ReactiveCommand SaveCommand { get; set; }
+        public ReactiveCommand EnterCommand { get; set; }
 
         [Reactive] public bool IsOpened { get; set; }
+        [Reactive] public int BodySelectionStart { get; set; }
 
         [Reactive] public Brush Background { get; set; }
 
@@ -87,7 +90,7 @@ namespace Kamban.ViewModels
                 (sh, sr, sc, cc) =>
                 sr != null && sc != null && !string.IsNullOrEmpty(sh) && cc != null);
 
-            SaveCommand = ReactiveCommand.Create(() => SaveCommandExecute(), issueFilled);
+            SaveCommand = ReactiveCommand.Create(SaveCommandExecute, issueFilled);
 
             CancelCommand = ReactiveCommand.Create(() =>
             {
@@ -95,9 +98,37 @@ namespace Kamban.ViewModels
                 IsOpened = false;
             });
 
+            EnterCommand = ReactiveCommand.Create(EnterCommandExecute);
+
             this.WhenAnyValue(x => x.SelectedColor)
                         .Where(x => x != null)
                         .Subscribe(_ => Background = SelectedColor.Brush);
+        }
+
+        private void EnterCommandExecute()
+        {
+            if (BodySelectionStart == 0)
+                return;
+
+            int currentSelection = BodySelectionStart;
+            int strStart = BodySelectionStart;
+            for (int i = BodySelectionStart - 1; i > 0; i--)
+                if (Body[i] == '\n')
+                {
+                    strStart = i + 1;
+                    break;
+                }
+
+            var subStr = Body.Substring(strStart, BodySelectionStart - strStart);
+            string digitStr = new string(subStr.TakeWhile(char.IsDigit).ToArray());
+
+            if (!string.IsNullOrEmpty(digitStr))
+            {
+                int digit = int.Parse(digitStr) + 1;
+                string newStr = Environment.NewLine + $"{digit}. ";
+                Body = Body.Insert(BodySelectionStart, newStr);
+                BodySelectionStart = currentSelection + newStr.Length;
+            }
         }
 
         private void SaveCommandExecute()
