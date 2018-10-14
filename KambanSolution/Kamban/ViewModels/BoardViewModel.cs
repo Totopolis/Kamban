@@ -60,6 +60,7 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> CreateTiketCommand { get; set; }
 
         public ReactiveCommand<Unit, Unit> AddBoardCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> PrevBoardCommand { get; set; }
         public ReactiveCommand<Unit, Unit> NextBoardCommand { get; set; }
         public ReactiveCommand<Unit, Unit> RenameBoardCommand { get; set; }
         public ReactiveCommand<object, Unit> SelectBoardCommand { get; set; }
@@ -110,6 +111,19 @@ namespace Kamban.ViewModels
                 });
             });
 
+            var prevNextCommandEnabled = this.BoardsInFile
+                .CountChanged
+                .Select(x => x > 1);
+            
+            PrevBoardCommand = ReactiveCommand.Create(() =>
+            {
+                int indx = BoardsInFile.IndexOf(CurrentBoard);
+
+                CurrentBoard = indx > 0 ?
+                    BoardsInFile[indx - 1] :
+                    BoardsInFile[BoardsInFile.Count - 1];
+            }, prevNextCommandEnabled);
+
             NextBoardCommand = ReactiveCommand.Create(() =>
             {
                 int indx = BoardsInFile.IndexOf(CurrentBoard);
@@ -117,7 +131,7 @@ namespace Kamban.ViewModels
                 CurrentBoard = indx < BoardsInFile.Count - 1 ?
                     BoardsInFile[indx + 1] :
                     BoardsInFile[0];
-            });
+            }, prevNextCommandEnabled);
 
             RenameBoardCommand = ReactiveCommand.CreateFromTask(async () => await RenameBoardCommandExecute());
 
@@ -235,8 +249,11 @@ namespace Kamban.ViewModels
 
             shell.AddVMCommand("Boards", "Rename board", "RenameBoardCommand", this);
 
-            shell.AddVMCommand("Boards", "Next board", "NextBoardCommand", this)
+            shell.AddVMCommand("Boards", "Prev board", "PrevBoardCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.Q);
+
+            shell.AddVMCommand("Boards", "Next board", "NextBoardCommand", this)
+                .SetHotKey(ModifierKeys.Control, Key.E);
 
             var request = viewRequest as BoardViewRequest;
 
