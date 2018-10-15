@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -27,6 +28,7 @@ namespace Kamban.ViewModels
         public ReactiveCommand<string, Unit> OpenRecentDbCommand { get; set; }
         public ReactiveCommand<string, Unit> RemoveRecentCommand { get; set; }
         public ReactiveCommand<string, Unit> AccentChangeCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> ExportCommand { get; set; }
 
         [Reactive]
         public bool IsLoading { get; set; }
@@ -38,11 +40,7 @@ namespace Kamban.ViewModels
         {
             this.shell = shell as IShell;
             this.appModel = appModel;
-
-            this.appModel.LoadConfig();
-
-            var recent = this.appModel.GetRecentDocuments();
-            Recents = new ReactiveList<string>(recent.Take(3));
+            Recents = new ReactiveList<string>();
 
             AccentChangeCommand =
                 ReactiveCommand.Create<string>(color =>
@@ -90,6 +88,9 @@ namespace Kamban.ViewModels
                     this.IsLoading = false;
                 }
             });
+
+            var canExport = Recents.CountChanged.Select(x => x > 1);
+            ExportCommand = ReactiveCommand.Create(() => this.shell.ShowView<ExportView>(), canExport);
 
             this.IsLoading = false;
         } //ctor
@@ -142,7 +143,16 @@ namespace Kamban.ViewModels
             shell.AddGlobalCommand("File", "Open", "OpenFileCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.O);
 
+            shell.AddGlobalCommand("File", "Export", "ExportCommand", this)
+                .SetHotKey(ModifierKeys.Control, Key.U);
+
             shell.AddGlobalCommand("File", "Exit", null, this);
+
+            this.appModel.LoadConfig();
+
+            var rcnts = this.appModel.GetRecentDocuments();
+            Recents.Clear();
+            Recents.AddRange(rcnts.Take(3));
         }
     }
 }

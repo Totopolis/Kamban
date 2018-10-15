@@ -15,6 +15,7 @@ namespace Kamban.Model
         void RemoveRecent(string doc);
 
         string Caption { get; set; }
+        string ArchiveFolder { get; set; }
 
         void LoadConfig();
         void SaveConfig();
@@ -27,6 +28,7 @@ namespace Kamban.Model
     {
         public List<string> Recent { get; set; }
         public string Caption { get; set; }
+        public string ArchiveFolder { get; set; }
 
         public AppConfig()
         {
@@ -46,6 +48,12 @@ namespace Kamban.Model
         {
             get => appConfig.Caption;
             set => appConfig.Caption = value;
+        }
+
+        public string ArchiveFolder
+        {
+            get => appConfig.ArchiveFolder;
+            set => appConfig.ArchiveFolder = value;
         }
 
         public AppModel(IShell shell)
