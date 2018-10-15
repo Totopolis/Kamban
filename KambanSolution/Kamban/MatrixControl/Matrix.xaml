@@ -6,6 +6,44 @@
              xmlns:local="clr-namespace:Kamban.MatrixControl"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="DefaultHorizontalHeaderTemplate">
+            <Border
+            BorderBrush="#E1E1E1"
+            BorderThickness="1"
+            Margin="-1, 0, 0, 0"
+            Background="#F4F4F4">
+                <TextBlock 
+                Margin="6" 
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontSize="14"
+                FontWeight="Bold"
+                Text="{Binding Caption}"/>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="DefaulVerticalHeaderTemplate">
+            <Border
+            BorderBrush="#E1E1E1"
+            BorderThickness="1"
+            Margin="0, -1, 0, 0"
+            Background="#F4F4F4">
+                <TextBlock 
+                Margin="6" 
+                FontSize="14"
+                FontWeight="Bold"
+                VerticalAlignment="Center"
+                Text="{Binding Caption}">
+                    <TextBlock.LayoutTransform>
+                        <RotateTransform Angle="270"/>
+                    </TextBlock.LayoutTransform>
+                </TextBlock>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+    
     <Grid Name="MainGrid">
     </Grid>
 </UserControl>

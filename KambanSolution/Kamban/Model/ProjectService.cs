@@ -4,9 +4,6 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using Ui.Wpf.Common;
-using Ui.Wpf.KanbanControl.Dimensions;
-using Ui.Wpf.KanbanControl.Dimensions.Generic;
-using Ui.Wpf.KanbanControl.Elements.CardElement;
 using Kamban.Repository;
 
 namespace Kamban.Model
@@ -35,10 +32,6 @@ namespace Kamban.Model
 
         // Obsolete
 
-        Task<IDimension> GetColumnHeadersAsync(int boardId);
-        Task<IDimension> GetRowHeadersAsync(int boardId);
-        
-        CardContent GetCardContent();
         RowInfo GetSelectedRow(string rowName);
         ColumnInfo GetSelectedColumn(string colName);
 
@@ -117,72 +110,6 @@ namespace Kamban.Model
         }
 
         #region Obsolete
-
-        public async Task<IDimension> GetColumnHeadersAsync(int boardId)
-        {
-            columns.Clear();
-            columns = await Task.Run(() => repo.GetColumns(boardId));
-
-            var columnHeaders = columns.Select(c => c.Name).ToArray();
-
-            return new TagDimension<string, Issue>(
-                tags: columnHeaders,
-                getItemTags: i => new[] {
-                    columns.Where(x => x.Id == i.ColumnId).Select(x => x.Name).FirstOrDefault()
-                },
-                categories: columnHeaders
-                    .Select(c => new TagsDimensionCategory<string>(c, c))
-                    .Select(tdc => (IDimensionCategory)tdc)
-                    .ToArray());
-        }
-
-        public async Task<CardsColors> GetTaskColorsAsync(int boardId)
-        {
-            var isss = await GetIssuesByBoardIdAsync(boardId);
-
-            var cardsColors = new CardsColors
-            {
-                Path = "pasd",
-                ColorMap = isss
-                    .ToDictionary(
-                        k => (object) k.Id,
-                        v => (ICardColor) new CardColor
-                        {
-                            Background = v.Color,
-                            BorderBrush = v.Color
-                        })
-            };
-
-            return cardsColors;
-        }
-
-        public async Task<IDimension> GetRowHeadersAsync(int boardId)
-        {
-            rows.Clear();
-            rows = await Task.Run(() => repo.GetRows(boardId));
-
-            var rowHeaders = rows.Select(r => r.Name).ToArray();
-
-            return new TagDimension<string, Issue>(
-                tags: rowHeaders,
-                getItemTags: i => new[] {
-                    rows.Where(x=>x.Id == i.RowId).Select(x=>x.Name).FirstOrDefault()
-                }, //i.Row.Name},
-                categories: rowHeaders
-                    .Select(r => new TagsDimensionCategory<string>(r, r))
-                    .Select(tdc => (IDimensionCategory)tdc)
-                    .ToArray()
-            );
-        }
-
-        public CardContent GetCardContent()
-        {
-            return new CardContent(new ICardContentItem[]
-            {
-                new CardContentItem("Head"),
-                new CardContentItem("Body", CardContentArea.Additional),
-            });
-        }
 
         public RowInfo GetSelectedRow(string rowName)
         {

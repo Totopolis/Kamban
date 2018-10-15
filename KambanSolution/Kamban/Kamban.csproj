@@ -123,11 +123,8 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="Ui.Wpf.Common, Version=1.0.11.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Ui.Wpf.Common.1.0.11\lib\net462\Ui.Wpf.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="Ui.Wpf.KanbanControl, Version=1.0.11.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Ui.Wpf.KanbanControl.1.0.11\lib\net462\Ui.Wpf.KanbanControl.dll</HintPath>
+    <Reference Include="Ui.Wpf.Common, Version=1.0.13.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ui.Wpf.Common.1.0.13\lib\net462\Ui.Wpf.Common.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
@@ -176,9 +173,9 @@
     <Compile Include="Repository\ColumnInfo.cs" />
     <Compile Include="Repository\Issue.cs" />
     <Compile Include="Repository\RowInfo.cs" />
-    <Compile Include="ViewModels\BoardDropHandler.cs" />
     <Compile Include="ViewModels\BoardViewModel.Commands.cs" />
     <Compile Include="ViewModels\BoardViewModel.cs" />
+    <Compile Include="ViewModels\ExportViewModel.cs" />
     <Compile Include="ViewModels\IssueViewModel.cs" />
     <Compile Include="ViewModels\IssueViewRequest.cs" />
     <Compile Include="ViewModels\MoveViewModel.cs" />

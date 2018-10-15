@@ -43,7 +43,7 @@ namespace Kamban.MatrixControl
                 cc.Content = it;
                 cc.MouseMove += Head_MouseMove;
                 cc.ContextMenu = HeadContextMenu;
-                cc.ContentTemplate = (DataTemplate)defaultTemplates["DefaultHorizontalHeaderTemplate"];
+                cc.ContentTemplate = (DataTemplate)this.Resources["DefaultHorizontalHeaderTemplate"];
                 MainGrid.Children.Add(cc);
 
                 MainGrid.Children.Add(BuildHorizontalSpliter(i, Columns.Count));
@@ -76,7 +76,7 @@ namespace Kamban.MatrixControl
                 cc.Content = it;
                 cc.MouseMove += Head_MouseMove;
                 cc.ContextMenu = HeadContextMenu;
-                cc.ContentTemplate = (DataTemplate)defaultTemplates["DefaulVerticalHeaderTemplate"];
+                cc.ContentTemplate = (DataTemplate)this.Resources["DefaulVerticalHeaderTemplate"];
                 MainGrid.Children.Add(cc);
 
                 MainGrid.Children.Add(BuildVerticalSpliter(i, Rows.Count));

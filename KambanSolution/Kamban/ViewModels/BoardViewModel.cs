@@ -13,8 +13,6 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
-using Ui.Wpf.KanbanControl.Dimensions;
-using Ui.Wpf.KanbanControl.Elements.CardElement;
 
 namespace Kamban.ViewModels
 {

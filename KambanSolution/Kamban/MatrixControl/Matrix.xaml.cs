@@ -10,7 +10,6 @@ using System.Reactive;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Ui.Wpf.KanbanControl;
 
 namespace Kamban.MatrixControl
 {
@@ -19,7 +18,6 @@ namespace Kamban.MatrixControl
     /// </summary>
     public partial class Matrix : UserControl, IDropTarget
     {
-        private static readonly DefaultTemplates defaultTemplates = new DefaultTemplates();
         private Dictionary<int, Intersection> cells;
         private Dictionary<ICard, Intersection> cardPointers;
 
