@@ -37,6 +37,7 @@
             dd:DragDrop.IsDropTarget="True"
             dd:DragDrop.DropHandler="{Binding}"
             ContextMenuOpening="ContextMenu_ContextMenuOpening"
+            MouseDoubleClick="mainListView_MouseDoubleClick"
             ContextMenu="{Binding CardContextMenu}"
             ItemsSource="{Binding Path=SelfCards, 
                                 RelativeSource={RelativeSource Mode=FindAncestor,

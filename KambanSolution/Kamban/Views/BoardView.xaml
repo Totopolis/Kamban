@@ -33,6 +33,7 @@
             Cards="{Binding Cards}"
             CardOfContextMenu="{Binding IssueOfContextMenu, Mode=TwoWay}"
             HeadOfContextMenu="{Binding HeadOfContextMenu, Mode=TwoWay}"
+            CellDoubleClickCommand="{Binding CellDoubleClickCommand}"
             mykanban:ContextMenuServiceExtensions.DataContext="{Binding}">
 
             <mykanban:Matrix.CardContextMenu>

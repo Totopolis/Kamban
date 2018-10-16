@@ -48,14 +48,13 @@ namespace Kamban.ViewModels
         public ReactiveCommand<IDim, Unit> InsertHeadBeforeCommand { get; set; }
         public ReactiveCommand<IDim, Unit> InsertHeadAfterCommand { get; set; }
 
-        // Obsolete
-
         [Reactive] private RowInfo SelectedRow { get; set; }
         [Reactive] private ColumnInfo SelectedColumn { get; set; }
 
         [Reactive] public ReactiveList<BoardInfo> BoardsInFile { get; set; }
 
         public ReactiveCommand<Unit, Unit> CreateTiketCommand { get; set; }
+        public ReactiveCommand<(object column, object row), Unit> CellDoubleClickCommand { get; set; }
 
         public ReactiveCommand<Unit, Unit> AddBoardCommand { get; set; }
         public ReactiveCommand<Unit, Unit> PrevBoardCommand { get; set; }
@@ -99,6 +98,9 @@ namespace Kamban.ViewModels
 
             CreateTiketCommand = ReactiveCommand.Create(() => ShowFlyout(IssueFlyout, null));
 
+            CellDoubleClickCommand = ReactiveCommand.Create<(object column, object row)>(
+                (tup) => ShowFlyout(IssueFlyout, null, (int)tup.column, (int)tup.row));
+
             AddBoardCommand = ReactiveCommand.Create(() =>
             {
                 this.shell.ShowView<WizardView>(new WizardViewRequest
@@ -131,7 +133,7 @@ namespace Kamban.ViewModels
                     BoardsInFile[0];
             }, prevNextCommandEnabled);
 
-            RenameBoardCommand = ReactiveCommand.CreateFromTask(async () => await RenameBoardCommandExecute());
+            RenameBoardCommand = ReactiveCommand.CreateFromTask(RenameBoardCommandExecute);
 
             SelectBoardCommand = ReactiveCommand
                 .Create((object mi) =>
@@ -220,10 +222,12 @@ namespace Kamban.ViewModels
             }
         }
 
-        private void ShowFlyout(IInitializableViewModel vm, ICard cvm)
+        private void ShowFlyout(IInitializableViewModel vm, ICard cvm, int column = 0, int row = 0)
         {
             vm.Initialize(new IssueViewRequest
             {
+                ColumnId = column,
+                RowId = row,
                 Card = cvm as CardViewModel,
                 PrjService = prjService,
                 BoardVM = this,

@@ -51,6 +51,18 @@ namespace Kamban.MatrixControl
             mx.CardOfContextMenu = SelectedCard;
             e.Handled = SelectedCard == null;
         }
+
+        private void mainListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            var point = e.GetPosition(mainListView);
+            var card = mainListView.GetObjectAtPoint<ListViewItem>(point) as ICard;
+
+            if (card == null)
+            {
+                var tup = (ColumnDeterminant, RowDeterminant);
+                mx.CellDoubleClickCommand?.Execute(tup).Subscribe();
+            }
+        }
     }//end of control
 
     public static class IntersectionHelper

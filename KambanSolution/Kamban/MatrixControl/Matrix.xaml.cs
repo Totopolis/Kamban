@@ -169,5 +169,18 @@ namespace Kamban.MatrixControl
                 typeof(Matrix),
                 new PropertyMetadata(null));
 
+        public ReactiveCommand<(object column, object row), Unit> CellDoubleClickCommand
+        {
+            get => (ReactiveCommand<(object column, object row), Unit>)GetValue(CellDoubleClickCommandProperty);
+            set => SetValue(CellDoubleClickCommandProperty, value);
+        }
+
+        public static readonly DependencyProperty CellDoubleClickCommandProperty =
+            DependencyProperty.Register(
+                "CellDoubleClickCommand",
+                typeof(ReactiveCommand<(object column, object row), Unit>),
+                typeof(Matrix),
+                new PropertyMetadata(null));
+
     }//end of class
 }

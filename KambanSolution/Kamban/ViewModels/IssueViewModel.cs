@@ -47,6 +47,8 @@ namespace Kamban.ViewModels
     {
         private IProjectService prjService;
         private BoardInfo board;
+        private int requestedColumnId;
+        private int requestedRowId;
 
         [Reactive] public CardViewModel Card { get; set; }
         [Reactive] public IssueEditResult Result { get; set; }
@@ -176,6 +178,14 @@ namespace Kamban.ViewModels
                 Body = null;
                 SelectedColor = ColorItems.First();
 
+                if (requestedColumnId!=0)
+                    SelectedColumn = AvailableColumns
+                        .First(c => c.Id == requestedColumnId);
+
+                if (requestedRowId != 0)
+                    SelectedRow = AvailableRows
+                        .First(c => c.Id == requestedRowId);
+
                 Result = IssueEditResult.Created;
             }
             else
@@ -205,6 +215,8 @@ namespace Kamban.ViewModels
             prjService = request.PrjService;
             board = request.Board;
             Card = request.Card;
+            requestedColumnId = request.ColumnId;
+            requestedRowId = request.RowId;
 
             Observable.FromAsync(() => UpdateViewModel())
                 .ObserveOnDispatcher()

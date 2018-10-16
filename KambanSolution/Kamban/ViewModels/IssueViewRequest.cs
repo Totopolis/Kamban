@@ -11,6 +11,8 @@ namespace Kamban.ViewModels
 {
     public class IssueViewRequest : ViewRequest
     {
+        public int ColumnId { get; set; }
+        public int RowId { get; set; }
         public CardViewModel Card { get; set; }
         public IProjectService PrjService { get; set; }
         public BoardViewModel BoardVM { get; set; }
