@@ -225,14 +225,14 @@ namespace Kamban.ViewModels
                 prjService.CreateOrUpdateColumnAsync(new ColumnInfo
                 {
                     Name = colName,
-                    Board = newBoard
+                    BoardId = newBoard.Id
                 });
 
             foreach (var rowName in RowList.Select(row => row.Name))
                 prjService.CreateOrUpdateRowAsync(new RowInfo
                 {
                     Name = rowName,
-                    Board = newBoard
+                    BoardId = newBoard.Id
                 });
 
             Close();

@@ -117,7 +117,7 @@ namespace Kamban.ViewModels
                 ColumnInfo ci = new ColumnInfo
                 {
                     Name = ts,
-                    Board = column.Info.Board
+                    BoardId = column.Info.BoardId
                 };
 
                 prjService.CreateOrUpdateColumnAsync(ci);
@@ -135,7 +135,7 @@ namespace Kamban.ViewModels
                 RowInfo ri = new RowInfo
                 {
                     Name = ts,
-                    Board = row.Info.Board
+                    BoardId = row.Info.BoardId
                 };
 
                 prjService.CreateOrUpdateRowAsync(ri);

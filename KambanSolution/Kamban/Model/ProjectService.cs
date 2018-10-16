@@ -66,12 +66,14 @@ namespace Kamban.Model
 
         public async Task<List<ColumnInfo>> GetColumnsByBoardIdAsync(int boardId)
         {
-            return await Task.Run(() => repo.GetColumns(boardId));
+            var columns = await Task.Run(() => repo.GetColumns(boardId));
+            return columns;
         }
 
         public async Task<List<RowInfo>> GetRowsByBoardIdAsync(int boardId)
         {
-            return await Task.Run(() => repo.GetRows(boardId));
+            var rows = await Task.Run(() => repo.GetRows(boardId));
+            return rows;
         }
 
         public async Task<IEnumerable<Issue>> GetIssuesByBoardIdAsync(int boardId)

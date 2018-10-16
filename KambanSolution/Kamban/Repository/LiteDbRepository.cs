@@ -83,7 +83,7 @@ namespace Kamban.Repository
             using (var db = new LiteDatabase(fileName))
             {
                 var rows = db.GetCollection<RowInfo>(Name<RowInfo>());
-                var result = rows.Find(x => x.Board.Id == boardId);
+                var result = rows.Find(x => x.BoardId == boardId);
 
                 return result.ToList();
             }
@@ -94,7 +94,7 @@ namespace Kamban.Repository
             using (var db = new LiteDatabase(fileName))
             {
                 var columns = db.GetCollection<ColumnInfo>(Name<ColumnInfo>());
-                var result = columns.Find(x => x.Board.Id == boardId);
+                var result = columns.Find(x => x.BoardId == boardId);
 
                 return result.ToList();
             }
