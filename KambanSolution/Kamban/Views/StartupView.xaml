@@ -23,6 +23,20 @@
             <Setter Property="Height" Value="125" />
             <Setter Property="TitleFontSize" Value="10" />
         </Style>
+
+        <DataTemplate x:Key="RecentContentTemplate">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock FontWeight="DemiBold">Boards:</TextBlock>
+                    <TextBlock Margin="5,0,0,0" Text="{Binding BoardList}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock FontWeight="DemiBold">Tickets:</TextBlock>
+                    <TextBlock Margin="5,0,0,0" Text="{Binding TotalTickets}"/>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
     </UserControl.Resources>
 
     <Grid>
@@ -59,7 +73,6 @@
                 Title="Create new database"
                 Command="{Binding NewFileCommand}"
                 Style="{StaticResource LargeTileStyle}" 
-                Content="ImageHere" 
                 Background="Teal" 
                 Margin="3"/>
 
@@ -100,16 +113,24 @@
             HorizontalAlignment="Left" 
             VerticalAlignment="Top">
             <ItemsControl ItemsSource="{Binding Recents}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <metro:Tile
                             Margin="3"
                             Style="{StaticResource LargeTileStyle}"
-                            Title="{Binding}"
+                            Title="{Binding Uri}"
+                            ContentTemplate="{StaticResource RecentContentTemplate}"
+                            Content="{Binding}"
                             Command="{Binding Path=DataContext.OpenRecentDbCommand, 
                                 RelativeSource={RelativeSource Mode=FindAncestor, 
                                 AncestorType={x:Type UserControl}}}"
-                            CommandParameter="{Binding}"/>
+                            CommandParameter="{Binding Uri}"/>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

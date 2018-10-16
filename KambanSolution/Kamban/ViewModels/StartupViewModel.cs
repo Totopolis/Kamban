@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -20,9 +21,16 @@ using Application = System.Windows.Application;
 
 namespace Kamban.ViewModels
 {
+    public class RecentTile : ReactiveObject
+    {
+        [Reactive] public int TotalTickets { get; set; }
+        [Reactive] public string BoardList { get; set; }
+        [Reactive] public string Uri { get; set; }
+    }
+
     public class StartupViewModel : ViewModelBase, IInitializableViewModel
     {
-        public ReactiveList<string> Recents { get; set; }
+        public ReactiveList<RecentTile> Recents { get; set; }
         public ReactiveCommand NewFileCommand { get; set; }
         public ReactiveCommand OpenFileCommand { get; set; }
         public ReactiveCommand<string, Unit> OpenRecentDbCommand { get; set; }
@@ -40,7 +48,7 @@ namespace Kamban.ViewModels
         {
             this.shell = shell as IShell;
             this.appModel = appModel;
-            Recents = new ReactiveList<string>();
+            Recents = new ReactiveList<RecentTile>();
 
             AccentChangeCommand =
                 ReactiveCommand.Create<string>(color =>
@@ -99,7 +107,10 @@ namespace Kamban.ViewModels
         {
             appModel.RemoveRecent(uri);
             appModel.SaveConfig();
-            Recents.PublishCollection(appModel.GetRecentDocuments().Take(3));
+
+            var tile = Recents.Where(x => x.Uri == uri).FirstOrDefault();
+            if (tile != null)
+                Recents.Remove(tile);
         }
 
         private void AddRecent(string uri)
@@ -107,10 +118,19 @@ namespace Kamban.ViewModels
             appModel.AddRecent(uri);
             appModel.SaveConfig();
 
-            Recents.Remove(uri);
-            Recents.Insert(0, uri);
-            if (Recents.Count > 3)
-                Recents.RemoveAt(3);
+            var tile = Recents.Where(x => x.Uri == uri).FirstOrDefault();
+            if (tile != null)
+                Recents.Remove(tile);
+            else
+            {
+                tile = new RecentTile { Uri = uri };
+                Task.Run(() => LoadStatAsync(new[] { tile }));
+            }
+
+            Recents.Insert(0, tile);
+
+            if (Recents.Count > 6)
+                Recents.RemoveAt(6);
         }
 
         private async Task<bool> OpenBoardView(string uri)
@@ -148,11 +168,37 @@ namespace Kamban.ViewModels
 
             shell.AddGlobalCommand("File", "Exit", null, this);
 
-            this.appModel.LoadConfig();
+            UpdateRecent();
 
+            Task.Run(() => LoadStatAsync(Recents));
+        }
+
+        private void UpdateRecent()
+        {
+            this.appModel.LoadConfig();
             var rcnts = this.appModel.GetRecentDocuments();
             Recents.Clear();
-            Recents.AddRange(rcnts.Take(3));
+
+            var tiles = rcnts.Select(x => new RecentTile { Uri = x }).Take(6);
+            Recents.AddRange(tiles);
         }
-    }
+
+        private async Task LoadStatAsync(IEnumerable<RecentTile> tiles)
+        {
+            foreach (var it in tiles)
+            {
+                if (!File.Exists(it.Uri))
+                    continue;
+
+                var prj = appModel.LoadProjectService(it.Uri);
+                var boards = await prj.GetAllBoardsInFileAsync();
+
+                it.BoardList = string.Join(",", boards.Select(x => x.Name));
+
+                it.TotalTickets = 0;
+                foreach (var brd in boards)
+                    it.TotalTickets += (await prj.GetIssuesByBoardIdAsync(brd.Id)).Count();
+            }
+        }
+    }//end of classs
 }
