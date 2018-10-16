@@ -7,13 +7,13 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <StackPanel Orientation="Vertical" Margin="20">
-            <TextBlock>Select source</TextBlock>
+        <StackPanel Orientation="Vertical" Margin="20" MaxWidth="600">
+            <TextBlock FontWeight="DemiBold" Margin="0,0,0,5">Select source</TextBlock>
             <ComboBox ItemsSource="{Binding AvailableFiles}" SelectedItem="{Binding SelectedFile}"/>
 
             <Separator Margin="0, 10, 0, 10"/>
-            
-            <TextBlock>Select boards to export</TextBlock>
+
+            <TextBlock FontWeight="DemiBold" Margin="0,0,0,5">Select boards to export</TextBlock>
             <ListBox ItemsSource="{Binding Boards}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
@@ -24,34 +24,39 @@
 
             <Separator Margin="0, 10, 0, 10"/>
 
-            <TextBlock>Formats to export</TextBlock>
-            <CheckBox IsChecked="{Binding ExportJson}" Content="Json"/>
-            <CheckBox IsEnabled="False" IsChecked="{Binding ExportXml}" Content="Xml"/>
-            <CheckBox IsChecked="{Binding ExportKamban}" Content="Kamban"/>
-            <CheckBox IsEnabled="False" IsChecked="{Binding ExportXls}" Content="Xls"/>
-            <CheckBox IsEnabled="False" IsChecked="{Binding ExportPdf}" Content="Pdf"/>
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock FontWeight="DemiBold" Margin="0,0,0,5">Formats to export</TextBlock>
+                    <CheckBox IsChecked="{Binding ExportJson}" Content="Json"/>
+                    <CheckBox IsEnabled="False" IsChecked="{Binding ExportXml}" Content="Xml"/>
+                    <CheckBox IsChecked="{Binding ExportKamban}" Content="Kamban"/>
+                    <CheckBox IsEnabled="False" IsChecked="{Binding ExportXls}" Content="Xls"/>
+                    <CheckBox IsEnabled="False" IsChecked="{Binding ExportPdf}" Content="Pdf"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Vertical" Margin="20, 0, 0, 0">
+                    <TextBlock FontWeight="DemiBold" Margin="0,0,0,5">Additional options</TextBlock>
+                    <CheckBox IsChecked="{Binding DatePostfix}" Content="DatePostfix"/>
+                    <CheckBox IsChecked="{Binding SplitBoardsToFiles}" Content="SplitBoardsToFiles"/>
+                </StackPanel>
+            </StackPanel>
 
             <Separator Margin="0, 10, 0, 10"/>
-            
-            <TextBlock>Additional options</TextBlock>
-            <CheckBox IsChecked="{Binding DatePostfix}" Content="DatePostfix"/>
-            <CheckBox IsChecked="{Binding SplitBoardsToFiles}" Content="SplitBoardsToFiles"/>
 
-            <Separator Margin="0, 10, 0, 10"/>
-            
-            <TextBlock>Target file prefix</TextBlock>
+
+            <TextBlock FontWeight="DemiBold" Margin="0,0,0,0">Target folder</TextBlock>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Margin="0,0,5,0" VerticalAlignment="Center" Text="{Binding TargetFolder}"/>
+                <Button Command="{Binding SelectTargetFolderCommand}">...</Button>
+            </StackPanel>
+
+            <TextBlock FontWeight="DemiBold" Margin="0,0,0,5">Target file prefix</TextBlock>
             <TextBox Text="{Binding TargetFile}"/>
-
-            <Separator Margin="0, 10, 0, 10"/>
-
-            <TextBlock>Target folder</TextBlock>
-            <TextBlock Text="{Binding TargetFolder}"/>
-            <Button Command="{Binding SelectTargetFolderCommand}">Select target folder</Button>
 
             <Separator Margin="0, 10, 0, 10"/>
             
             <StackPanel Orientation="Horizontal">
-                <Button Command="{Binding ExportCommand}">Export</Button>
+                <Button Command="{Binding ExportCommand}" Margin="0,0,20,0">Export</Button>
                 <Button Command="{Binding CancelCommand}">Cancel</Button>
             </StackPanel>
         </StackPanel>
