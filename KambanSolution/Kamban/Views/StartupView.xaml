@@ -91,7 +91,14 @@
             FontSize="30"
             FontFamily="Segoe UI"/>
 
-        <WrapPanel Grid.Row="3" Grid.Column="1" Width="940" Height="382" HorizontalAlignment="Left" VerticalAlignment="Top">
+        <WrapPanel 
+            Grid.Row="3" 
+            Grid.Column="1" 
+            Width="940" 
+            Height="382" 
+            Orientation="Horizontal"
+            HorizontalAlignment="Left" 
+            VerticalAlignment="Top">
             <ItemsControl ItemsSource="{Binding Recents}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
