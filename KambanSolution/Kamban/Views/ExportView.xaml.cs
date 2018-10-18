@@ -11,7 +11,7 @@ namespace Kamban.Views
         {
             InitializeComponent();
             ViewModel = vm;
-            DataContext = vm;
+            DataContext = ViewModel;
         }
 
         public IViewModel ViewModel { get; set; }
@@ -19,7 +19,7 @@ namespace Kamban.Views
         public void Configure(UiShowOptions options)
         {
             ViewModel.FullTitle = options.Title;
-            //ViewModel.Title = Path.GetFileName(options.Title);
+            ViewModel.Title = "Export";
         }
     }
 }

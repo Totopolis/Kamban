@@ -16,7 +16,7 @@ namespace Kamban.ViewModels
             var headTxt = head is ColumnViewModel ? "column" : "row";
             headTxt += $" {head.Caption}";
 
-            var ts = await dialogCoordinator
+            var ts = await dialCoord
                 .ShowInputAsync(this, "Warning", $"Enter new name for {headTxt}",
                     new MetroDialogSettings()
                     {
@@ -48,7 +48,7 @@ namespace Kamban.ViewModels
             if (column != null && Columns.Count <= 1) return;
             if (row != null && Rows.Count <= 1) return;
 
-            var ts = await dialogCoordinator.ShowMessageAsync(this, "Warning",
+            var ts = await dialCoord.ShowMessageAsync(this, "Warning",
                 $"Are you shure to delete {headTxt}?"
                 , MessageDialogStyle.AffirmativeAndNegative);
 
@@ -97,7 +97,7 @@ namespace Kamban.ViewModels
 
         private async Task InsertHead(IDim head, int after)
         {
-            var ts = await dialogCoordinator
+            var ts = await dialCoord
                 .ShowInputAsync(this, "Info", $"Enter new name",
                     new MetroDialogSettings()
                     {
@@ -155,7 +155,7 @@ namespace Kamban.ViewModels
         private async Task RenameBoardCommandExecute()
         {
             var str = $"Enter new board name for \"{CurrentBoard.Name}\"";
-            var ts = await dialogCoordinator
+            var ts = await dialCoord
             .ShowInputAsync(this, "Board rename", str,
                 new MetroDialogSettings()
                 {
@@ -174,7 +174,7 @@ namespace Kamban.ViewModels
 
         private async Task DeleteCardCommandExecuteAsync(ICard cvm)
         {
-            var ts = await dialogCoordinator.ShowMessageAsync(this, "Warning",
+            var ts = await dialCoord.ShowMessageAsync(this, "Warning",
                 $"Are you shure to delete issue '{cvm.Header}'?"
                 , MessageDialogStyle.AffirmativeAndNegative);
 

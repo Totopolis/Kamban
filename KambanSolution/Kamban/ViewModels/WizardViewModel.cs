@@ -41,13 +41,14 @@ namespace Kamban.ViewModels
 
         private readonly IAppModel appModel;
         private readonly IShell shell;
-        private readonly IDialogCoordinator dialogCoordinator = DialogCoordinator.Instance;
+        private readonly IDialogCoordinator dialCoord;
         private IProjectService prjService;
 
-        public WizardViewModel(IAppModel appModel, IShell shell)
+        public WizardViewModel(IAppModel appModel, IShell shell, IDialogCoordinator dc)
         {
             this.appModel = appModel;
             this.shell = shell;
+            dialCoord = dc;
 
             validator = new WizardValidator();
             Title = "Creating new file";
@@ -202,7 +203,7 @@ namespace Kamban.ViewModels
 
                 if (BoardsInFile.Contains(BoardName))
                 {
-                    await dialogCoordinator.ShowMessageAsync(this, "Can not create board",
+                    await dialCoord.ShowMessageAsync(this, "Can not create board",
                         "Board with such name already exists in file");
                     return;
                 }

@@ -44,10 +44,6 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-    
-    <Style TargetType="xctk:WizardPage">
-        
-    </Style>
 
     <DataTemplate DataType="{x:Type viewModels:IssueViewModel }">
         <views:IssueView/>

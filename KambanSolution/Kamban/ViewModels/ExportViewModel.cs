@@ -1,15 +1,23 @@
-﻿using Kamban.Model;
-using Newtonsoft.Json;
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Input;
+using System.Windows.Threading;
+using Kamban.Model;
+using Kamban.Views;
+using MahApps.Metro;
+using MahApps.Metro.Controls.Dialogs;
+using Newtonsoft.Json;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
+using Ui.Wpf.Common.ShowOptions;
 using Ui.Wpf.Common.ViewModels;
 
 namespace Kamban.ViewModels
@@ -30,7 +38,9 @@ namespace Kamban.ViewModels
 
     public class ExportViewModel : ViewModelBase, IInitializableViewModel
     {
+        private readonly IShell shell;
         private readonly IAppModel appModel;
+        private readonly IDialogCoordinator dialCoord;
         private IProjectService prjService;
 
         [Reactive] public ReactiveList<string> AvailableFiles { get; set; }
@@ -51,14 +61,16 @@ namespace Kamban.ViewModels
 
         public ReactiveCommand<Unit, Unit> SelectTargetFolderCommand { get; set; }
         public ReactiveCommand<Unit, Unit> ExportCommand { get; set; }
-        public ReactiveCommand<Unit, Unit> CancelCommand { get; set; }
+        public ReactiveCommand CancelCommand { get; set; }
 
-        public ExportViewModel(IAppModel am)
+        public ExportViewModel(IShell shell, IAppModel am, IDialogCoordinator dc)
         {
-            appModel = am;
+            this.shell = shell as IShell;
+            this.appModel = am;
+            dialCoord = dc;
 
-            var canExport = this.WhenAnyValue(x => x.SelectedFile, y => y.Boards.ItemChanged,
-                (sf, br) => !string.IsNullOrEmpty(sf) && Boards.Where(z => z.IsChecked).Count() > 0);
+            //var canExport = this.WhenAnyValue(x => x.SelectedFile, y => y.Boards.ItemChanged,
+            //  (sf, br) => !string.IsNullOrEmpty(sf) && Boards.Where(z => z.IsChecked).Count() > 0);
 
             SelectTargetFolderCommand = ReactiveCommand.Create(SelectTargetFolderCommandExecute);
             ExportCommand = ReactiveCommand.CreateFromTask(ExportCommandExecute);
@@ -90,15 +102,22 @@ namespace Kamban.ViewModels
 
         private async Task ExportCommandExecute()
         {
+            if (!Directory.Exists(TargetFolder))
+            {
+                await dialCoord.ShowMessageAsync(this, "Warning", "Target directory not found");
+                return;
+            }
+
             string fileName = TargetFolder + "\\" + TargetFile;
             if (DatePostfix)
                 fileName += "_" + DateTime.Now.ToString("yyyyMMdd");
 
-            // TODO: check target folder exists
             if (!SplitBoardsToFiles)
                 await DoExportWhole(fileName);
             else
                 await DoExportSplit(fileName);
+
+            await dialCoord.ShowMessageAsync(this, "Info", "Process finished");
         }
 
         private async Task DoExportWhole(string fileName)

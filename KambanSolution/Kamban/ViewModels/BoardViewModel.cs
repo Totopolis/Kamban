@@ -18,11 +18,10 @@ namespace Kamban.ViewModels
 {
     public partial class BoardViewModel : ViewModelBase, IInitializableViewModel
     {
+        private readonly IShell shell;
+        private readonly IDialogCoordinator dialCoord;
+
         private IProjectService prjService;
-
-        private readonly IDialogCoordinator dialogCoordinator = DialogCoordinator.Instance;
-
-        // Actual
 
         [Reactive] public BoardInfo CurrentBoard { get; set; }
 
@@ -62,11 +61,12 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> RenameBoardCommand { get; set; }
         public ReactiveCommand<object, Unit> SelectBoardCommand { get; set; }
 
-        private readonly IShell shell;
+        
 
-        public BoardViewModel(IShell shell)
+        public BoardViewModel(IShell shell, IDialogCoordinator dc)
         {
             this.shell = shell;
+            dialCoord = dc;
 
             Columns = new ReactiveList<IDim>();
             Rows = new ReactiveList<IDim>();

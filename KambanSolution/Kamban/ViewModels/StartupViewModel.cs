@@ -17,7 +17,6 @@ using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ShowOptions;
 using Ui.Wpf.Common.ViewModels;
-using Application = System.Windows.Application;
 
 namespace Kamban.ViewModels
 {
@@ -35,26 +34,22 @@ namespace Kamban.ViewModels
         public ReactiveCommand OpenFileCommand { get; set; }
         public ReactiveCommand<string, Unit> OpenRecentDbCommand { get; set; }
         public ReactiveCommand<string, Unit> RemoveRecentCommand { get; set; }
-        public ReactiveCommand<string, Unit> AccentChangeCommand { get; set; }
-        public ReactiveCommand<Unit, Unit> ExportCommand { get; set; }
+        public ReactiveCommand ExportCommand { get; set; }
 
         [Reactive]
         public bool IsLoading { get; set; }
 
         private readonly IShell shell;
         private readonly IAppModel appModel;
+        private readonly IDialogCoordinator dialCoord;
 
-        public StartupViewModel(IShell shell, IAppModel appModel)
+        public StartupViewModel(IShell shell, IAppModel appModel, IDialogCoordinator dc)
         {
             this.shell = shell as IShell;
             this.appModel = appModel;
-            Recents = new ReactiveList<RecentTile>();
+            dialCoord = dc;
 
-            AccentChangeCommand =
-                ReactiveCommand.Create<string>(color =>
-                    ThemeManager.ChangeAppStyle(Application.Current,
-                        ThemeManager.GetAccent(color),
-                        ThemeManager.GetAppTheme("baselight")));
+            Recents = new ReactiveList<RecentTile>();
 
             OpenRecentDbCommand = ReactiveCommand.Create<string>(async (uri) =>
             {
@@ -64,7 +59,7 @@ namespace Kamban.ViewModels
                 {
                     RemoveRecent(uri);
 
-                    await DialogCoordinator.Instance.ShowMessageAsync(this, "Error",
+                    await dialCoord.ShowMessageAsync(this, "Error",
                         "File was deleted or moved");
                 }
 
@@ -98,7 +93,8 @@ namespace Kamban.ViewModels
             });
 
             var canExport = Recents.CountChanged.Select(x => x > 1);
-            ExportCommand = ReactiveCommand.Create(() => this.shell.ShowView<ExportView>(), canExport);
+            ExportCommand = ReactiveCommand.Create(() => 
+                this.shell.ShowView<ExportView>(), canExport);
 
             this.IsLoading = false;
         } //ctor
@@ -190,15 +186,20 @@ namespace Kamban.ViewModels
                 if (!File.Exists(it.Uri))
                     continue;
 
-                var prj = appModel.LoadProjectService(it.Uri);
-                var boards = await prj.GetAllBoardsInFileAsync();
+                try
+                {
+                    var prj = appModel.LoadProjectService(it.Uri);
+                    var boards = await prj.GetAllBoardsInFileAsync();
 
-                it.BoardList = string.Join(",", boards.Select(x => x.Name));
+                    it.BoardList = string.Join(",", boards.Select(x => x.Name));
 
-                it.TotalTickets = 0;
-                foreach (var brd in boards)
-                    it.TotalTickets += (await prj.GetIssuesByBoardIdAsync(brd.Id)).Count();
-            }
+                    it.TotalTickets = 0;
+                    foreach (var brd in boards)
+                        it.TotalTickets += (await prj.GetIssuesByBoardIdAsync(brd.Id)).Count();
+                }
+                // Skip broken file
+                catch { }
+            }//foreach
         }
     }//end of classs
 }

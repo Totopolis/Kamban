@@ -5,6 +5,7 @@ using Kamban.ViewModels;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
 using Kamban.Repository;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace Kamban
 {
@@ -15,6 +16,7 @@ namespace Kamban
             var container = ConfigureContainer();
             var shell = container.Resolve<IShell>();
             shell.Container = container;
+
             return shell;
         }
 
@@ -41,6 +43,10 @@ namespace Kamban
             builder
                 .RegisterType<AppModel>()
                 .As<IAppModel>()
+                .SingleInstance();
+
+            builder.RegisterInstance(DialogCoordinator.Instance)
+                .As<IDialogCoordinator>()
                 .SingleInstance();
 
             ConfigureView<StartupViewModel, StartupView>(builder);

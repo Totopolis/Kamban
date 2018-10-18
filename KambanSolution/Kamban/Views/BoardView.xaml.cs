@@ -20,7 +20,7 @@ namespace Kamban.Views
         public void Configure(UiShowOptions options)
         {
             ViewModel.FullTitle = options.Title;
-            ViewModel.Title = Path.GetFileName(options.Title);
+            //ViewModel.Title = Path.GetFileName(options.Title);
         }
     }
 }
