@@ -23,6 +23,9 @@ namespace Kamban.MatrixControl
                 return;
             }
 
+            int columnCount = Columns.Count;
+            int rowCount = Rows.Count;
+
             //////////////////
             // 1. Fill columns
             //////////////////
@@ -32,7 +35,7 @@ namespace Kamban.MatrixControl
                 new ColumnDefinition { Width = new GridLength(30, GridUnitType.Pixel) });
 
             // columns
-            for (int i = 0; i < Columns.Count; i++)
+            for (int i = 0; i < columnCount; i++)
             {
                 var it = Columns[i];
 
@@ -51,7 +54,9 @@ namespace Kamban.MatrixControl
                 cc.ContentTemplate = (DataTemplate)this.Resources["DefaultHorizontalHeaderTemplate"];
                 MainGrid.Children.Add(cc);
 
-                MainGrid.Children.Add(BuildHorizontalSpliter(i, Columns.Count));
+                // dont draw excess splitter
+                if (i < columnCount - 1)
+                    MainGrid.Children.Add(BuildVerticalSpliter(i, rowCount));
 
                 Grid.SetColumn(cc, i + 1);
                 Grid.SetRow(cc, 0);
@@ -64,8 +69,9 @@ namespace Kamban.MatrixControl
             // columns header
             MainGrid.RowDefinitions.Add(
                 new RowDefinition { Height = new GridLength(30, GridUnitType.Pixel) });
+
             // rows
-            for (int i = 0; i < Rows.Count; i++)
+            for (int i = 0; i < rowCount; i++)
             {
                 var it = Rows[i];
 
@@ -84,7 +90,9 @@ namespace Kamban.MatrixControl
                 cc.ContentTemplate = (DataTemplate)this.Resources["DefaulVerticalHeaderTemplate"];
                 MainGrid.Children.Add(cc);
 
-                MainGrid.Children.Add(BuildVerticalSpliter(i, Rows.Count));
+                // dont draw excess splitter
+                if (i < rowCount - 1)
+                    MainGrid.Children.Add(BuildHorizontalSpliter(i, columnCount));
 
                 Grid.SetColumn(cc, 0);
                 Grid.SetRow(cc, i + 1);
@@ -164,9 +172,13 @@ namespace Kamban.MatrixControl
             };
 
             Panel.SetZIndex(newSpliter, int.MaxValue);
+
             Grid.SetColumn(newSpliter, 0);
-            Grid.SetRow(newSpliter, index + 1);
             Grid.SetColumnSpan(newSpliter, horizontalCategoriescount + 1);
+
+            Grid.SetRow(newSpliter, index + 1);
+
+            Monik?.ApplicationVerbose($"Matrix.BuildHorizontalSpliter rowIndx={index + 1} columnSpan={horizontalCategoriescount + 1}");
 
             return newSpliter;
         }
@@ -180,9 +192,13 @@ namespace Kamban.MatrixControl
             };
 
             Panel.SetZIndex(newSpliter, int.MaxValue);
+
             Grid.SetRow(newSpliter, 0);
-            Grid.SetColumn(newSpliter, index + 1);
             Grid.SetRowSpan(newSpliter, verticalCategoriesCount + 1);
+
+            Grid.SetColumn(newSpliter, index + 1);
+            
+            Monik?.ApplicationVerbose($"Matrix.BuildVerticalSpliter columnIndx={index + 1} rowSpan={verticalCategoriesCount + 1}");
 
             return newSpliter;
         }
