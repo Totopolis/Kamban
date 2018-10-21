@@ -13,10 +13,15 @@ namespace Kamban.MatrixControl
     {
         public void RebuildGrid()
         {
+            Monik?.ApplicationVerbose("Matrix.RebuildGrid started");
+
             MainGrid.Children.Clear();
 
             if (Rows.Count == 0 || Columns.Count == 0)
+            {
+                Monik?.ApplicationVerbose("Matrix.RebuildGrid skip func");
                 return;
+            }
 
             //////////////////
             // 1. Fill columns
@@ -112,7 +117,13 @@ namespace Kamban.MatrixControl
                     Grid.SetRowSpan(cell, 1);
                 }
 
-            RebuildCards();
+            ////////////////////////
+            // 3. Fill Cards
+            ////////////////////////
+            foreach (var it in Cards)
+                AddCard(it);
+
+            Monik?.ApplicationVerbose("Matrix.RebuildGrid finished");
         }
 
         private int GetHashValue(object a, object b)
@@ -120,18 +131,26 @@ namespace Kamban.MatrixControl
             return new { a, b }.GetHashCode();
         }
 
-        private void RebuildCards()
+        private void AddCard(ICard card)
         {
-            foreach (var it in Cards)
-            {
-                int hash = GetHashValue(it.ColumnDeterminant, it.RowDeterminant);
+            int hash = GetHashValue(card.ColumnDeterminant, card.RowDeterminant);
 
-                if (!cells.ContainsKey(hash))
-                    continue;
+            if (!cells.ContainsKey(hash))
+                return;
 
-                cells[hash].SelfCards.Add(it);
-                cardPointers.Add(it, cells[hash]);
-            }
+            cells[hash].SelfCards.Add(card);
+            cardPointers.Add(card, cells[hash]);
+        }
+
+        private void RemoveCard(ICard card)
+        {
+            int hash = GetHashValue(card.ColumnDeterminant, card.RowDeterminant);
+
+            if (!cells.ContainsKey(hash))
+                return;
+
+            cells[hash].SelfCards.Remove(card);
+            cardPointers.Remove(card);
         }
 
         private GridSplitter BuildHorizontalSpliter(int index, int horizontalCategoriescount)

@@ -1,4 +1,5 @@
 ﻿using GongSolutions.Wpf.DragDrop;
+using Monik.Common;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -24,9 +25,19 @@ namespace Kamban.MatrixControl
         public Matrix()
         {
             InitializeComponent();
-
-            RebuildGrid();
         }
+
+        public IMonik Monik
+        {
+            get => (IMonik)GetValue(MonikProperty);
+            set => SetValue(MonikProperty, value);
+        }
+
+        public static readonly DependencyProperty MonikProperty =
+            DependencyProperty.Register("Monik",
+                typeof(IMonik),
+                typeof(Matrix),
+                new PropertyMetadata(null));
 
         public ReactiveList<ICard> Cards
         {

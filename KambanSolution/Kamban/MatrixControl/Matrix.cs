@@ -2,6 +2,7 @@
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
@@ -20,18 +21,41 @@ namespace Kamban.MatrixControl
         public static void OnCardsPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
             var mx = obj as Matrix;
+            mx.Monik?.ApplicationVerbose("Matrix.OnCardsPropertyChanged");
 
-            mx.RebuildGrid();
+            if (mx.Cards == null)
+                return;
 
-            // TODO: concrete add or remove
-            mx.Cards?
-                .Changed
-                .Subscribe(_ => mx.RebuildGrid());
+            mx.Cards
+                .ShouldReset
+                .Subscribe(_ =>
+                {
+                    mx.Monik?.ApplicationVerbose("Matrix.Cards.ShouldReset");
+                    mx.RebuildGrid();
+                });
 
-            mx.Cards?
+            mx.Cards
+                .ItemsAdded
+                .Subscribe(card => 
+                {
+                    mx.Monik?.ApplicationVerbose("Matrix.Cards.ItemsAdded");
+                    mx.AddCard(card);
+                });
+
+            mx.Cards
+                .ItemsRemoved
+                .Subscribe(card => 
+                {
+                    mx.Monik?.ApplicationVerbose("Matrix.Cards.ItemsRemoved");
+                    mx.RemoveCard(card);
+                });
+
+            mx.Cards
                 .ItemChanged
                 .Subscribe((x) =>
                 {
+                    mx.Monik?.ApplicationVerbose("Matrix.Cards.ItemChanged");
+
                     var card = x.Sender;
 
                     // CRASH AT REMOVE COLUMN WITH CARDS IF OLD CELLS DELETED BY COL_ROW DELETE COMMAND!!!!!!!!!!!
@@ -50,17 +74,37 @@ namespace Kamban.MatrixControl
         public static void OnColumnsPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
             var mx = obj as Matrix;
+            mx.Monik?.ApplicationVerbose("Matrix.OnColumnsPropertyChanged");
+
+            if (mx.Columns == null)
+                return;
+
             mx.Columns
                 .Changed
-                .Subscribe(_ => mx.RebuildGrid());
+                .Where(x => x.Action != NotifyCollectionChangedAction.Reset)
+                .Subscribe(_ =>
+                {
+                    mx.Monik?.ApplicationVerbose("Matrix.Columns.Changed");
+                    mx.RebuildGrid();
+                });
         }
 
         public static void OnRowsPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
             var mx = obj as Matrix;
+            mx.Monik?.ApplicationVerbose("Matrix.OnRowsPropertyChanged");
+
+            if (mx.Rows == null)
+                return;
+
             mx.Rows
                 .Changed
-                .Subscribe(_ => mx.RebuildGrid());
+                .Where(x => x.Action != NotifyCollectionChangedAction.Reset)
+                .Subscribe(_ =>
+                {
+                    mx.Monik?.ApplicationVerbose("Matrix.Rows.Changed");
+                    mx.RebuildGrid();
+                });
         }
 
         private ColumnDefinition columnWidthChanging = null;

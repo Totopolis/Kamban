@@ -9,6 +9,7 @@ using Kamban.MatrixControl;
 using Kamban.Model;
 using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
+using Monik.Common;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
@@ -20,8 +21,11 @@ namespace Kamban.ViewModels
     {
         private readonly IShell shell;
         private readonly IDialogCoordinator dialCoord;
+        private readonly IMonik mon;
 
         private IProjectService prjService;
+
+        [Reactive] public IMonik Monik { get; set; }
 
         [Reactive] public BoardInfo CurrentBoard { get; set; }
 
@@ -61,16 +65,19 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> RenameBoardCommand { get; set; }
         public ReactiveCommand<object, Unit> SelectBoardCommand { get; set; }
 
-        
-
-        public BoardViewModel(IShell shell, IDialogCoordinator dc)
+        public BoardViewModel(IShell shell, IDialogCoordinator dc, IMonik m)
         {
             this.shell = shell;
             dialCoord = dc;
+            mon = m;
 
-            Columns = new ReactiveList<IDim>();
-            Rows = new ReactiveList<IDim>();
-            Cards = new ReactiveList<ICard>();
+            mon.LogicVerbose("BoardViewModel.ctor started");
+
+            Monik = mon;
+
+            Columns = new ReactiveList<IDim>() { ChangeTrackingEnabled = true };
+            Rows = new ReactiveList<IDim>() { ChangeTrackingEnabled = true };
+            Cards = new ReactiveList<ICard>() { ChangeTrackingEnabled = true };
 
             BoardsInFile = new ReactiveList<BoardInfo>();
             IssueFlyout = new IssueViewModel();
@@ -138,6 +145,8 @@ namespace Kamban.ViewModels
             SelectBoardCommand = ReactiveCommand
                 .Create((object mi) =>
                 {
+                    mon.LogicVerbose("BoardViewModel.SelectBoardCommand executed");
+
                     string name = ((MenuItem)mi).Header as string;
                     CurrentBoard = BoardsInFile.Where(x => x.Name == name).First();
                 });
@@ -146,6 +155,8 @@ namespace Kamban.ViewModels
                 .ItemChanged
                 .Subscribe(ob =>
                 {
+                    mon.LogicVerbose("BoardViewModel.Columns.ItemChanged");
+
                     var cvm = ob.Sender as ColumnViewModel;
                     prjService.CreateOrUpdateColumnAsync(cvm.Info);
                 });
@@ -154,6 +165,8 @@ namespace Kamban.ViewModels
                 .ItemChanged
                 .Subscribe(ob =>
                 {
+                    mon.LogicVerbose("BoardViewModel.Rows.ItemChanged");
+
                     var rvm = ob.Sender as RowViewModel;
                     prjService.CreateOrUpdateRowAsync(rvm.Info);
                 });
@@ -162,6 +175,8 @@ namespace Kamban.ViewModels
                 .ItemChanged
                 .Subscribe(ob =>
                 {
+                    mon.LogicVerbose("BoardViewModel.Cards.ItemChanged");
+
                     var cvm = ob.Sender as CardViewModel;
                     prjService.CreateOrUpdateIssueAsync(cvm.Issue);
                 });
@@ -169,20 +184,30 @@ namespace Kamban.ViewModels
             this.ObservableForProperty(w => w.CurrentBoard)
                 .Where(v => v != null)
                 .ObserveOnDispatcher()
-                .Subscribe(async _ => await RefreshContent());
+                .Subscribe(async _ =>
+                {
+                    mon.LogicVerbose("BoardViewModel.CurrentBoard changed");
+                    await RefreshContent();
+                });
 
             this.ObservableForProperty(w => w.IssueFlyout.IsOpened)
                 .Where(x => x.Value == false && IssueFlyout.Result == IssueEditResult.Created)
                 .Subscribe(_ =>
                 {
+                    mon.LogicVerbose("BoardViewModel.IssueFlyout closed and issue need create");
+
                     var card = IssueFlyout.Card;
                     prjService.CreateOrUpdateIssueAsync(card.Issue);
                     Cards.Add(card);
                 });
+
+            mon.LogicVerbose("BoardViewModel.ctor finished");
         }
-        
+
         private async Task RefreshContent()
         {
+            mon.LogicVerbose("BoardViewModel.RefreshContent started");
+
             try
             {
                 Title = CurrentBoard.Name;
@@ -200,25 +225,24 @@ namespace Kamban.ViewModels
                 //foreach (var it in toDel)
                 //    scope.DeleteIssueAsync(it.Id);
 
-                Columns.ChangeTrackingEnabled = false;
-                Rows.ChangeTrackingEnabled = false;
-                Cards.ChangeTrackingEnabled = false;
+                using (Columns.SuppressChangeNotifications())
+                using (Rows.SuppressChangeNotifications())
+                using (Cards.SuppressChangeNotifications())
+                {
+                    Columns.Clear();
+                    Rows.Clear();
+                    Cards.Clear();
 
-                Columns.Clear();
-                Rows.Clear();
-                Cards.Clear();
+                    Columns.AddRange(columns.Select(x => new ColumnViewModel(x)));
+                    Rows.AddRange(rows.Select(x => new RowViewModel(x)));
+                    Cards.AddRange(issues.Select(x => new CardViewModel(x)));
+                }
 
-                Columns.AddRange(columns.Select(x => new ColumnViewModel(x)));
-                Rows.AddRange(rows.Select(x => new RowViewModel(x)));
-                Cards.AddRange(issues.Select(x => new CardViewModel(x)));
-
-                Cards.ChangeTrackingEnabled = true;
-                Rows.ChangeTrackingEnabled = true;
-                Columns.ChangeTrackingEnabled = true;
+                mon.LogicVerbose("BoardViewModel.RefreshContent finished");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Title = "RefreshContent: " + ex.Message;
+                mon.ApplicationError("BoardViewModel.RefreshContent: " + ex.Message);
             }
         }
 
@@ -237,6 +261,8 @@ namespace Kamban.ViewModels
 
         public void Initialize(ViewRequest viewRequest)
         {
+            mon.LogicVerbose("BoardViewModel.Initialize started");
+
             shell.AddVMCommand("Edit", "Add tiket", "CreateTiketCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.W);
 
@@ -273,7 +299,11 @@ namespace Kamban.ViewModels
                     CurrentBoard = !string.IsNullOrEmpty(request.NeededBoardName)
                         ? BoardsInFile.First(board => board.Name == request.NeededBoardName)
                         : BoardsInFile.First();
+
+                    mon.LogicVerbose("BoardViewModel.Initialize setup current board finished");
                 });
+
+            mon.LogicVerbose("BoardViewModel.Initialize finished");
         }
     }//end of class
 }

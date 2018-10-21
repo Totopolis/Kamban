@@ -6,6 +6,7 @@ using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
 using Kamban.Repository;
 using MahApps.Metro.Controls.Dialogs;
+using Monik.Common;
 
 namespace Kamban
 {
@@ -16,6 +17,9 @@ namespace Kamban
             var container = ConfigureContainer();
             var shell = container.Resolve<IShell>();
             shell.Container = container;
+
+            var mon = container.Resolve<IMonik>();
+            mon.ApplicationInfo("Bootstrapper initialized");
 
             return shell;
         }
@@ -47,6 +51,10 @@ namespace Kamban
 
             builder.RegisterInstance(DialogCoordinator.Instance)
                 .As<IDialogCoordinator>()
+                .SingleInstance();
+
+            builder.RegisterInstance(new MonikFile("kamban.log"))
+                .As<IMonik>()
                 .SingleInstance();
 
             ConfigureView<StartupViewModel, StartupView>(builder);
