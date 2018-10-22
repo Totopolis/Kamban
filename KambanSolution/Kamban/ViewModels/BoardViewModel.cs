@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -56,6 +57,8 @@ namespace Kamban.ViewModels
 
         [Reactive] public ReactiveList<BoardInfo> BoardsInFile { get; set; }
 
+        private List<CommandItem> BoardsMenuItems;
+
         public ReactiveCommand<Unit, Unit> CreateTiketCommand { get; set; }
         public ReactiveCommand<(object column, object row), Unit> CellDoubleClickCommand { get; set; }
 
@@ -70,6 +73,8 @@ namespace Kamban.ViewModels
             this.shell = shell;
             dialCoord = dc;
             mon = m;
+
+            BoardsMenuItems = new List<CommandItem>();
 
             mon.LogicVerbose("BoardViewModel.ctor started");
 
@@ -292,9 +297,13 @@ namespace Kamban.ViewModels
                 .Subscribe(boards =>
                 {
                     BoardsInFile.PublishCollection(boards);
+                    BoardsMenuItems.Clear();
 
                     foreach (var brd in boards)
-                        shell.AddInstanceCommand("Boards", brd.Name, "SelectBoardCommand", this);
+                    { 
+                        var cmd = shell.AddInstanceCommand("Boards", brd.Name, "SelectBoardCommand", this);
+                        BoardsMenuItems.Add(cmd);
+                    }
 
                     CurrentBoard = !string.IsNullOrEmpty(request.NeededBoardName)
                         ? BoardsInFile.First(board => board.Name == request.NeededBoardName)

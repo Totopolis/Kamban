@@ -154,8 +154,9 @@ namespace Kamban.ViewModels
 
         private async Task RenameBoardCommandExecute()
         {
-            var str = $"Enter new board name for \"{CurrentBoard.Name}\"";
-            var ts = await dialCoord
+            var oldName = CurrentBoard.Name;
+            var str = $"Enter new board name for \"{oldName}\"";
+            var newName = await dialCoord
             .ShowInputAsync(this, "Board rename", str,
                 new MetroDialogSettings()
                 {
@@ -164,12 +165,17 @@ namespace Kamban.ViewModels
                     DefaultText = SelectedColumn?.Name
                 });
 
-            if (string.IsNullOrEmpty(ts))
+            if (string.IsNullOrEmpty(newName))
                 return;
 
-            CurrentBoard.Name = ts;
+            CurrentBoard.Name = newName;
             prjService.CreateOrUpdateBoardAsync(CurrentBoard);
-            Title = ts;
+            Title = newName;
+
+            BoardsMenuItems
+                .Where(x => x.Name == oldName)
+                .First()
+                .Name = newName;
         }
 
         private async Task DeleteCardCommandExecuteAsync(ICard cvm)
