@@ -35,6 +35,7 @@ namespace Kamban.ViewModels
         public ReactiveCommand<string, Unit> OpenRecentDbCommand { get; set; }
         public ReactiveCommand<string, Unit> RemoveRecentCommand { get; set; }
         public ReactiveCommand ExportCommand { get; set; }
+        public ReactiveCommand ExitCommand { get; set; }
 
         [Reactive]
         public bool IsLoading { get; set; }
@@ -95,6 +96,8 @@ namespace Kamban.ViewModels
             var canExport = Recents.CountChanged.Select(x => x > 1);
             ExportCommand = ReactiveCommand.Create(() => 
                 this.shell.ShowView<ExportView>(), canExport);
+
+            ExitCommand = ReactiveCommand.Create(() => App.Current.Shutdown());
 
             this.IsLoading = false;
         } //ctor
@@ -162,7 +165,7 @@ namespace Kamban.ViewModels
             shell.AddGlobalCommand("File", "Export", "ExportCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.U);
 
-            shell.AddGlobalCommand("File", "Exit", null, this);
+            shell.AddGlobalCommand("File", "Exit", "ExitCommand", this);
 
             UpdateRecent();
 

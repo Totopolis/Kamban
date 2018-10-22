@@ -62,6 +62,9 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> CreateTiketCommand { get; set; }
         public ReactiveCommand<(object column, object row), Unit> CellDoubleClickCommand { get; set; }
 
+        public ReactiveCommand<Unit, Unit> CreateColumnCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> CreateRowCommand { get; set; }
+
         public ReactiveCommand<Unit, Unit> AddBoardCommand { get; set; }
         public ReactiveCommand<Unit, Unit> PrevBoardCommand { get; set; }
         public ReactiveCommand<Unit, Unit> NextBoardCommand { get; set; }
@@ -112,6 +115,12 @@ namespace Kamban.ViewModels
 
             CellDoubleClickCommand = ReactiveCommand.Create<(object column, object row)>(
                 (tup) => ShowFlyout(IssueFlyout, null, (int)tup.column, (int)tup.row));
+
+            CreateColumnCommand = ReactiveCommand.CreateFromTask(() =>
+                InsertHeadAfterCommandExecute(Columns.Last()));
+
+            CreateRowCommand = ReactiveCommand.CreateFromTask(() =>
+                InsertHeadAfterCommandExecute(Rows.Last()));
 
             AddBoardCommand = ReactiveCommand.Create(() =>
             {

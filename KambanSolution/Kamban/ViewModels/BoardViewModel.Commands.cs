@@ -142,9 +142,9 @@ namespace Kamban.ViewModels
                 var indx = Rows.IndexOf(head) + after;
                 Rows.Insert(indx, new RowViewModel(ri));
 
-                for (int i = 0; i < Columns.Count; i++)
+                for (int i = 0; i < Rows.Count; i++)
                 {
-                    var rvm = Columns[i] as RowViewModel;
+                    var rvm = Rows[i] as RowViewModel;
                     rvm.Order = i;
                 }
             }
