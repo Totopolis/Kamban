@@ -1,7 +1,9 @@
-﻿using GongSolutions.Wpf.DragDrop;
+﻿using DynamicData;
+using GongSolutions.Wpf.DragDrop;
 using Monik.Common;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using ReactiveUI.Legacy;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,13 +21,22 @@ namespace Kamban.MatrixControl
     /// </summary>
     public partial class Matrix : UserControl, IDropTarget
     {
-        private Dictionary<int, Intersection> cells;
-        private Dictionary<ICard, Intersection> cardPointers;
-
         public Matrix()
         {
             InitializeComponent();
         }
+
+        public bool EnableWork
+        {
+            get => (bool)GetValue(EnableWorkProperty);
+            set => SetValue(EnableWorkProperty, value);
+        }
+
+        public static readonly DependencyProperty EnableWorkProperty =
+            DependencyProperty.Register("EnableWork",
+                typeof(bool),
+                typeof(Matrix),
+                new PropertyMetadata(false, new PropertyChangedCallback(OnEnableWorkPropertyChanged)));
 
         public IMonik Monik
         {
@@ -39,43 +50,43 @@ namespace Kamban.MatrixControl
                 typeof(Matrix),
                 new PropertyMetadata(null));
 
-        public ReactiveList<ICard> Cards
+        public SourceList<ICard> Cards
         {
-            get => (ReactiveList<ICard>)GetValue(CardsProperty);
+            get => (SourceList<ICard>)GetValue(CardsProperty);
             set => SetValue(CardsProperty, value);
         }
 
         public static readonly DependencyProperty CardsProperty =
             DependencyProperty.Register("Cards",
-                typeof(ReactiveList<ICard>),
+                typeof(SourceList<ICard>),
                 typeof(Matrix),
-                new PropertyMetadata(new ReactiveList<ICard>(),
+                new PropertyMetadata(new SourceList<ICard>(),
                     new PropertyChangedCallback(OnCardsPropertyChanged)));
 
-        public ReactiveList<IDim> Columns
+        public SourceList<IDim> Columns
         {
-            get => (ReactiveList<IDim>)GetValue(ColumnsProperty);
+            get => (SourceList<IDim>)GetValue(ColumnsProperty);
             set => SetValue(ColumnsProperty, value);
         }
 
         public static readonly DependencyProperty ColumnsProperty =
             DependencyProperty.Register("Columns",
-                typeof(ReactiveList<IDim>),
+                typeof(SourceList<IDim>),
                 typeof(Matrix),
-                new PropertyMetadata(new ReactiveList<IDim>(),
+                new PropertyMetadata(new SourceList<IDim>(),
                     new PropertyChangedCallback(OnColumnsPropertyChanged)));
 
-        public ReactiveList<IDim> Rows
+        public SourceList<IDim> Rows
         {
-            get => (ReactiveList<IDim>)GetValue(RowsProperty);
+            get => (SourceList<IDim>)GetValue(RowsProperty);
             set => SetValue(RowsProperty, value);
         }
 
         public static readonly DependencyProperty RowsProperty =
             DependencyProperty.Register("Rows",
-                typeof(ReactiveList<IDim>),
+                typeof(SourceList<IDim>),
                 typeof(Matrix),
-                new PropertyMetadata(new ReactiveList<IDim>(),
+                new PropertyMetadata(new SourceList<IDim>(),
                     new PropertyChangedCallback(OnRowsPropertyChanged)));
 
         public ICard CardUnderMouse

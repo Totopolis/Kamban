@@ -2,6 +2,7 @@
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,14 +29,14 @@ namespace Kamban.MatrixControl
             mx = parent;
             InitializeComponent();
 
-            SelfCards = new ReactiveList<ICard>();
+            SelfCards = null;
             SelectedCard = null;
         }
 
         public object ColumnDeterminant { get; set; }
         public object RowDeterminant { get; set; }
 
-        public ReactiveList<ICard> SelfCards { get; set; }
+        [Reactive] public ReadOnlyObservableCollection<ICard> SelfCards { get; set; }
 
         [Reactive] public ICard SelectedCard { get; set; }
 

@@ -1,4 +1,5 @@
-﻿using GongSolutions.Wpf.DragDrop;
+﻿using DynamicData;
+using GongSolutions.Wpf.DragDrop;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -18,57 +19,19 @@ namespace Kamban.MatrixControl
 {
     public partial class Matrix
     {
+        public static void OnEnableWorkPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
+        {
+            var mx = obj as Matrix;
+            mx.Monik?.ApplicationVerbose("Matrix.OnEnableWorkPropertyChanged");
+
+            if (mx.EnableWork)
+                mx.RebuildGrid();
+        }
+
         public static void OnCardsPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
             var mx = obj as Matrix;
             mx.Monik?.ApplicationVerbose("Matrix.OnCardsPropertyChanged");
-
-            if (mx.Cards == null)
-                return;
-
-            mx.Cards
-                .ShouldReset
-                .Subscribe(_ =>
-                {
-                    mx.Monik?.ApplicationVerbose("Matrix.Cards.ShouldReset");
-                    mx.RebuildGrid();
-                });
-
-            mx.Cards
-                .ItemsAdded
-                .Subscribe(card => 
-                {
-                    mx.Monik?.ApplicationVerbose("Matrix.Cards.ItemsAdded");
-                    mx.AddCard(card);
-                });
-
-            mx.Cards
-                .ItemsRemoved
-                .Subscribe(card => 
-                {
-                    mx.Monik?.ApplicationVerbose("Matrix.Cards.ItemsRemoved");
-                    mx.RemoveCard(card);
-                });
-
-            mx.Cards
-                .ItemChanged
-                .Subscribe((x) =>
-                {
-                    mx.Monik?.ApplicationVerbose("Matrix.Cards.ItemChanged");
-
-                    var card = x.Sender;
-
-                    // CRASH AT REMOVE COLUMN WITH CARDS IF OLD CELLS DELETED BY COL_ROW DELETE COMMAND!!!!!!!!!!!
-                    var oldIntersec = mx.cardPointers[card];
-                    var newIntersec = mx.cells[mx.GetHashValue(card.ColumnDeterminant, card.RowDeterminant)];
-
-                    if (oldIntersec != newIntersec)
-                    {
-                        oldIntersec.SelfCards.Remove(card);
-                        newIntersec.SelfCards.Add(card);
-                        mx.cardPointers[card] = newIntersec;
-                    }
-                });
         }
 
         public static void OnColumnsPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
@@ -80,8 +43,9 @@ namespace Kamban.MatrixControl
                 return;
 
             mx.Columns
-                .Changed
-                .Where(x => x.Action != NotifyCollectionChangedAction.Reset)
+                .Connect()
+                .Where(x => mx.EnableWork)
+                //.Where(x => x.Action != NotifyCollectionChangedAction.Reset && mx.EnableWork)
                 .Subscribe(_ =>
                 {
                     mx.Monik?.ApplicationVerbose("Matrix.Columns.Changed");
@@ -98,8 +62,9 @@ namespace Kamban.MatrixControl
                 return;
 
             mx.Rows
-                .Changed
-                .Where(x => x.Action != NotifyCollectionChangedAction.Reset)
+                .Connect()
+                .Where(x => mx.EnableWork)
+                //.Where(x => x.Action != NotifyCollectionChangedAction.Reset && mx.EnableWork)
                 .Subscribe(_ =>
                 {
                     mx.Monik?.ApplicationVerbose("Matrix.Rows.Changed");
@@ -120,9 +85,10 @@ namespace Kamban.MatrixControl
         {
             if (columnWidthChanging != null)
             {
+                var columns = Columns.Items.ToList();
                 var cd = MainGrid.ColumnDefinitions;
                 for (int i = 1; i < cd.Count; i++)
-                    Columns[i - 1].Size = (int)cd[i].Width.Value;
+                    columns[i - 1].Size = (int)cd[i].Width.Value;
             }
         }
 
@@ -139,9 +105,10 @@ namespace Kamban.MatrixControl
         {
             if (rowHeightChanging != null)
             {
+                var rows = Rows.Items.ToList();
                 var rd = MainGrid.RowDefinitions;
                 for (int i = 1; i < rd.Count; i++)
-                    Rows[i - 1].Size = (int)rd[i].Height.Value;
+                    rows[i - 1].Size = (int)rd[i].Height.Value;
             }
         }
 
@@ -160,12 +127,13 @@ namespace Kamban.MatrixControl
 
                 double colSize = 100 / (self.Columns.Count - 1);
 
+                var columns = self.Columns.Items.ToList();
                 var colDefs = self.MainGrid.ColumnDefinitions;
                 for (int i = 1; i < colDefs.Count; i++)
                 {
                     var len = new GridLength(colSize, GridUnitType.Star);
                     colDefs[i].Width = len;
-                    self.Columns[i - 1].Size = (int)len.Value * 10;
+                    columns[i - 1].Size = (int)len.Value * 10;
                 }
 
                 //self.GridRowsReset();
@@ -174,16 +142,17 @@ namespace Kamban.MatrixControl
 
                 double rowSize = 100 / (self.Rows.Count - 1);
 
+                var rows = self.Rows.Items.ToList();
                 var rowDefs = self.MainGrid.RowDefinitions;
                 for (int i = 1; i < rowDefs.Count; i++)
                 {
                     var len = new GridLength(rowSize, GridUnitType.Star);
                     rowDefs[i].Height = len;
-                    self.Rows[i - 1].Size = (int)len.Value * 10;
+                    rows[i - 1].Size = (int)len.Value * 10;
                 }
             });
         }
-
+        
         private void Head_MouseMove(object sender, MouseEventArgs e)
         {
             var ic = sender as ContentControl;
@@ -204,22 +173,30 @@ namespace Kamban.MatrixControl
 
         void IDropTarget.Drop(IDropInfo dropInfo)
         {
+            Monik?.ApplicationVerbose("Matrix.Drop");
+
             var card = dropInfo.Data as CardViewModel;
 
-            var srcIntersec = cardPointers[card];
+            /*var srcIntersec = cardPointers[card];
 
             // dirty fingers
             var targetIntersec = ((dropInfo.VisualTarget as ListView)
                 .Parent as Grid)
                 .Parent as Intersection;
 
-            if (targetIntersec != srcIntersec)
+            if (targetIntersec != null && targetIntersec != srcIntersec)
             {
                 card.ColumnDeterminant = targetIntersec.ColumnDeterminant;
                 card.RowDeterminant = targetIntersec.RowDeterminant;
 
                 DropCardCommand?.Execute(card).Subscribe();
             }
+
+            var targetCard = dropInfo.TargetItem as CardViewModel;
+            if (targetCard != null)
+            {
+                // sort
+            }*/
         }
 
     }//end of class

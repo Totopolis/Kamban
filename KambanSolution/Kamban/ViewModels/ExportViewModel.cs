@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Threading;
+using DynamicData;
 using Kamban.Model;
 using Kamban.Views;
 using MahApps.Metro;
@@ -42,10 +44,12 @@ namespace Kamban.ViewModels
         private readonly IAppModel appModel;
         private readonly IDialogCoordinator dialCoord;
         private IProjectService prjService;
+        private SourceList<string> files;
+        private SourceList<BoardToExport> boards;
 
-        [Reactive] public ReactiveList<string> AvailableFiles { get; set; }
+        [Reactive] public ReadOnlyObservableCollection<string> AvailableFiles { get; set; }
         [Reactive] public string SelectedFile { get; set; }
-        [Reactive] public ReactiveList<BoardToExport> Boards { get; set; }
+        [Reactive] public ReadOnlyObservableCollection<BoardToExport> AvailableBoards { get; set; }
 
         [Reactive] public bool ExportJson { get; set; }
         [Reactive] public bool ExportXml { get; set; }
@@ -69,6 +73,23 @@ namespace Kamban.ViewModels
             this.appModel = am;
             dialCoord = dc;
 
+            files = new SourceList<string>();
+            boards = new SourceList<BoardToExport>();
+
+            files
+                .Connect()
+                .Bind(out ReadOnlyObservableCollection<string> temp)
+                .Subscribe();
+
+            AvailableFiles = temp;
+
+            boards
+                .Connect()
+                .Bind(out ReadOnlyObservableCollection<BoardToExport> temp2)
+                .Subscribe();
+
+            AvailableBoards = temp2;
+
             //var canExport = this.WhenAnyValue(x => x.SelectedFile, y => y.Boards.ItemChanged,
             //  (sf, br) => !string.IsNullOrEmpty(sf) && Boards.Where(z => z.IsChecked).Count() > 0);
 
@@ -82,12 +103,12 @@ namespace Kamban.ViewModels
                 .Subscribe(async (sf) =>
                 {
                     prjService = appModel.LoadProjectService(sf.Value);
-                    Boards.Clear();
 
-                    var boards = (await prjService.GetAllBoardsInFileAsync())
+                    var lst = (await prjService.GetAllBoardsInFileAsync())
                         .Select(x => new BoardToExport { Board = x, IsChecked = true });
 
-                    Boards.AddRange(boards);
+                    boards.Clear();
+                    boards.AddRange(lst);
 
                     TargetFile = Path.GetFileNameWithoutExtension(sf.Value) + "_export";
                 });
@@ -218,11 +239,9 @@ namespace Kamban.ViewModels
         public void Initialize(ViewRequest viewRequest)
         {
             Title = "Export";
-            AvailableFiles = new ReactiveList<string>();
-            Boards = new ReactiveList<BoardToExport>();
-
-            AvailableFiles.AddRange(appModel.GetRecentDocuments());
-            SelectedFile = AvailableFiles.Count > 0 ? AvailableFiles[0] : null;
+            
+            files.AddRange(appModel.GetRecentDocuments());
+            SelectedFile = files.Count > 0 ? files.Items.First() : null;
 
             ExportJson = true;
             DatePostfix = true;

@@ -1,9 +1,12 @@
-﻿using Kamban.MatrixControl;
+﻿using DynamicData;
+using Kamban.MatrixControl;
 using Kamban.Model;
 using MahApps.Metro.Controls.Dialogs;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -59,10 +62,9 @@ namespace Kamban.ViewModels
             if (column != null)
             {
                 prjService.DeleteColumnAsync(column.Id);
-                var firstColumn = Columns.OrderBy(x => x.Order).First();
+                var firstColumn = Columns.Items.OrderBy(x => x.Order).First();
 
-                var cards = Cards.Where(x => (int)x.ColumnDeterminant == column.Id);
-                foreach (CardViewModel it in cards)
+                foreach (CardViewModel it in Cards.Items.Where(x => (int)x.ColumnDeterminant == column.Id))
                     it.ColumnDeterminant = firstColumn.Determinant;
 
                 // remove after Matrix update !!!
@@ -71,10 +73,9 @@ namespace Kamban.ViewModels
             else
             {
                 prjService.DeleteRowAsync(row.Id);
-                var firstRow = Rows.OrderBy(x => x.Order).First();
+                var firstRow = Rows.Items.OrderBy(x => x.Order).First();
 
-                var cards = Cards.Where(x => (int)x.RowDeterminant == row.Id);
-                foreach (CardViewModel it in cards)
+                foreach (CardViewModel it in Cards.Items.Where(x => (int)x.RowDeterminant == row.Id))
                     it.RowDeterminant = firstRow.Determinant;
 
                 // remove after Matrix update !!!
@@ -121,13 +122,14 @@ namespace Kamban.ViewModels
                 };
 
                 prjService.CreateOrUpdateColumnAsync(ci);
-                var indx = Columns.IndexOf(head) + after;
+                var indx = Columns.Items.IndexOf(head) + after;
                 Columns.Insert(indx, new ColumnViewModel(ci));
 
-                for (int i = 0; i < Columns.Count; i++)
+                int i = 0;
+                foreach (var it in Columns.Items)
                 {
-                    var cvm = Columns[i] as ColumnViewModel;
-                    cvm.Order = i;
+                    it.Order = i;
+                    i++;
                 }
             }
             else
@@ -139,13 +141,14 @@ namespace Kamban.ViewModels
                 };
 
                 prjService.CreateOrUpdateRowAsync(ri);
-                var indx = Rows.IndexOf(head) + after;
+                var indx = Rows.Items.IndexOf(head) + after;
                 Rows.Insert(indx, new RowViewModel(ri));
 
-                for (int i = 0; i < Rows.Count; i++)
+                int i = 0;
+                foreach (var it in Rows.Items)
                 {
-                    var rvm = Rows[i] as RowViewModel;
-                    rvm.Order = i;
+                    it.Order = i;
+                    i++;
                 }
             }
 

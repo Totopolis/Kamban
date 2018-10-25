@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using AutoMapper;
+using DynamicData;
 using Kamban.MatrixControl;
 using Kamban.Model;
 using ReactiveUI;
@@ -50,11 +52,14 @@ namespace Kamban.ViewModels
         private int requestedColumnId;
         private int requestedRowId;
 
+        private SourceList<ColumnInfo> columns;
+        private SourceList<RowInfo> rows;
+
         [Reactive] public CardViewModel Card { get; set; }
         [Reactive] public IssueEditResult Result { get; set; }
 
-        public ReactiveList<ColumnInfo> AvailableColumns { get; set; }
-        public ReactiveList<RowInfo> AvailableRows { get; set; }
+        public ReadOnlyObservableCollection<ColumnInfo> AvailableColumns { get; set; }
+        public ReadOnlyObservableCollection<RowInfo> AvailableRows { get; set; }
 
         [Reactive] public string Head { get; set; }
         [Reactive] public string Body { get; set; }
@@ -84,8 +89,21 @@ namespace Kamban.ViewModels
         {
             Card = null;
 
-            AvailableColumns = new ReactiveList<ColumnInfo>();
-            AvailableRows = new ReactiveList<RowInfo>();
+            columns = new SourceList<ColumnInfo>();
+            columns
+                .Connect()
+                .Bind(out ReadOnlyObservableCollection<ColumnInfo> temp)
+                .Subscribe();
+
+            AvailableColumns = temp;
+
+            rows = new SourceList<RowInfo>();
+            rows
+                .Connect()
+                .Bind(out ReadOnlyObservableCollection<RowInfo> temp2)
+                .Subscribe();
+
+            AvailableRows = temp2;
 
             var issueFilled = this.WhenAnyValue(
                 t => t.Head, t => t.SelectedRow, t => t.SelectedColumn, t => t.SelectedColor,
@@ -164,13 +182,16 @@ namespace Kamban.ViewModels
 
         public async Task UpdateViewModel()
         {
-            var columns = await prjService.GetColumnsByBoardIdAsync(board.Id);
-            var rows = await prjService.GetRowsByBoardIdAsync(board.Id);
+            var columnsInfo = await prjService.GetColumnsByBoardIdAsync(board.Id);
+            var rowsInfo = await prjService.GetRowsByBoardIdAsync(board.Id);
 
-            AvailableColumns.PublishCollection(columns);
-            SelectedColumn = AvailableColumns.First();
-            AvailableRows.PublishCollection(rows);
-            SelectedRow = AvailableRows.First();
+            columns.Clear();
+            columns.AddRange(columnsInfo);
+            SelectedColumn = columns.Items.First();
+
+            rows.Clear();
+            rows.AddRange(rowsInfo);
+            SelectedRow = rows.Items.First();
 
             if (Card == null)
             {
@@ -179,11 +200,11 @@ namespace Kamban.ViewModels
                 SelectedColor = ColorItems.First();
 
                 if (requestedColumnId!=0)
-                    SelectedColumn = AvailableColumns
+                    SelectedColumn = columns.Items
                         .First(c => c.Id == requestedColumnId);
 
                 if (requestedRowId != 0)
-                    SelectedRow = AvailableRows
+                    SelectedRow = rows.Items
                         .First(c => c.Id == requestedRowId);
 
                 Result = IssueEditResult.Created;
@@ -193,9 +214,9 @@ namespace Kamban.ViewModels
                 Head = Card.Header;
                 Body = Card.Body;
 
-                SelectedColumn = AvailableColumns
+                SelectedColumn = columns.Items
                     .First(c => c.Id == (int)Card.ColumnDeterminant);
-                SelectedRow = AvailableRows
+                SelectedRow = rows.Items
                     .First(r => r.Id == (int)Card.RowDeterminant);
 
                 SelectedColor = ColorItems.
@@ -215,6 +236,7 @@ namespace Kamban.ViewModels
             prjService = request.PrjService;
             board = request.Board;
             Card = request.Card;
+
             requestedColumnId = request.ColumnId;
             requestedRowId = request.RowId;
 

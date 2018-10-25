@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
@@ -8,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Threading;
+using DynamicData;
 using Kamban.Model;
 using Kamban.Views;
 using MahApps.Metro;
@@ -29,7 +32,12 @@ namespace Kamban.ViewModels
 
     public class StartupViewModel : ViewModelBase, IInitializableViewModel
     {
-        public ReactiveList<RecentTile> Recents { get; set; }
+        private readonly IShell shell;
+        private readonly IAppModel appModel;
+        private readonly IDialogCoordinator dialCoord;
+        private readonly SourceList<RecentTile> recentList;
+
+        public ReadOnlyObservableCollection<RecentTile> Recents { get; set; }
         public ReactiveCommand NewFileCommand { get; set; }
         public ReactiveCommand OpenFileCommand { get; set; }
         public ReactiveCommand<string, Unit> OpenRecentDbCommand { get; set; }
@@ -40,17 +48,19 @@ namespace Kamban.ViewModels
         [Reactive]
         public bool IsLoading { get; set; }
 
-        private readonly IShell shell;
-        private readonly IAppModel appModel;
-        private readonly IDialogCoordinator dialCoord;
-
         public StartupViewModel(IShell shell, IAppModel appModel, IDialogCoordinator dc)
         {
             this.shell = shell as IShell;
             this.appModel = appModel;
             dialCoord = dc;
 
-            Recents = new ReactiveList<RecentTile>();
+            recentList = new SourceList<RecentTile>();
+            recentList
+                .Connect()
+                .Bind(out ReadOnlyObservableCollection<RecentTile> temp)
+                .Subscribe();
+
+            Recents = temp;
 
             OpenRecentDbCommand = ReactiveCommand.Create<string>(async (uri) =>
             {
@@ -93,7 +103,10 @@ namespace Kamban.ViewModels
                 }
             });
 
-            var canExport = Recents.CountChanged.Select(x => x > 1);
+            var canExport = recentList
+                .Connect()
+                .Select(x => x.Count > 0);
+
             ExportCommand = ReactiveCommand.Create(() => 
                 this.shell.ShowView<ExportView>(), canExport);
 
@@ -107,9 +120,9 @@ namespace Kamban.ViewModels
             appModel.RemoveRecent(uri);
             appModel.SaveConfig();
 
-            var tile = Recents.Where(x => x.Uri == uri).FirstOrDefault();
+            var tile = recentList.Items.Where(x => x.Uri == uri).FirstOrDefault();
             if (tile != null)
-                Recents.Remove(tile);
+                recentList.Remove(tile);
         }
 
         private void AddRecent(string uri)
@@ -117,19 +130,19 @@ namespace Kamban.ViewModels
             appModel.AddRecent(uri);
             appModel.SaveConfig();
 
-            var tile = Recents.Where(x => x.Uri == uri).FirstOrDefault();
+            var tile = recentList.Items.Where(x => x.Uri == uri).FirstOrDefault();
             if (tile != null)
-                Recents.Remove(tile);
+                recentList.Remove(tile);
             else
             {
                 tile = new RecentTile { Uri = uri };
                 Task.Run(() => LoadStatAsync(new[] { tile }));
             }
 
-            Recents.Insert(0, tile);
+            recentList.Insert(0, tile);
 
-            if (Recents.Count > 6)
-                Recents.RemoveAt(6);
+            if (recentList.Count > 6)
+                recentList.RemoveAt(6);
         }
 
         private async Task<bool> OpenBoardView(string uri)
@@ -169,17 +182,17 @@ namespace Kamban.ViewModels
 
             UpdateRecent();
 
-            Task.Run(() => LoadStatAsync(Recents));
+            Task.Run(() => LoadStatAsync(recentList.Items));
         }
 
         private void UpdateRecent()
         {
             this.appModel.LoadConfig();
             var rcnts = this.appModel.GetRecentDocuments();
-            Recents.Clear();
+            recentList.Clear();
 
             var tiles = rcnts.Select(x => new RecentTile { Uri = x }).Take(6);
-            Recents.AddRange(tiles);
+            recentList.AddRange(tiles);
         }
 
         private async Task LoadStatAsync(IEnumerable<RecentTile> tiles)

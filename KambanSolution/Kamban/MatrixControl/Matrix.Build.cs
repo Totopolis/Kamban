@@ -1,5 +1,8 @@
-﻿using System;
+﻿using DynamicData;
+using DynamicData.Binding;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -23,7 +26,9 @@ namespace Kamban.MatrixControl
                 return;
             }
 
+            var columns = Columns.Items.ToList();
             int columnCount = Columns.Count;
+            var rows = Rows.Items.ToList();
             int rowCount = Rows.Count;
 
             //////////////////
@@ -37,7 +42,7 @@ namespace Kamban.MatrixControl
             // columns
             for (int i = 0; i < columnCount; i++)
             {
-                var it = Columns[i];
+                var it = columns[i];
 
                 var cd = new ColumnDefinition();
                 cd.DataContext = it;
@@ -73,7 +78,7 @@ namespace Kamban.MatrixControl
             // rows
             for (int i = 0; i < rowCount; i++)
             {
-                var it = Rows[i];
+                var it = rows[i];
 
                 var rd = new RowDefinition();
                 rd.DataContext = it;
@@ -101,22 +106,27 @@ namespace Kamban.MatrixControl
             ////////////////////////
             // 3. Fill Intersections
             ////////////////////////
-            cells = new Dictionary<int, Intersection>();
-            cardPointers = new Dictionary<ICard, Intersection>();
-
             for (int i = 0; i < Columns.Count; i++)
                 for (int j = 0; j < Rows.Count; j++)
                 {
+                    object colDet = columns[i].Determinant;
+                    object rowDet = rows[j].Determinant;
+
+                    Cards
+                        .Connect()
+                        .Filter(x => x.ColumnDeterminant.Equals(colDet)
+                            && x.RowDeterminant.Equals(rowDet))
+                        .Sort(SortExpressionComparer<ICard>.Ascending(c => c.Order))
+                        .Bind(out ReadOnlyObservableCollection<ICard> intersectionCards)
+                        .Subscribe();
+
                     Intersection cell = new Intersection(this)
                     {
                         DataContext = this,
-                        ColumnDeterminant = Columns[i].Determinant,
-                        RowDeterminant = Rows[j].Determinant
+                        ColumnDeterminant = columns[i].Determinant,
+                        RowDeterminant = rows[j].Determinant,
+                        SelfCards = intersectionCards
                     };
-
-                    int hash = GetHashValue(Columns[i].Determinant, Rows[j].Determinant);
-
-                    cells.Add(hash, cell);
 
                     MainGrid.Children.Add(cell);
                     Grid.SetColumn(cell, i + 1);
@@ -125,40 +135,12 @@ namespace Kamban.MatrixControl
                     Grid.SetRowSpan(cell, 1);
                 }
 
-            ////////////////////////
-            // 3. Fill Cards
-            ////////////////////////
-            foreach (var it in Cards)
-                AddCard(it);
-
             Monik?.ApplicationVerbose("Matrix.RebuildGrid finished");
         }
 
         private int GetHashValue(object a, object b)
         {
             return new { a, b }.GetHashCode();
-        }
-
-        private void AddCard(ICard card)
-        {
-            int hash = GetHashValue(card.ColumnDeterminant, card.RowDeterminant);
-
-            if (!cells.ContainsKey(hash))
-                return;
-
-            cells[hash].SelfCards.Add(card);
-            cardPointers.Add(card, cells[hash]);
-        }
-
-        private void RemoveCard(ICard card)
-        {
-            int hash = GetHashValue(card.ColumnDeterminant, card.RowDeterminant);
-
-            if (!cells.ContainsKey(hash))
-                return;
-
-            cells[hash].SelfCards.Remove(card);
-            cardPointers.Remove(card);
         }
 
         private GridSplitter BuildHorizontalSpliter(int index, int horizontalCategoriescount)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DynamicData;
 using FluentValidation;
 using Kamban.Model;
 using Kamban.Views;
@@ -27,9 +29,9 @@ namespace Kamban.ViewModels
         [Reactive] public bool InExistedFile { get; set; }
         [Reactive] public bool CanCreate { get; set; }
 
-        public ReactiveList<LocalDimension> ColumnList { get; set; }
-        public ReactiveList<LocalDimension> RowList { get; set; }
-        public ReactiveList<string> BoardsInFile { get; set; }
+        public ObservableCollection<LocalDimension> ColumnList { get; set; }
+        public ObservableCollection<LocalDimension> RowList { get; set; }
+        public ObservableCollection<string> BoardsInFile { get; set; }
         public ReactiveCommand CreateCommand { get; set; }
         public ReactiveCommand CancelCommand { get; set; }
         public ReactiveCommand SelectFolderCommand { get; set; }
@@ -53,8 +55,8 @@ namespace Kamban.ViewModels
             validator = new WizardValidator();
             Title = "Creating new file";
             FullTitle = "Creating new file";
-            BoardsInFile = new ReactiveList<string>();
-
+            BoardsInFile = new ObservableCollection<string>();
+            
             this.WhenAnyValue(x => x.BoardName)
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Subscribe(v =>
@@ -69,7 +71,7 @@ namespace Kamban.ViewModels
 
             SelectFolderCommand = ReactiveCommand.Create(SelectFolder);
 
-            ColumnList = new ReactiveList<LocalDimension>
+            ColumnList = new ObservableCollection<LocalDimension>
             {
                 new LocalDimension("Backlog"),
                 new LocalDimension("In progress"),
@@ -87,7 +89,7 @@ namespace Kamban.ViewModels
                 });
 
 
-            RowList = new ReactiveList<LocalDimension>()
+            RowList = new ObservableCollection<LocalDimension>()
             {
                 new LocalDimension("Important"),
                 new LocalDimension("So-so"),
@@ -108,29 +110,18 @@ namespace Kamban.ViewModels
 
             CancelCommand = ReactiveCommand.Create(Close);
 
-            this.WhenAnyObservable(s => s.ColumnList.ItemChanged)
-                .Subscribe(_ =>
-                    UpdateDimensionList(ColumnList));
+            ColumnList.CollectionChanged += (ob, arg) => UpdateDimensionList(ColumnList);
+            RowList.CollectionChanged += (ob, arg) => UpdateDimensionList(RowList);
 
-            this.WhenAnyObservable(s => s.RowList.ItemChanged)
-                .Subscribe(_ =>
-                    UpdateDimensionList(RowList));
-
-            this.WhenAnyObservable(s => s.ColumnList.ItemsAdded)
-                .Subscribe(_ => UpdateDimensionList(ColumnList));
-
-            this.WhenAnyObservable(s => s.RowList.ItemsAdded)
-                .Subscribe(_ => UpdateDimensionList(RowList));
-
-            this.WhenAnyObservable(s => s.AllErrors.Changed)
-                .Subscribe(_ => CanCreate = !AllErrors.Any() &&
-                                            ColumnList.Count(col => col.HasErrors) == 0 &&
-                                            RowList.Count(row => row.HasErrors) == 0);
+            AllErrors
+                .Connect()
+                .Subscribe(_ => CanCreate = !AllErrors.Items.Any() &&
+                                           ColumnList.Count(col => col.HasErrors) == 0 &&
+                                           RowList.Count(row => row.HasErrors) == 0);
         }
 
-        private void UpdateDimensionList(ReactiveList<LocalDimension> list)
+        private void UpdateDimensionList(ObservableCollection<LocalDimension> list)
         {
-            list.ChangeTrackingEnabled = false;
             foreach (var dim in list)
             {
                 dim.IsDuplicate = false;
@@ -142,7 +133,6 @@ namespace Kamban.ViewModels
                 .Where(g => g.Count() > 1)
                 .ToList();
 
-
             foreach (var group in duplicatgroups)
             {
                 foreach (var dim in group)
@@ -152,9 +142,7 @@ namespace Kamban.ViewModels
                 }
             }
 
-            list.ChangeTrackingEnabled = true;
-
-            CanCreate = !AllErrors.Any() &&
+            CanCreate = !AllErrors.Items.Any() &&
                         ColumnList.Count(col => col.HasErrors) == 0 &&
                         RowList.Count(row => row.HasErrors) == 0;
         }
@@ -163,7 +151,6 @@ namespace Kamban.ViewModels
         {
             // stop chars for short file name    +=[]:;«,./?'space'
             // stops for long                    /\:*?«<>|
-
             char[] separators =
             {
                 '+', '=', '[', ']', ':', ';', '"', ',', '.', '/', '?', ' ',
@@ -187,7 +174,7 @@ namespace Kamban.ViewModels
                 FolderName = dialog.SelectedPath;
         }
 
-        public async Task Create() // todo:validate first wizard page again when creating?
+        public async Task Create()
         {
             var uri = FolderName + "\\" + FileName;
 
@@ -195,11 +182,10 @@ namespace Kamban.ViewModels
             {
                 prjService = appModel.CreateProjectService(uri);
             }
-
             else
             {
                 var boards = await prjService.GetAllBoardsInFileAsync();
-                BoardsInFile.PublishCollection(boards.Select(board => board.Name));
+                BoardsInFile.AddRange(boards.Select(board => board.Name));
 
                 if (BoardsInFile.Contains(BoardName))
                 {
@@ -311,10 +297,8 @@ namespace Kamban.ViewModels
                     return "";
                 }
             }
-
         } //class
     }
-
 
     public static class ExtensionMethods
     {

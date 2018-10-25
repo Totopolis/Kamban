@@ -23,6 +23,7 @@
         </Grid.ColumnDefinitions>
 
         <mykanban:Matrix
+            EnableWork="{Binding EnableMatrix}"
             Monik="{Binding Monik}"
             Grid.Column="0"
             Grid.ColumnSpan="4"

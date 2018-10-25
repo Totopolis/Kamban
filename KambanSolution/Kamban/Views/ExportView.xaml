@@ -16,7 +16,7 @@
             <Separator Margin="0, 10, 0, 10"/>
 
             <TextBlock FontWeight="DemiBold" Margin="0,0,0,5">Select boards to export</TextBlock>
-            <ListBox ItemsSource="{Binding Boards}">
+            <ListBox ItemsSource="{Binding AvailableBoards}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <CheckBox IsChecked="{Binding IsChecked}" Content="{Binding Path=Board.Name}"/>

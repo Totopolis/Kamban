@@ -6,6 +6,8 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Input;
+using DynamicData;
+using DynamicData.Binding;
 using Kamban.MatrixControl;
 using Kamban.Model;
 using Kamban.Views;
@@ -26,13 +28,14 @@ namespace Kamban.ViewModels
 
         private IProjectService prjService;
 
+        [Reactive] public bool EnableMatrix { get; set; }
         [Reactive] public IMonik Monik { get; set; }
 
         [Reactive] public BoardInfo CurrentBoard { get; set; }
 
-        public ReactiveList<IDim> Columns { get; set; }
-        public ReactiveList<IDim> Rows { get; set; }
-        public ReactiveList<ICard> Cards { get; set; }
+        [Reactive] public SourceList<IDim> Columns { get; set; }
+        [Reactive] public SourceList<IDim> Rows { get; set; }
+        [Reactive] public SourceList<ICard> Cards { get; set; }
 
         [Reactive] public ICard IssueOfContextMenu { get; set; }
 
@@ -55,8 +58,7 @@ namespace Kamban.ViewModels
         [Reactive] private RowInfo SelectedRow { get; set; }
         [Reactive] private ColumnInfo SelectedColumn { get; set; }
 
-        [Reactive] public ReactiveList<BoardInfo> BoardsInFile { get; set; }
-
+        private List<BoardInfo> BoardsInFile;
         private List<CommandItem> BoardsMenuItems;
 
         public ReactiveCommand<Unit, Unit> CreateTiketCommand { get; set; }
@@ -81,13 +83,14 @@ namespace Kamban.ViewModels
 
             mon.LogicVerbose("BoardViewModel.ctor started");
 
+            EnableMatrix = false;
             Monik = mon;
 
-            Columns = new ReactiveList<IDim>() { ChangeTrackingEnabled = true };
-            Rows = new ReactiveList<IDim>() { ChangeTrackingEnabled = true };
-            Cards = new ReactiveList<ICard>() { ChangeTrackingEnabled = true };
+            Columns = new SourceList<IDim>();
+            Rows = new SourceList<IDim>();
+            Cards = new SourceList<ICard>();
 
-            BoardsInFile = new ReactiveList<BoardInfo>();
+            BoardsInFile = new List<BoardInfo>();
             IssueFlyout = new IssueViewModel();
             MoveFlyout = new MoveViewModel();
 
@@ -117,10 +120,10 @@ namespace Kamban.ViewModels
                 (tup) => ShowFlyout(IssueFlyout, null, (int)tup.column, (int)tup.row));
 
             CreateColumnCommand = ReactiveCommand.CreateFromTask(() =>
-                InsertHeadAfterCommandExecute(Columns.Last()));
+                InsertHeadAfterCommandExecute(Columns.Items.Last()));
 
             CreateRowCommand = ReactiveCommand.CreateFromTask(() =>
-                InsertHeadAfterCommandExecute(Rows.Last()));
+                InsertHeadAfterCommandExecute(Rows.Items.Last()));
 
             AddBoardCommand = ReactiveCommand.Create(() =>
             {
@@ -132,9 +135,11 @@ namespace Kamban.ViewModels
                 });
             });
 
-            var prevNextCommandEnabled = this.BoardsInFile
-                .CountChanged
-                .Select(x => x > 1);
+            /*var prevNextCommandEnabled = this
+                .WhenAnyValue(x => x.BoardsInFile)
+                .Where(x => x != null)
+                .Select(x => x.Count > 1)
+                .AsObservable();*/
             
             PrevBoardCommand = ReactiveCommand.Create(() =>
             {
@@ -143,7 +148,7 @@ namespace Kamban.ViewModels
                 CurrentBoard = indx > 0 ?
                     BoardsInFile[indx - 1] :
                     BoardsInFile[BoardsInFile.Count - 1];
-            }, prevNextCommandEnabled);
+            });
 
             NextBoardCommand = ReactiveCommand.Create(() =>
             {
@@ -152,7 +157,7 @@ namespace Kamban.ViewModels
                 CurrentBoard = indx < BoardsInFile.Count - 1 ?
                     BoardsInFile[indx + 1] :
                     BoardsInFile[0];
-            }, prevNextCommandEnabled);
+            });
 
             RenameBoardCommand = ReactiveCommand.CreateFromTask(RenameBoardCommandExecute);
 
@@ -166,32 +171,32 @@ namespace Kamban.ViewModels
                 });
 
             Columns
-                .ItemChanged
-                .Subscribe(ob =>
+                .Connect()
+                .Transform(x => x as ColumnViewModel)
+                .WhenAnyPropertyChanged()
+                .Subscribe(cvm =>
                 {
                     mon.LogicVerbose("BoardViewModel.Columns.ItemChanged");
-
-                    var cvm = ob.Sender as ColumnViewModel;
                     prjService.CreateOrUpdateColumnAsync(cvm.Info);
                 });
 
             Rows
-                .ItemChanged
-                .Subscribe(ob =>
+                .Connect()
+                .Transform(x => x as RowViewModel)
+                .WhenAnyPropertyChanged()
+                .Subscribe(rvm =>
                 {
                     mon.LogicVerbose("BoardViewModel.Rows.ItemChanged");
-
-                    var rvm = ob.Sender as RowViewModel;
                     prjService.CreateOrUpdateRowAsync(rvm.Info);
                 });
 
             Cards
-                .ItemChanged
-                .Subscribe(ob =>
+                .Connect()
+                .Transform(x => x as CardViewModel)
+                .WhenAnyPropertyChanged()
+                .Subscribe(cvm =>
                 {
-                    mon.LogicVerbose("BoardViewModel.Cards.ItemChanged");
-
-                    var cvm = ob.Sender as CardViewModel;
+                    mon.LogicVerbose("BoardViewModel.Cards.WhenAnyPropertyChanged");
                     prjService.CreateOrUpdateIssueAsync(cvm.Issue);
                 });
 
@@ -226,6 +231,7 @@ namespace Kamban.ViewModels
             {
                 Title = CurrentBoard.Name;
                 FullTitle = prjService.Uri;
+                EnableMatrix = false;
 
                 var columns = await prjService.GetColumnsByBoardIdAsync(CurrentBoard.Id);
                 columns.Sort((x, y) => x.Order.CompareTo(y.Order));
@@ -239,18 +245,25 @@ namespace Kamban.ViewModels
                 //foreach (var it in toDel)
                 //    scope.DeleteIssueAsync(it.Id);
 
-                using (Columns.SuppressChangeNotifications())
-                using (Rows.SuppressChangeNotifications())
-                using (Cards.SuppressChangeNotifications())
+                Rows.Edit(il =>
+                {
+                    Rows.Clear();
+                    Rows.AddRange(rows.Select(x => new RowViewModel(x)));
+                });
+
+                Columns.Edit(il =>
                 {
                     Columns.Clear();
-                    Rows.Clear();
-                    Cards.Clear();
-
                     Columns.AddRange(columns.Select(x => new ColumnViewModel(x)));
-                    Rows.AddRange(rows.Select(x => new RowViewModel(x)));
-                    Cards.AddRange(issues.Select(x => new CardViewModel(x)));
-                }
+                });
+
+                Cards.Edit(il =>
+                {
+                    il.Clear();
+                    il.AddRange(issues.Select(x => new CardViewModel(x)));
+                });
+
+                EnableMatrix = true;
 
                 mon.LogicVerbose("BoardViewModel.RefreshContent finished");
             }
@@ -305,7 +318,7 @@ namespace Kamban.ViewModels
                 .ObserveOnDispatcher()
                 .Subscribe(boards =>
                 {
-                    BoardsInFile.PublishCollection(boards);
+                    BoardsInFile.AddRange(boards);
                     BoardsMenuItems.Clear();
 
                     foreach (var brd in boards)

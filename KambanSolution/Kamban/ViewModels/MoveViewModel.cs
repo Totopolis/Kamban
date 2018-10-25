@@ -1,7 +1,9 @@
-﻿using Kamban.MatrixControl;
+﻿using DynamicData;
+using Kamban.MatrixControl;
 using Kamban.Model;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using ReactiveUI.Legacy;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,12 +25,12 @@ namespace Kamban.ViewModels
         [Reactive] public Brush Background { get; set; }
         [Reactive] public bool IsOpened { get; set; }
 
-        [Reactive] public ReactiveList<BoardInfo> AvailableBoards { get; set; }
+        [Reactive] public SourceList<BoardInfo> AvailableBoards { get; set; }
         [Reactive] public BoardInfo SelectedBoard { get; set; }
 
-        [Reactive] public ReactiveList<ColumnInfo> AvailableColumns { get; set; }
+        [Reactive] public SourceList<ColumnInfo> AvailableColumns { get; set; }
         [Reactive] public ColumnInfo SelectedColumn { get; set; }
-        [Reactive] public ReactiveList<RowInfo> AvailableRows { get; set; }
+        [Reactive] public SourceList<RowInfo> AvailableRows { get; set; }
         [Reactive] public RowInfo SelectedRow { get; set; }
 
         [Reactive] public string Url { get; set; }
@@ -40,9 +42,9 @@ namespace Kamban.ViewModels
 
         public MoveViewModel()
         {
-            AvailableBoards = new ReactiveList<BoardInfo>();
-            AvailableColumns = new ReactiveList<ColumnInfo>();
-            AvailableRows = new ReactiveList<RowInfo>();
+            AvailableBoards = new SourceList<BoardInfo>();
+            AvailableColumns = new SourceList<ColumnInfo>();
+            AvailableRows = new SourceList<RowInfo>();
 
             CancelCommand = ReactiveCommand.Create(() => IsOpened = false);
             CopyToCommand = ReactiveCommand.Create(CopyToCommandExecute);
@@ -65,6 +67,7 @@ namespace Kamban.ViewModels
                 Head = "[Copy] " + card.Header,
                 ColumnId = SelectedColumn.Id,
                 RowId = SelectedRow.Id,
+                Order = card.Order,
                 Color = card.Color,
                 Body = card.Body,
                 Created = card.Created,
@@ -88,6 +91,7 @@ namespace Kamban.ViewModels
                 Head = card.Header,
                 ColumnId = SelectedColumn.Id,
                 RowId = SelectedRow.Id,
+                Order = card.Order,
                 Color = card.Color,
                 Body = card.Body,
                 Created = card.Created,
@@ -110,22 +114,22 @@ namespace Kamban.ViewModels
             AvailableBoards.Clear();
             AvailableBoards.AddRange(boards);
 
-            await ChangeBoard(AvailableBoards.First().Id);
+            await ChangeBoard(AvailableBoards.Items.First().Id);
         }
 
         private async Task ChangeBoard(int boardId)
         {
-            SelectedBoard = AvailableBoards.Where(x => x.Id == boardId).First();
+            SelectedBoard = AvailableBoards.Items.Where(x => x.Id == boardId).First();
 
             var columns = await prjService.GetColumnsByBoardIdAsync(SelectedBoard.Id);
             AvailableColumns.Clear();
             AvailableColumns.AddRange(columns);
-            SelectedColumn = AvailableColumns.First();
+            SelectedColumn = AvailableColumns.Items.First();
 
             var rows = await prjService.GetRowsByBoardIdAsync(SelectedBoard.Id);
             AvailableRows.Clear();
             AvailableRows.AddRange(rows);
-            SelectedRow = AvailableRows.First();
+            SelectedRow = AvailableRows.Items.First();
         }
 
         public void Initialize(ViewRequest viewRequest)

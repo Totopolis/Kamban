@@ -85,6 +85,7 @@ namespace Kamban.MatrixControl
 
         object ColumnDeterminant { get; set; }
         object RowDeterminant { get; set; }
+        int Order { get; set; }
 
         string Body { get; set; }
         DateTime Created { get; set; }
@@ -109,6 +110,7 @@ namespace Kamban.MatrixControl
             Color = iss.Color;
             ColumnDeterminant = iss.ColumnId;
             RowDeterminant = iss.RowId;
+            Order = iss.Order;
             Body = iss.Body;
             Created = iss.Created;
             Modified = iss.Modified;
@@ -126,6 +128,7 @@ namespace Kamban.MatrixControl
 
             this.WhenAnyValue(x => x.ColumnDeterminant).Subscribe(x => issueInfo.ColumnId = (int)x);
             this.WhenAnyValue(x => x.RowDeterminant).Subscribe(x => issueInfo.RowId = (int)x);
+            this.WhenAnyValue(x => x.Order).Subscribe(x => issueInfo.Order = x);
             this.WhenAnyValue(x => x.Modified).Subscribe(x => issueInfo.Modified = x);
         }
 
@@ -134,6 +137,7 @@ namespace Kamban.MatrixControl
         [Reactive] public string Color { get; set; }
         [Reactive] public object ColumnDeterminant { get; set; }
         [Reactive] public object RowDeterminant { get; set; }
+        [Reactive] public int Order { get; set; }
         [Reactive] public string Body { get; set; }
         [Reactive] public DateTime Created { get; set; }
         [Reactive] public DateTime Modified { get; set; }
