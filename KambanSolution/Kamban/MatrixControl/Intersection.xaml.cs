@@ -33,8 +33,8 @@ namespace Kamban.MatrixControl
             SelectedCard = null;
         }
 
-        public object ColumnDeterminant { get; set; }
-        public object RowDeterminant { get; set; }
+        public int ColumnDeterminant { get; set; }
+        public int RowDeterminant { get; set; }
 
         [Reactive] public ReadOnlyObservableCollection<ICard> SelfCards { get; set; }
 

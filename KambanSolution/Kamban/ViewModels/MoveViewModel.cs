@@ -1,4 +1,5 @@
-﻿using DynamicData;
+﻿using AutoMapper;
+using DynamicData;
 using Kamban.MatrixControl;
 using Kamban.Model;
 using ReactiveUI;
@@ -18,6 +19,8 @@ namespace Kamban.ViewModels
 {
     public class MoveViewModel : ViewModelBase, IInitializableViewModel
     {
+        private readonly IMapper mapper;
+
         private IProjectService prjService;
         private CardViewModel card;
         private BoardViewModel boardVM;
@@ -40,8 +43,10 @@ namespace Kamban.ViewModels
         public ReactiveCommand CopyToCommand { get; set; }
         public ReactiveCommand MoveToCommand { get; set; }
 
-        public MoveViewModel()
+        public MoveViewModel(IMapper mp)
         {
+            mapper = mp;
+
             AvailableBoards = new SourceList<BoardInfo>();
             AvailableColumns = new SourceList<ColumnInfo>();
             AvailableRows = new SourceList<RowInfo>();
@@ -77,7 +82,7 @@ namespace Kamban.ViewModels
 
             prjService.CreateOrUpdateIssueAsync(issue);
 
-            var cvm = new CardViewModel(issue);
+            var cvm = mapper.Map<Issue, CardViewModel>(issue);
             boardVM.Cards.Add(cvm);
 
             IsOpened = false;

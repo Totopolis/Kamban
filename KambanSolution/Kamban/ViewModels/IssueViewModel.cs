@@ -157,14 +157,12 @@ namespace Kamban.ViewModels
 
             if (cvm == null)
             {
-                var issue = new Issue
+                cvm = new CardViewModel
                 {
                     Id = 0,
                     Created = DateTime.Now,
                     BoardId = board.Id
                 };
-
-                cvm = new CardViewModel(issue);
             }
 
             cvm.Header = Head;

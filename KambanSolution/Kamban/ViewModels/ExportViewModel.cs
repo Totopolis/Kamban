@@ -90,11 +90,13 @@ namespace Kamban.ViewModels
 
             AvailableBoards = temp2;
 
-            //var canExport = this.WhenAnyValue(x => x.SelectedFile, y => y.Boards.ItemChanged,
-            //  (sf, br) => !string.IsNullOrEmpty(sf) && Boards.Where(z => z.IsChecked).Count() > 0);
+            var canExport = boards
+                .Connect()
+                .Filter(x => x.IsChecked == true)
+                .Select(x => x.Count > 0 && !string.IsNullOrEmpty(SelectedFile));
 
             SelectTargetFolderCommand = ReactiveCommand.Create(SelectTargetFolderCommandExecute);
-            ExportCommand = ReactiveCommand.CreateFromTask(ExportCommandExecute);
+            ExportCommand = ReactiveCommand.CreateFromTask(ExportCommandExecute, canExport);
             CancelCommand = ReactiveCommand.Create(() => this.Close());
 
             // TODO: handle not found file

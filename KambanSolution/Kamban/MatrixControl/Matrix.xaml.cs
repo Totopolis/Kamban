@@ -139,20 +139,6 @@ namespace Kamban.MatrixControl
                 typeof(Matrix),
                 new PropertyMetadata(null, new PropertyChangedCallback(NormalizeGridCommandPropertyChanged)));
 
-        
-        public ReactiveCommand<ICard, Unit> DropCardCommand
-        {
-            get => (ReactiveCommand<ICard, Unit>)GetValue(DropCardCommandProperty);
-            set => SetValue(DropCardCommandProperty, value);
-        }
-
-        public static readonly DependencyProperty DropCardCommandProperty =
-            DependencyProperty.Register(
-                "DropCardCommand",
-                typeof(ReactiveCommand<ICard, Unit>),
-                typeof(Matrix),
-                new PropertyMetadata(null));
-
         public ContextMenu CardContextMenu
         {
             get => (ContextMenu)GetValue(CardContextMenuProperty);

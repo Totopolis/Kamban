@@ -45,7 +45,6 @@ namespace Kamban.MatrixControl
             mx.Columns
                 .Connect()
                 .Where(x => mx.EnableWork)
-                //.Where(x => x.Action != NotifyCollectionChangedAction.Reset && mx.EnableWork)
                 .Subscribe(_ =>
                 {
                     mx.Monik?.ApplicationVerbose("Matrix.Columns.Changed");
@@ -64,7 +63,6 @@ namespace Kamban.MatrixControl
             mx.Rows
                 .Connect()
                 .Where(x => mx.EnableWork)
-                //.Where(x => x.Action != NotifyCollectionChangedAction.Reset && mx.EnableWork)
                 .Subscribe(_ =>
                 {
                     mx.Monik?.ApplicationVerbose("Matrix.Rows.Changed");
@@ -176,13 +174,22 @@ namespace Kamban.MatrixControl
             Monik?.ApplicationVerbose("Matrix.Drop");
 
             var card = dropInfo.Data as CardViewModel;
-
-            /*var srcIntersec = cardPointers[card];
+            var targetCard = dropInfo.TargetItem as CardViewModel;
 
             // dirty fingers
             var targetIntersec = ((dropInfo.VisualTarget as ListView)
                 .Parent as Grid)
                 .Parent as Intersection;
+
+            if (card.ColumnDeterminant != targetIntersec.ColumnDeterminant ||
+                card.RowDeterminant != targetIntersec.RowDeterminant)
+            {
+                Monik?.ApplicationVerbose("Matrix.Drop move to other intersection");
+                card.ColumnDeterminant = targetIntersec.ColumnDeterminant;
+                card.RowDeterminant = targetIntersec.RowDeterminant;
+            }
+
+            /*var srcIntersec = cardPointers[card];
 
             if (targetIntersec != null && targetIntersec != srcIntersec)
             {

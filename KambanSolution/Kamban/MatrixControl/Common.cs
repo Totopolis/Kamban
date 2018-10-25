@@ -18,19 +18,18 @@ namespace Kamban.MatrixControl
     public interface IDim
     {
         string Caption { get; set; }
-        object Determinant { get; set; }
+        int Determinant { get; set; }
         int Size { get; set; }
         int Order { get; set; }
     }
 
     public class ColumnViewModel : ReactiveObject, IDim
     {
-        private readonly ColumnInfo columnInfo;
-        public ColumnInfo Info => columnInfo;
+        public ColumnInfo Info { get; }
 
         public ColumnViewModel(ColumnInfo ci)
         {
-            columnInfo = ci;
+            Info = ci;
 
             Id = ci.Id;
             Caption = ci.Name;
@@ -38,26 +37,25 @@ namespace Kamban.MatrixControl
             Size = ci.Width;
             Order = ci.Order;
 
-            this.WhenAnyValue(x => x.Size).Subscribe(x => columnInfo.Width = x);
-            this.WhenAnyValue(x => x.Caption).Subscribe(x => columnInfo.Name = x);
-            this.WhenAnyValue(x => x.Order).Subscribe(x => columnInfo.Order = x);
+            this.WhenAnyValue(x => x.Size).Subscribe(x => Info.Width = x);
+            this.WhenAnyValue(x => x.Caption).Subscribe(x => Info.Name = x);
+            this.WhenAnyValue(x => x.Order).Subscribe(x => Info.Order = x);
         }
 
         [Reactive] public int Id { get; set; }
         [Reactive] public string Caption { get; set; }
-        [Reactive] public object Determinant { get; set; }
+        [Reactive] public int Determinant { get; set; }
         [Reactive] public int Size { get; set; }
         [Reactive] public int Order { get; set; }
     }
 
     public class RowViewModel : ReactiveObject, IDim
     {
-        private readonly RowInfo rowInfo;
-        public RowInfo Info => rowInfo;
+        public RowInfo Info { get; }
 
         public RowViewModel(RowInfo ri)
         {
-            rowInfo = ri;
+            Info = ri;
 
             Id = ri.Id;
             Caption = ri.Name;
@@ -65,14 +63,14 @@ namespace Kamban.MatrixControl
             Size = ri.Height;
             Order = ri.Order;
 
-            this.WhenAnyValue(x => x.Size).Subscribe(x => rowInfo.Height = x);
-            this.WhenAnyValue(x => x.Caption).Subscribe(x => rowInfo.Name = x);
-            this.WhenAnyValue(x => x.Order).Subscribe(x => rowInfo.Order = x);
+            this.WhenAnyValue(x => x.Size).Subscribe(x => Info.Height = x);
+            this.WhenAnyValue(x => x.Caption).Subscribe(x => Info.Name = x);
+            this.WhenAnyValue(x => x.Order).Subscribe(x => Info.Order = x);
         }
 
         [Reactive] public int Id { get; set; }
         [Reactive] public string Caption { get; set; }
-        [Reactive] public object Determinant { get; set; }
+        [Reactive] public int Determinant { get; set; }
         [Reactive] public int Size { get; set; }
         [Reactive] public int Order { get; set; }
     }
@@ -83,8 +81,8 @@ namespace Kamban.MatrixControl
         string Header { get; set; }
         string Color { get; set; }
 
-        object ColumnDeterminant { get; set; }
-        object RowDeterminant { get; set; }
+        int ColumnDeterminant { get; set; }
+        int RowDeterminant { get; set; }
         int Order { get; set; }
 
         string Body { get; set; }
@@ -98,45 +96,19 @@ namespace Kamban.MatrixControl
     // def back color "#FFFFE0"
     public class CardViewModel : ReactiveObject, ICard
     {
-        private readonly Issue issueInfo;
-        public Issue Issue => issueInfo;
-
-        public CardViewModel(Issue iss)
+        public CardViewModel()
         {
-            issueInfo = iss;
+            // TODO: whenany => update modified
 
-            Id = iss.Id;
-            Header = iss.Head;
-            Color = iss.Color;
-            ColumnDeterminant = iss.ColumnId;
-            RowDeterminant = iss.RowId;
-            Order = iss.Order;
-            Body = iss.Body;
-            Created = iss.Created;
-            Modified = iss.Modified;
-            ShowDescription = !string.IsNullOrEmpty(issueInfo.Body);
-            BoardId = iss.BoardId;
-
-            this.WhenAnyValue(x => x.Header).Subscribe(x => issueInfo.Head = x);
-            this.WhenAnyValue(x => x.Color).Subscribe(x => issueInfo.Color = x);
-
-            this.WhenAnyValue(x => x.Body).Subscribe(x =>
-            {
-                ShowDescription = !string.IsNullOrEmpty(x);
-                issueInfo.Body = x;
-            });
-
-            this.WhenAnyValue(x => x.ColumnDeterminant).Subscribe(x => issueInfo.ColumnId = (int)x);
-            this.WhenAnyValue(x => x.RowDeterminant).Subscribe(x => issueInfo.RowId = (int)x);
-            this.WhenAnyValue(x => x.Order).Subscribe(x => issueInfo.Order = x);
-            this.WhenAnyValue(x => x.Modified).Subscribe(x => issueInfo.Modified = x);
+            this.WhenAnyValue(x => x.Body)
+                .Subscribe(x => ShowDescription = !string.IsNullOrEmpty(x));
         }
 
         [Reactive] public int Id { get; set; }
         [Reactive] public string Header { get; set; }
         [Reactive] public string Color { get; set; }
-        [Reactive] public object ColumnDeterminant { get; set; }
-        [Reactive] public object RowDeterminant { get; set; }
+        [Reactive] public int ColumnDeterminant { get; set; }
+        [Reactive] public int RowDeterminant { get; set; }
         [Reactive] public int Order { get; set; }
         [Reactive] public string Body { get; set; }
         [Reactive] public DateTime Created { get; set; }

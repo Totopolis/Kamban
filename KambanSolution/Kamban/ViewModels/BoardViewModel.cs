@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Input;
+using AutoMapper;
 using DynamicData;
 using DynamicData.Binding;
 using Kamban.MatrixControl;
@@ -25,6 +26,7 @@ namespace Kamban.ViewModels
         private readonly IShell shell;
         private readonly IDialogCoordinator dialCoord;
         private readonly IMonik mon;
+        private readonly IMapper mapper;
 
         private IProjectService prjService;
 
@@ -73,11 +75,12 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> RenameBoardCommand { get; set; }
         public ReactiveCommand<object, Unit> SelectBoardCommand { get; set; }
 
-        public BoardViewModel(IShell shell, IDialogCoordinator dc, IMonik m)
+        public BoardViewModel(IShell shell, IDialogCoordinator dc, IMonik m, IMapper mp)
         {
             this.shell = shell;
             dialCoord = dc;
             mon = m;
+            mapper = mp;
 
             BoardsMenuItems = new List<CommandItem>();
 
@@ -92,7 +95,7 @@ namespace Kamban.ViewModels
 
             BoardsInFile = new List<BoardInfo>();
             IssueFlyout = new IssueViewModel();
-            MoveFlyout = new MoveViewModel();
+            MoveFlyout = new MoveViewModel(mapper);
 
             CardClickCommand = ReactiveCommand.Create<ICard>(c => ShowFlyout(IssueFlyout, c));
             NormalizeGridCommand = ReactiveCommand.Create(() => { });
@@ -197,7 +200,8 @@ namespace Kamban.ViewModels
                 .Subscribe(cvm =>
                 {
                     mon.LogicVerbose("BoardViewModel.Cards.WhenAnyPropertyChanged");
-                    prjService.CreateOrUpdateIssueAsync(cvm.Issue);
+                    var iss = mapper.Map<CardViewModel, Issue>(cvm);
+                    prjService.CreateOrUpdateIssueAsync(iss);
                 });
 
             this.ObservableForProperty(w => w.CurrentBoard)
@@ -216,7 +220,8 @@ namespace Kamban.ViewModels
                     mon.LogicVerbose("BoardViewModel.IssueFlyout closed and issue need create");
 
                     var card = IssueFlyout.Card;
-                    prjService.CreateOrUpdateIssueAsync(card.Issue);
+                    var iss = mapper.Map<CardViewModel, Issue>(card);
+                    prjService.CreateOrUpdateIssueAsync(iss);
                     Cards.Add(card);
                 });
 
@@ -260,7 +265,7 @@ namespace Kamban.ViewModels
                 Cards.Edit(il =>
                 {
                     il.Clear();
-                    il.AddRange(issues.Select(x => new CardViewModel(x)));
+                    il.AddRange(issues.Select(x => mapper.Map<Issue, CardViewModel>(x)));
                 });
 
                 EnableMatrix = true;

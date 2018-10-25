@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -109,14 +110,15 @@ namespace Kamban.MatrixControl
             for (int i = 0; i < Columns.Count; i++)
                 for (int j = 0; j < Rows.Count; j++)
                 {
-                    object colDet = columns[i].Determinant;
-                    object rowDet = rows[j].Determinant;
+                    int colDet = columns[i].Determinant;
+                    int rowDet = rows[j].Determinant;
 
                     Cards
                         .Connect()
-                        .Filter(x => x.ColumnDeterminant.Equals(colDet)
-                            && x.RowDeterminant.Equals(rowDet))
+                        .Filter(x => x.ColumnDeterminant == colDet
+                            && x.RowDeterminant == rowDet)
                         .Sort(SortExpressionComparer<ICard>.Ascending(c => c.Order))
+                        .ObserveOnDispatcher()
                         .Bind(out ReadOnlyObservableCollection<ICard> intersectionCards)
                         .Subscribe();
 
