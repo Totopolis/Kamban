@@ -3,6 +3,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -75,7 +76,7 @@ namespace Kamban.MatrixControl
         [Reactive] public int Order { get; set; }
     }
 
-    public interface ICard
+    public interface ICard : INotifyPropertyChanged
     {
         int Id { get; set; }
         string Header { get; set; }

@@ -115,8 +115,8 @@ namespace Kamban.MatrixControl
 
                     Cards
                         .Connect()
-                        .Filter(x => x.ColumnDeterminant == colDet
-                            && x.RowDeterminant == rowDet)
+                        .AutoRefresh()
+                        .Filter(x => x.ColumnDeterminant == colDet && x.RowDeterminant == rowDet)
                         .Sort(SortExpressionComparer<ICard>.Ascending(c => c.Order))
                         .ObserveOnDispatcher()
                         .Bind(out ReadOnlyObservableCollection<ICard> intersectionCards)
