@@ -157,7 +157,7 @@ namespace Kamban.ViewModels
             shell.AddGlobalCommand("File", "Open", "OpenFileCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.O);
 
-            shell.AddGlobalCommand("File", "Export", "ExportCommand", this)
+            shell.AddGlobalCommand("File", "Export", "ExportCommand", this, true)
                 .SetHotKey(ModifierKeys.Control, Key.U);
 
             shell.AddGlobalCommand("File", "Exit", "ExitCommand", this);

@@ -318,7 +318,7 @@ namespace Kamban.ViewModels
                 .SetHotKey(ModifierKeys.Control, Key.W);
 
             shell.AddVMCommand("Edit", "Add column", "CreateColumnCommand", this);
-            shell.AddVMCommand("Edit", "Add row", "CreateRowCommand", this);
+            shell.AddVMCommand("Edit", "Add row", "CreateRowCommand", this, true);
 
             shell.AddVMCommand("Edit", "Normalize Grid", "NormalizeGridCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.G);
@@ -331,7 +331,7 @@ namespace Kamban.ViewModels
             shell.AddVMCommand("Boards", "Prev board", "PrevBoardCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.Q);
 
-            shell.AddVMCommand("Boards", "Next board", "NextBoardCommand", this)
+            shell.AddVMCommand("Boards", "Next board", "NextBoardCommand", this, true)
                 .SetHotKey(ModifierKeys.Control, Key.E);
 
             var request = viewRequest as BoardViewRequest;
