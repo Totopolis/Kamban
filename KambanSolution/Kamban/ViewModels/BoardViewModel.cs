@@ -210,6 +210,14 @@ namespace Kamban.ViewModels
                 .Subscribe(async _ =>
                 {
                     mon.LogicVerbose("BoardViewModel.CurrentBoard changed");
+
+                    BoardsMenuItems.ForEach(x => x.IsChecked = false);
+
+                    var command = BoardsMenuItems
+                        .Where(x => x.Name == CurrentBoard.Name)
+                        .First()
+                        .IsChecked = true;
+
                     await RefreshContent();
                 });
 
