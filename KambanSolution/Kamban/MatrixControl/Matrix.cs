@@ -192,6 +192,8 @@ namespace Kamban.MatrixControl
             // Reorder
             card.Order = targetCard != null ? targetCard.Order - 1 : int.MaxValue;
 
+            // OPTIMiZE: Use R/O/ObservableCollection projection
+
             var targetCards = Cards.Items
                         .Where(x => x.ColumnDeterminant == card.ColumnDeterminant
                             && x.RowDeterminant == card.RowDeterminant)

@@ -2,7 +2,8 @@
                     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:viewModels="clr-namespace:Kamban.ViewModels"
-                    xmlns:views="clr-namespace:Kamban.Views">
+                    xmlns:views="clr-namespace:Kamban.Views"
+                    xmlns:kam="clr-namespace:Kamban.Views.WpfResources">
 
     <Style TargetType="Label">
         <Setter Property="BorderThickness" Value="1"/>
@@ -10,6 +11,10 @@
         <Setter Property="FontSize" Value="16"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+
+    <Style TargetType="{x:Type kam:SelectionBindingTextBox}" 
+           BasedOn="{StaticResource {x:Type TextBox}}">
     </Style>
 
     <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">

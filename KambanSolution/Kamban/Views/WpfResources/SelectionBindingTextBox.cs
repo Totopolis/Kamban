@@ -37,7 +37,6 @@ namespace Kamban.Views.WpfResources
             {
                 return (int)this.GetValue(BindableSelectionStartProperty);
             }
-
             set
             {
                 this.SetValue(BindableSelectionStartProperty, value);
@@ -50,7 +49,6 @@ namespace Kamban.Views.WpfResources
             {
                 return (int)this.GetValue(BindableSelectionLengthProperty);
             }
-
             set
             {
                 this.SetValue(BindableSelectionLengthProperty, value);

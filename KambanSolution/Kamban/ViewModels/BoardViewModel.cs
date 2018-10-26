@@ -138,10 +138,12 @@ namespace Kamban.ViewModels
                 });
             });
 
+            // TODO: can prev/next
+
             /*var prevNextCommandEnabled = this
                 .WhenAnyValue(x => x.BoardsInFile)
                 .Where(x => x != null)
-                .Select(x => x.Count > 1)
+                .Select(x => BoardsInFile.Count > 1)
                 .AsObservable();*/
 
             PrevBoardCommand = ReactiveCommand.Create(() =>
@@ -213,7 +215,7 @@ namespace Kamban.ViewModels
 
                     BoardsMenuItems.ForEach(x => x.IsChecked = false);
 
-                    var command = BoardsMenuItems
+                    BoardsMenuItems
                         .Where(x => x.Name == CurrentBoard.Name)
                         .First()
                         .IsChecked = true;
