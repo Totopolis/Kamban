@@ -92,8 +92,8 @@ namespace Kamban.ViewModels
 
             var canExport = boards
                 .Connect()
-                .Filter(x => x.IsChecked == true)
-                .Select(x => x.Count > 0 && !string.IsNullOrEmpty(SelectedFile));
+                .AutoRefresh()
+                .Select(x => boards.Items.Count(y => y.IsChecked) > 0 && !string.IsNullOrEmpty(SelectedFile));
 
             SelectTargetFolderCommand = ReactiveCommand.Create(SelectTargetFolderCommandExecute);
             ExportCommand = ReactiveCommand.CreateFromTask(ExportCommandExecute, canExport);

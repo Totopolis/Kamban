@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Threading;
 using DynamicData;
+using DynamicData.Binding;
 using Kamban.Model;
 using Kamban.Views;
 using MahApps.Metro;
@@ -28,6 +29,7 @@ namespace Kamban.ViewModels
         [Reactive] public int TotalTickets { get; set; }
         [Reactive] public string BoardList { get; set; }
         [Reactive] public string Uri { get; set; }
+        [Reactive] public DateTime LastAccess { get; set; }
     }
 
     public class StartupViewModel : ViewModelBase, IInitializableViewModel
@@ -41,7 +43,6 @@ namespace Kamban.ViewModels
         public ReactiveCommand NewFileCommand { get; set; }
         public ReactiveCommand OpenFileCommand { get; set; }
         public ReactiveCommand<string, Unit> OpenRecentDbCommand { get; set; }
-        public ReactiveCommand<string, Unit> RemoveRecentCommand { get; set; }
         public ReactiveCommand ExportCommand { get; set; }
         public ReactiveCommand ExitCommand { get; set; }
 
@@ -57,6 +58,9 @@ namespace Kamban.ViewModels
             recentList = new SourceList<RecentTile>();
             recentList
                 .Connect()
+                .AutoRefresh()
+                .Sort(SortExpressionComparer<RecentTile>.Descending(x => x.LastAccess))
+                //.Top(3) // ?
                 .Bind(out ReadOnlyObservableCollection<RecentTile> temp)
                 .Subscribe();
 
@@ -65,19 +69,9 @@ namespace Kamban.ViewModels
             OpenRecentDbCommand = ReactiveCommand.Create<string>(async (uri) =>
             {
                 IsLoading = true;
-
-                if (!await OpenBoardView(uri))
-                {
-                    RemoveRecent(uri);
-
-                    await dialCoord.ShowMessageAsync(this, "Error",
-                        "File was deleted or moved");
-                }
-
+                await OpenBoardView(uri);
                 IsLoading = false;
             });
-
-            RemoveRecentCommand = ReactiveCommand.Create<string>(RemoveRecent);
 
             NewFileCommand = ReactiveCommand.Create(() =>
                 this.shell.ShowView<WizardView>(
@@ -94,17 +88,15 @@ namespace Kamban.ViewModels
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
                     this.IsLoading = true;
-
                     var uri = dialog.FileName;
                     await OpenBoardView(uri);
-                    AddRecent(uri);
-
                     this.IsLoading = false;
                 }
             });
 
             var canExport = recentList
                 .Connect()
+                .AutoRefresh()
                 .Select(x => x.Count > 0);
 
             ExportCommand = ReactiveCommand.Create(() => 
@@ -115,44 +107,27 @@ namespace Kamban.ViewModels
             this.IsLoading = false;
         } //ctor
 
-        private void RemoveRecent(string uri)
-        {
-            appModel.RemoveRecent(uri);
-            appModel.SaveConfig();
-
-            var tile = recentList.Items.Where(x => x.Uri == uri).FirstOrDefault();
-            if (tile != null)
-                recentList.Remove(tile);
-        }
-
-        private void AddRecent(string uri)
-        {
-            appModel.AddRecent(uri);
-            appModel.SaveConfig();
-
-            var tile = recentList.Items.Where(x => x.Uri == uri).FirstOrDefault();
-            if (tile != null)
-                recentList.Remove(tile);
-            else
-            {
-                tile = new RecentTile { Uri = uri };
-                Task.Run(() => LoadStatAsync(new[] { tile }));
-            }
-
-            recentList.Insert(0, tile);
-
-            if (recentList.Count > 6)
-                recentList.RemoveAt(6);
-        }
-
-        private async Task<bool> OpenBoardView(string uri)
+        private async Task OpenBoardView(string uri)
         {
             var file = new FileInfo(uri);
 
             if (!file.Exists)
-                return false;
+            {
+                await dialCoord.ShowMessageAsync(this, "Error", "File was deleted or moved");
+                return;
+            }
 
-            IProjectService service = await Task.Run(() => appModel.LoadProjectService(uri));
+            IProjectService service;
+
+            try
+            {
+                service = await Task.Run(() => appModel.LoadProjectService(uri));
+            }
+            catch
+            {
+                await dialCoord.ShowMessageAsync(this, "Error", "File was damaged");
+                return;
+            }
 
             var title = file.FullName;
 
@@ -162,9 +137,13 @@ namespace Kamban.ViewModels
                 viewRequest: new BoardViewRequest { ViewId = title, PrjService = service },
                 options: new UiShowOptions { Title = title });
 
-            AddRecent(uri);
-
-            return true;
+            var tile = recentList.Items.Where(x => x.Uri == uri).FirstOrDefault();
+            if (tile == null)
+            {
+                tile = new RecentTile { Uri = uri };
+                await LoadTileAsync(tile);
+                recentList.Add(tile);
+            }
         }
 
         public void Initialize(ViewRequest viewRequest)
@@ -180,42 +159,50 @@ namespace Kamban.ViewModels
 
             shell.AddGlobalCommand("File", "Exit", "ExitCommand", this);
 
-            UpdateRecent();
-
-            Task.Run(() => LoadStatAsync(recentList.Items));
+            Observable.FromAsync(() => LoadRecentsAsync())
+                .ObserveOnDispatcher()
+                .Subscribe(tiles => recentList.Edit(il =>
+                {
+                    recentList.Clear();
+                    recentList.AddRange(tiles);
+                }));
         }
 
-        private void UpdateRecent()
+        private async Task<RecentTile[]> LoadRecentsAsync()
         {
             this.appModel.LoadConfig();
             var rcnts = this.appModel.GetRecentDocuments();
-            recentList.Clear();
+            var tiles = rcnts.Select(x => new RecentTile { Uri = x }).ToList(); //.Take(6);
 
-            var tiles = rcnts.Select(x => new RecentTile { Uri = x }).Take(6);
-            recentList.AddRange(tiles);
-        }
-
-        private async Task LoadStatAsync(IEnumerable<RecentTile> tiles)
-        {
             foreach (var it in tiles)
-            {
-                if (!File.Exists(it.Uri))
-                    continue;
+                await LoadTileAsync(it);
 
-                try
-                {
-                    var prj = appModel.LoadProjectService(it.Uri);
-                    var boards = await prj.GetAllBoardsInFileAsync();
-
-                    it.BoardList = string.Join(",", boards.Select(x => x.Name));
-
-                    it.TotalTickets = 0;
-                    foreach (var brd in boards)
-                        it.TotalTickets += (await prj.GetIssuesByBoardIdAsync(brd.Id)).Count();
-                }
-                // Skip broken file
-                catch { }
-            }//foreach
+            return tiles.ToArray();
         }
+
+        private async Task LoadTileAsync(RecentTile tile)
+        {
+            if (!File.Exists(tile.Uri))
+                return;
+
+            try
+            {
+                tile.LastAccess = File.GetLastWriteTime(tile.Uri);
+
+                var prj = appModel.LoadProjectService(tile.Uri);
+                var boards = await prj.GetAllBoardsInFileAsync();
+
+                var lst = boards.Select(x => x.Name).ToList();
+                var str = string.Join(",", lst);
+                tile.BoardList = str;
+
+                tile.TotalTickets = 0;
+                foreach (var brd in boards)
+                    tile.TotalTickets += (await prj.GetIssuesByBoardIdAsync(brd.Id)).Count();
+            }
+            // Skip broken file
+            catch { }
+        }
+
     }//end of classs
 }
