@@ -143,7 +143,7 @@ namespace Kamban.ViewModels
                 .Where(x => x != null)
                 .Select(x => x.Count > 1)
                 .AsObservable();*/
-            
+
             PrevBoardCommand = ReactiveCommand.Create(() =>
             {
                 int indx = BoardsInFile.IndexOf(CurrentBoard);
@@ -220,8 +220,17 @@ namespace Kamban.ViewModels
                     mon.LogicVerbose("BoardViewModel.IssueFlyout closed and issue need create");
 
                     var card = IssueFlyout.Card;
+                    var targetCards = Cards.Items
+                        .Where(x => x.ColumnDeterminant == card.ColumnDeterminant
+                            && x.RowDeterminant == card.RowDeterminant);
+
+                    card.Order = targetCards.Count() == 0 ? 0 :
+                        targetCards.Max(x => x.Order) + 10;
+
                     var iss = mapper.Map<CardViewModel, Issue>(card);
                     prjService.CreateOrUpdateIssueAsync(iss);
+                    card.Id = iss.Id;
+
                     Cards.Add(card);
                 });
 

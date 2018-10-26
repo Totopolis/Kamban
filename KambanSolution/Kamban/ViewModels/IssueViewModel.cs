@@ -153,27 +153,21 @@ namespace Kamban.ViewModels
 
         private void SaveCommandExecute()
         {
-            var cvm = Card;
-
-            if (cvm == null)
-            {
-                cvm = new CardViewModel
+            if (Card == null)
+                Card = new CardViewModel
                 {
                     Id = 0,
                     Created = DateTime.Now,
-                    BoardId = board.Id
+                    BoardId = board.Id,
+                    Order = 0
                 };
-            }
 
-            cvm.Header = Head;
-            cvm.Color = SelectedColor.SystemName;
-            cvm.Body = Body;
-            cvm.ColumnDeterminant = SelectedColumn.Id;
-            cvm.RowDeterminant = SelectedRow.Id;
-            cvm.Modified = DateTime.Now;
-
-            if (Card == null)
-                Card = cvm;
+            Card.Header = Head;
+            Card.Color = SelectedColor.SystemName;
+            Card.Body = Body;
+            Card.ColumnDeterminant = SelectedColumn.Id;
+            Card.RowDeterminant = SelectedRow.Id;
+            Card.Modified = DateTime.Now;
 
             IsOpened = false;
         }

@@ -150,7 +150,7 @@ namespace Kamban.MatrixControl
                 }
             });
         }
-        
+
         private void Head_MouseMove(object sender, MouseEventArgs e)
         {
             var ic = sender as ContentControl;
@@ -162,7 +162,7 @@ namespace Kamban.MatrixControl
             if (border == null) return;
             HeadOfContextMenu = border.DataContext;
         }
-        
+
         void IDropTarget.DragOver(IDropInfo dropInfo)
         {
             dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
@@ -189,21 +189,20 @@ namespace Kamban.MatrixControl
                 card.RowDeterminant = targetIntersec.RowDeterminant;
             }
 
-            /*var srcIntersec = cardPointers[card];
+            // Reorder
+            card.Order = targetCard != null ? targetCard.Order - 1 : int.MaxValue;
 
-            if (targetIntersec != null && targetIntersec != srcIntersec)
+            var targetCards = Cards.Items
+                        .Where(x => x.ColumnDeterminant == card.ColumnDeterminant
+                            && x.RowDeterminant == card.RowDeterminant)
+                        .OrderBy(x => x.Order);
+
+            int i = 0;
+            foreach (var it in targetCards)
             {
-                card.ColumnDeterminant = targetIntersec.ColumnDeterminant;
-                card.RowDeterminant = targetIntersec.RowDeterminant;
-
-                DropCardCommand?.Execute(card).Subscribe();
+                it.Order = i;
+                i += 10;
             }
-
-            var targetCard = dropInfo.TargetItem as CardViewModel;
-            if (targetCard != null)
-            {
-                // sort
-            }*/
         }
 
     }//end of class

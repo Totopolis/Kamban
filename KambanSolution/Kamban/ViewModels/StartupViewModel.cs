@@ -143,6 +143,9 @@ namespace Kamban.ViewModels
                 tile = new RecentTile { Uri = uri };
                 await LoadTileAsync(tile);
                 recentList.Add(tile);
+
+                appModel.AddRecent(uri);
+                appModel.SaveConfig();
             }
         }
 
