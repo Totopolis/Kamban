@@ -116,8 +116,7 @@ namespace Kamban.ViewModels
             Url = ps.Uri;
 
             var boards = await ps.GetAllBoardsInFileAsync();
-            AvailableBoards.Clear();
-            AvailableBoards.AddRange(boards);
+            AvailableBoards.ClearAndAddRange(boards);
 
             await ChangeBoard(AvailableBoards.Items.First().Id);
         }
@@ -127,14 +126,12 @@ namespace Kamban.ViewModels
             SelectedBoard = AvailableBoards.Items.Where(x => x.Id == boardId).First();
 
             var columns = await prjService.GetColumnsByBoardIdAsync(SelectedBoard.Id);
-            AvailableColumns.Clear();
-            AvailableColumns.AddRange(columns);
-            SelectedColumn = AvailableColumns.Items.First();
+            AvailableColumns.ClearAndAddRange(columns);
+            SelectedColumn = AvailableColumns.First();
 
             var rows = await prjService.GetRowsByBoardIdAsync(SelectedBoard.Id);
-            AvailableRows.Clear();
-            AvailableRows.AddRange(rows);
-            SelectedRow = AvailableRows.Items.First();
+            AvailableRows.ClearAndAddRange(rows);
+            SelectedRow = AvailableRows.First();
         }
 
         public void Initialize(ViewRequest viewRequest)

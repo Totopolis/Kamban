@@ -269,23 +269,9 @@ namespace Kamban.ViewModels
                 //foreach (var it in toDel)
                 //    scope.DeleteIssueAsync(it.Id);
 
-                Rows.Edit(il =>
-                {
-                    Rows.Clear();
-                    Rows.AddRange(rows.Select(x => new RowViewModel(x)));
-                });
-
-                Columns.Edit(il =>
-                {
-                    Columns.Clear();
-                    Columns.AddRange(columns.Select(x => new ColumnViewModel(x)));
-                });
-
-                Cards.Edit(il =>
-                {
-                    il.Clear();
-                    il.AddRange(issues.Select(x => mapper.Map<Issue, CardViewModel>(x)));
-                });
+                Columns.ClearAndAddRange(columns.Select(x => new ColumnViewModel(x)));
+                Rows.ClearAndAddRange(rows.Select(x => new RowViewModel(x)));
+                Cards.ClearAndAddRange(issues.Select(x => mapper.Map<Issue, CardViewModel>(x)));
 
                 EnableMatrix = true;
 

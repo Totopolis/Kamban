@@ -90,20 +90,10 @@ namespace Kamban.ViewModels
             Card = null;
 
             columns = new SourceList<ColumnInfo>();
-            columns
-                .Connect()
-                .Bind(out ReadOnlyObservableCollection<ColumnInfo> temp)
-                .Subscribe();
-
-            AvailableColumns = temp;
+            AvailableColumns = columns.SpawnCollection();
 
             rows = new SourceList<RowInfo>();
-            rows
-                .Connect()
-                .Bind(out ReadOnlyObservableCollection<RowInfo> temp2)
-                .Subscribe();
-
-            AvailableRows = temp2;
+            AvailableRows = rows.SpawnCollection();
 
             var issueFilled = this.WhenAnyValue(
                 t => t.Head, t => t.SelectedRow, t => t.SelectedColumn, t => t.SelectedColor,
@@ -177,13 +167,11 @@ namespace Kamban.ViewModels
             var columnsInfo = await prjService.GetColumnsByBoardIdAsync(board.Id);
             var rowsInfo = await prjService.GetRowsByBoardIdAsync(board.Id);
 
-            columns.Clear();
-            columns.AddRange(columnsInfo);
-            SelectedColumn = columns.Items.First();
+            columns.ClearAndAddRange(columnsInfo);
+            SelectedColumn = columns.First();
 
-            rows.Clear();
-            rows.AddRange(rowsInfo);
-            SelectedRow = rows.Items.First();
+            rows.ClearAndAddRange(rowsInfo);
+            SelectedRow = rows.First();
 
             if (Card == null)
             {
@@ -191,13 +179,11 @@ namespace Kamban.ViewModels
                 Body = null;
                 SelectedColor = ColorItems.First();
 
-                if (requestedColumnId!=0)
-                    SelectedColumn = columns.Items
-                        .First(c => c.Id == requestedColumnId);
+                if (requestedColumnId != 0)
+                    SelectedColumn = columns.First(c => c.Id == requestedColumnId);
 
                 if (requestedRowId != 0)
-                    SelectedRow = rows.Items
-                        .First(c => c.Id == requestedRowId);
+                    SelectedRow = rows.First(c => c.Id == requestedRowId);
 
                 Result = IssueEditResult.Created;
             }
@@ -206,10 +192,8 @@ namespace Kamban.ViewModels
                 Head = Card.Header;
                 Body = Card.Body;
 
-                SelectedColumn = columns.Items
-                    .First(c => c.Id == (int)Card.ColumnDeterminant);
-                SelectedRow = rows.Items
-                    .First(r => r.Id == (int)Card.RowDeterminant);
+                SelectedColumn = columns.First(c => c.Id == Card.ColumnDeterminant);
+                SelectedRow = rows.First(r => r.Id == Card.RowDeterminant);
 
                 SelectedColor = ColorItems.
                     FirstOrDefault(c => c.SystemName == Card.Color)

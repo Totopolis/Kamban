@@ -76,19 +76,8 @@ namespace Kamban.ViewModels
             files = new SourceList<string>();
             boards = new SourceList<BoardToExport>();
 
-            files
-                .Connect()
-                .Bind(out ReadOnlyObservableCollection<string> temp)
-                .Subscribe();
-
-            AvailableFiles = temp;
-
-            boards
-                .Connect()
-                .Bind(out ReadOnlyObservableCollection<BoardToExport> temp2)
-                .Subscribe();
-
-            AvailableBoards = temp2;
+            AvailableFiles = files.SpawnCollection();
+            AvailableBoards = boards.SpawnCollection();
 
             var canExport = boards
                 .Connect()
@@ -109,8 +98,7 @@ namespace Kamban.ViewModels
                     var lst = (await prjService.GetAllBoardsInFileAsync())
                         .Select(x => new BoardToExport { Board = x, IsChecked = true });
 
-                    boards.Clear();
-                    boards.AddRange(lst);
+                    boards.ClearAndAddRange(lst);
 
                     TargetFile = Path.GetFileNameWithoutExtension(sf.Value) + "_export";
                 });

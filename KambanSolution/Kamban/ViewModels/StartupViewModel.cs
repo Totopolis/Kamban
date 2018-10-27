@@ -114,6 +114,11 @@ namespace Kamban.ViewModels
             if (!file.Exists)
             {
                 await dialCoord.ShowMessageAsync(this, "Error", "File was deleted or moved");
+
+                appModel.RemoveRecent(uri);
+                appModel.SaveConfig();
+
+                recentList.Delete(x => x.Uri == uri);
                 return;
             }
 
