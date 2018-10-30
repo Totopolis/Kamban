@@ -81,7 +81,7 @@ namespace Kamban.ViewModels
             {
                 var dialog = new OpenFileDialog
                 {
-                    Filter = @"SQLite DataBase | *.db",
+                    Filter = @"SQLite DataBase | *.kam",
                     Title = @"Select exists database"
                 };
 

@@ -159,6 +159,16 @@ namespace Kamban.ViewModels
             };
             prjService.CreateOrUpdateBoardAsync(bi);
 
+            // Normilize grid
+            double colSize = 100 / (Columns.Count - 1);
+            for (int i = 0; i < Columns.Count; i++)
+                Columns[i].Size = (int)colSize * 10;
+
+            double rowSize = 100 / (Rows.Count - 1);
+            for (int i = 0; i < Rows.Count; i++)
+                Rows[i].Size = (int)rowSize * 10;
+
+            // Create columns
             foreach (var cvm in Columns)
             {
                 var ci = new ColumnInfo
@@ -171,6 +181,7 @@ namespace Kamban.ViewModels
                 prjService.CreateOrUpdateColumnAsync(ci);
             }
 
+            // Create rows
             foreach (var rvm in Rows)
             {
                 var ri = new RowInfo
@@ -182,8 +193,6 @@ namespace Kamban.ViewModels
                 };
                 prjService.CreateOrUpdateRowAsync(ri);
             }
-
-            // TODO: normilize grid
 
             shell.ShowView<BoardView>(
                 viewRequest: new BoardViewRequest { ViewId = uri, PrjService = prjService },
@@ -209,7 +218,7 @@ namespace Kamban.ViewModels
             };
 
             string str = boardName.Replace(separators, "_");
-            return str + ".db";
+            return str + ".kam";
         }
 
         public void Initialize(ViewRequest viewRequest)
