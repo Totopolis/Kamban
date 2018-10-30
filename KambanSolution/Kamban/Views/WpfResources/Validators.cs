@@ -10,12 +10,12 @@ namespace Kamban.Views.WpfResources
     {
         public WizardValidator()
         {
-            RuleFor(wiz => wiz.BoardName)
+            /*RuleFor(wiz => wiz.BoardName)
                 .NotNull().Length(5, 25)
                 .WithMessage("This field must be between 5 and 25 chars length")
                 .Must((wiz,boardName)=>
                     !wiz.BoardsInFile.Contains(boardName))
-                .WithMessage("Such board already exists in this file...");
+                .WithMessage("Such board already exists in this file...");*/
 
             RuleFor(wiz => wiz.FolderName)
                 .Must(Directory.Exists)
@@ -23,13 +23,13 @@ namespace Kamban.Views.WpfResources
                 .Must(HasUserRightsInDirectory)
                 .WithMessage("You have no rights in this directory...");
 
-            RuleFor(wiz => wiz.FileName)
+            /*RuleFor(wiz => wiz.FileName)
                 .NotNull()
                 .Must(IsValidDataBaseName)
                 .WithMessage("File name must have .db extension and can't contain any specific chars")
                 .Must((wiz, filename) =>
                  wiz.InExistedFile || !File.Exists(wiz.FolderName+'\\'+filename))
-                .WithMessage("This file already exists..");
+                .WithMessage("This file already exists..");*/
         }
 
         private bool IsValidDataBaseName(string name)
@@ -73,7 +73,7 @@ namespace Kamban.Views.WpfResources
         }
     }
 
-    public class LocalDimensionValidator : AbstractValidator<WizardViewModel.LocalDimension>
+    /*public class LocalDimensionValidator : AbstractValidator<WizardViewModel.LocalDimension>
     {
         public LocalDimensionValidator()
         {
@@ -85,5 +85,5 @@ namespace Kamban.Views.WpfResources
                 .Must(name => !string.IsNullOrEmpty(name) && name.Length < 30)
                 .WithMessage("Column name length must be between 1 and 30 chars");
         }
-    }
+    }*/
 }

@@ -133,7 +133,6 @@ namespace Kamban.ViewModels
                 this.shell.ShowView<WizardView>(new WizardViewRequest
                 {
                     ViewId = $"Creating new board in {prjService.Uri}",
-                    InExistedFile = true,
                     Uri = prjService.Uri
                 });
             });
@@ -182,7 +181,8 @@ namespace Kamban.ViewModels
                 .Subscribe(cvm =>
                 {
                     mon.LogicVerbose("BoardViewModel.Columns.ItemChanged");
-                    prjService.CreateOrUpdateColumnAsync(cvm.Info);
+                    var col = mapper.Map<ColumnViewModel, ColumnInfo>(cvm);
+                    prjService.CreateOrUpdateColumnAsync(col);
                 });
 
             Rows
@@ -192,7 +192,8 @@ namespace Kamban.ViewModels
                 .Subscribe(rvm =>
                 {
                     mon.LogicVerbose("BoardViewModel.Rows.ItemChanged");
-                    prjService.CreateOrUpdateRowAsync(rvm.Info);
+                    var row = mapper.Map<RowViewModel, RowInfo>(rvm);
+                    prjService.CreateOrUpdateRowAsync(row);
                 });
 
             Cards
@@ -268,9 +269,8 @@ namespace Kamban.ViewModels
                 //var toDel = issues.Where(x => x.ColumnId == 0 || x.RowId == 0).ToArray();
                 //foreach (var it in toDel)
                 //    scope.DeleteIssueAsync(it.Id);
-
-                Columns.ClearAndAddRange(columns.Select(x => new ColumnViewModel(x)));
-                Rows.ClearAndAddRange(rows.Select(x => new RowViewModel(x)));
+                Columns.ClearAndAddRange(columns.Select(x => mapper.Map<ColumnInfo, ColumnViewModel>(x)));
+                Rows.ClearAndAddRange(rows.Select(x => mapper.Map<RowInfo, RowViewModel>(x)));
                 Cards.ClearAndAddRange(issues.Select(x => mapper.Map<Issue, CardViewModel>(x)));
 
                 EnableMatrix = true;

@@ -118,12 +118,13 @@ namespace Kamban.ViewModels
                 ColumnInfo ci = new ColumnInfo
                 {
                     Name = ts,
-                    BoardId = column.Info.BoardId
+                    BoardId = column.BoardId
                 };
 
                 prjService.CreateOrUpdateColumnAsync(ci);
                 var indx = Columns.Items.IndexOf(head) + after;
-                Columns.Insert(indx, new ColumnViewModel(ci));
+                var temp = mapper.Map<ColumnInfo, ColumnViewModel>(ci);
+                Columns.Insert(indx, temp);
 
                 int i = 0;
                 foreach (var it in Columns.Items)
@@ -137,12 +138,13 @@ namespace Kamban.ViewModels
                 RowInfo ri = new RowInfo
                 {
                     Name = ts,
-                    BoardId = row.Info.BoardId
+                    BoardId = row.BoardId
                 };
 
                 prjService.CreateOrUpdateRowAsync(ri);
                 var indx = Rows.Items.IndexOf(head) + after;
-                Rows.Insert(indx, new RowViewModel(ri));
+                var temp = mapper.Map<RowInfo, RowViewModel>(ri);
+                Rows.Insert(indx, temp);
 
                 int i = 0;
                 foreach (var it in Rows.Items)

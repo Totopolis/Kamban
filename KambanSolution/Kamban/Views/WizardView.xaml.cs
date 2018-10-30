@@ -20,15 +20,5 @@ namespace Kamban.Views
         {
             ViewModel.Title = options.Title;
         }
-
-        private void Wizard_Cancel(object sender, System.Windows.RoutedEventArgs e)
-        {
-            (ViewModel as WizardViewModel)?.Close();
-        }
-
-        private void Wizard_Finish(object sender, Xceed.Wpf.Toolkit.Core.CancelRoutedEventArgs e)
-        {
-            (ViewModel as WizardViewModel)?.Create();
-        }
     }
 }

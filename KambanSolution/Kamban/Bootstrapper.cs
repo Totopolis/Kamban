@@ -85,6 +85,26 @@ namespace Kamban
                     .ForMember(dst => dst.Header, opt => opt.MapFrom(src => src.Head))
                     .ForMember(dst => dst.ColumnDeterminant, opt => opt.MapFrom(src => src.ColumnId))
                     .ForMember(dst => dst.RowDeterminant, opt => opt.MapFrom(src => src.RowId));
+
+                cfg.CreateMap<ColumnViewModel, ColumnInfo>()
+                    .ForMember(dst => dst.Name, opt => opt.MapFrom(src => src.Caption))
+                    .ForMember(dst => dst.Id, opt => opt.MapFrom(src => src.Determinant))
+                    .ForMember(dst => dst.Width, opt => opt.MapFrom(src => src.Size));
+
+                cfg.CreateMap<ColumnInfo, ColumnViewModel>()
+                    .ForMember(dst => dst.Caption, opt => opt.MapFrom(src => src.Name))
+                    .ForMember(dst => dst.Determinant, opt => opt.MapFrom(src => src.Id))
+                    .ForMember(dst => dst.Size, opt => opt.MapFrom(src => src.Width));
+
+                cfg.CreateMap<RowViewModel, RowInfo>()
+                    .ForMember(dst => dst.Name, opt => opt.MapFrom(src => src.Caption))
+                    .ForMember(dst => dst.Id, opt => opt.MapFrom(src => src.Determinant))
+                    .ForMember(dst => dst.Height, opt => opt.MapFrom(src => src.Size));
+
+                cfg.CreateMap<RowInfo, RowViewModel>()
+                    .ForMember(dst => dst.Caption, opt => opt.MapFrom(src => src.Name))
+                    .ForMember(dst => dst.Determinant, opt => opt.MapFrom(src => src.Id))
+                    .ForMember(dst => dst.Size, opt => opt.MapFrom(src => src.Height));
             });
         }
 

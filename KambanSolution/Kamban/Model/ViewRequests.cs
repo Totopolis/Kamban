@@ -4,7 +4,6 @@ namespace Kamban.Model
 {
     public class WizardViewRequest : ViewRequest
     {
-        public bool InExistedFile { get; set; }
         public string Uri { get; set; }
     }
 

@@ -75,7 +75,7 @@ namespace Kamban.ViewModels
 
             NewFileCommand = ReactiveCommand.Create(() =>
                 this.shell.ShowView<WizardView>(
-                    new WizardViewRequest { ViewId = "Creating new file", InExistedFile = false }));
+                    new WizardViewRequest { ViewId = "Creating new file", Uri = null }));
 
             OpenFileCommand = ReactiveCommand.Create(async () =>
             {

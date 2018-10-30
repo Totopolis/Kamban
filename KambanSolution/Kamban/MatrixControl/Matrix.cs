@@ -1,5 +1,6 @@
 ﻿using DynamicData;
 using GongSolutions.Wpf.DragDrop;
+using Kamban.Model;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;

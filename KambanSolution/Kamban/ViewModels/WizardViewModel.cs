@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -23,28 +24,33 @@ namespace Kamban.ViewModels
 {
     public class WizardViewModel : ViewModelBase, IInitializableViewModel
     {
+        [Reactive] public bool IsNewFile { get; set; }
         [Reactive] public string BoardName { get; set; }
-        [Reactive] public string FolderName { get; set; }
-        [Reactive] public string FileName { get; set; }
-        [Reactive] public bool InExistedFile { get; set; }
-        [Reactive] public bool CanCreate { get; set; }
 
-        public ObservableCollection<LocalDimension> ColumnList { get; set; }
-        public ObservableCollection<LocalDimension> RowList { get; set; }
-        public ObservableCollection<string> BoardsInFile { get; set; }
+        [Reactive]
+        public List<BoardTemplate> Templates { get; set; } =
+            InternalBoardTemplates.Templates;
+
+        [Reactive] public BoardTemplate SelectedTemplate { get; set; }
+        [Reactive] public string FileName { get; set; }
+        [Reactive] public string FolderName { get; set; }
+
+        [Reactive] public ObservableCollection<ColumnViewModel> Columns { get; set; }
+        [Reactive] public ObservableCollection<RowViewModel> Rows { get; set; }
+
+        public ReactiveCommand FillFromTemplateCommand { get; set; }
+        public ReactiveCommand AddColumnCommand { get; set; }
+        public ReactiveCommand AddRowCommand { get; set; }
+        public ReactiveCommand ClearAllCommand { get; set; }
+
         public ReactiveCommand CreateCommand { get; set; }
         public ReactiveCommand CancelCommand { get; set; }
-        public ReactiveCommand SelectFolderCommand { get; set; }
 
-        public ReactiveCommand AddColumnCommand { get; set; }
-        public ReactiveCommand<LocalDimension, Unit> DeleteColumnCommand { get; set; }
-        public ReactiveCommand AddRowCommand { get; set; }
-        public ReactiveCommand<LocalDimension, Unit> DeleteRowCommand { get; set; }
+        public ReactiveCommand SelectFolderCommand { get; set; }
 
         private readonly IAppModel appModel;
         private readonly IShell shell;
         private readonly IDialogCoordinator dialCoord;
-        private IProjectService prjService;
 
         public WizardViewModel(IAppModel appModel, IShell shell, IDialogCoordinator dc)
         {
@@ -52,99 +58,144 @@ namespace Kamban.ViewModels
             this.shell = shell;
             dialCoord = dc;
 
-            validator = new WizardValidator();
-            Title = "Creating new file";
-            FullTitle = "Creating new file";
-            BoardsInFile = new ObservableCollection<string>();
-            
+            Columns = new ObservableCollection<ColumnViewModel>();
+            Rows = new ObservableCollection<RowViewModel>();
+
+            FillFromTemplateCommand = ReactiveCommand.Create(() =>
+            {
+                Columns.Clear();
+                Columns.AddRange(SelectedTemplate.Columns);
+
+                Rows.Clear();
+                Rows.AddRange(SelectedTemplate.Rows);
+            });
+
+            ClearAllCommand = ReactiveCommand.Create(() =>
+            {
+                Columns.Clear();
+                Rows.Clear();
+            });
+
+            CreateCommand = ReactiveCommand.CreateFromTask(CreateCommandExecute);
+            CancelCommand = ReactiveCommand.Create(() => this.Close());
+
+            SelectFolderCommand = ReactiveCommand.Create(() =>
+            {
+                FolderBrowserDialog dialog = new FolderBrowserDialog
+                {
+                    ShowNewFolderButton = false,
+                    SelectedPath = FolderName
+                };
+                //dialog.RootFolder = Environment.SpecialFolder.MyDocuments;
+
+                if (dialog.ShowDialog() == DialogResult.OK)
+                    FolderName = dialog.SelectedPath;
+            });
+
+            Title = "Creating new board";
+            FullTitle = Title;
+
             this.WhenAnyValue(x => x.BoardName)
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Subscribe(v =>
-                {
-                    if (!InExistedFile)
-                        FileName = BoardNameToFileName(v);
-                });
-
-            BoardName = "My Board";
-
-            FolderName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-            SelectFolderCommand = ReactiveCommand.Create(SelectFolder);
-
-            ColumnList = new ObservableCollection<LocalDimension>
-            {
-                new LocalDimension("Backlog"),
-                new LocalDimension("In progress"),
-                new LocalDimension("Done")
-            };
-
-            AddColumnCommand =
-                ReactiveCommand.Create(() => ColumnList.Add(new LocalDimension("New column")));
-
-            DeleteColumnCommand = ReactiveCommand
-                .Create<LocalDimension>(column =>
-                {
-                    ColumnList.Remove(column);
-                    UpdateDimensionList(ColumnList);
-                });
-
-
-            RowList = new ObservableCollection<LocalDimension>()
-            {
-                new LocalDimension("Important"),
-                new LocalDimension("So-so"),
-                new LocalDimension("Trash")
-            };
-
-            AddRowCommand =
-                ReactiveCommand.Create(() => RowList.Add(new LocalDimension("New row")));
-
-            DeleteRowCommand = ReactiveCommand
-                .Create<LocalDimension>(row =>
-                {
-                    RowList.Remove(row);
-                    UpdateDimensionList(RowList);
-                });
-
-            CreateCommand = ReactiveCommand.CreateFromTask(Create);
-
-            CancelCommand = ReactiveCommand.Create(Close);
-
-            ColumnList.CollectionChanged += (ob, arg) => UpdateDimensionList(ColumnList);
-            RowList.CollectionChanged += (ob, arg) => UpdateDimensionList(RowList);
-
-            AllErrors
-                .Connect()
-                .Subscribe(_ => CanCreate = !AllErrors.Items.Any() &&
-                                           ColumnList.Count(col => col.HasErrors) == 0 &&
-                                           RowList.Count(row => row.HasErrors) == 0);
+                .Where(x => !string.IsNullOrWhiteSpace(x) && IsNewFile)
+                .Subscribe(v => FileName = BoardNameToFileName(v));
         }
 
-        private void UpdateDimensionList(ObservableCollection<LocalDimension> list)
+        private async Task CreateCommandExecute()
         {
-            foreach (var dim in list)
+            if (string.IsNullOrWhiteSpace(BoardName) || string.IsNullOrWhiteSpace(FileName)
+                || string.IsNullOrWhiteSpace(FolderName))
             {
-                dim.IsDuplicate = false;
-                dim.RaisePropertyChanged(nameof(dim.Name));
+                await dialCoord.ShowMessageAsync(this, "Error", "Empty string");
+                return;
             }
 
-            var duplicatgroups = list
-                .GroupBy(dim => dim.Name)
-                .Where(g => g.Count() > 1)
-                .ToList();
-
-            foreach (var group in duplicatgroups)
+            if (!Directory.Exists(FolderName))
             {
-                foreach (var dim in group)
+                await dialCoord.ShowMessageAsync(this, "Error", "Directory does not exists");
+                return;
+            }
+
+            string uri = FolderName + "\\" + FileName;
+
+            if (!IsNewFile && !File.Exists(uri))
+            {
+                await dialCoord.ShowMessageAsync(this, "Error", "File not found");
+                return;
+            }
+
+            if (IsNewFile && File.Exists(uri))
+            {
+                await dialCoord.ShowMessageAsync(this, "Error", "File already exists");
+                return;
+            }
+
+            if (Columns.Count == 0)
+            {
+                await dialCoord.ShowMessageAsync(this, "Error", "Need add columns");
+                return;
+            }
+
+            if (Rows.Count == 0)
+            {
+                await dialCoord.ShowMessageAsync(this, "Error", "Need add rows");
+                return;
+            }
+
+            var prjService = IsNewFile ? appModel.CreateProjectService(uri) :
+                appModel.LoadProjectService(uri);
+
+            var boards = await prjService.GetAllBoardsInFileAsync();
+            if (boards.Where(x => x.Name == BoardName).Count() > 0)
+            {
+                await dialCoord.ShowMessageAsync(this, "Error", "Board name already used");
+                return;
+            }
+
+            var bi = new BoardInfo
+            {
+                Name = BoardName,
+                Created = DateTime.Now,
+                Modified = DateTime.Now
+            };
+            prjService.CreateOrUpdateBoardAsync(bi);
+
+            foreach (var cvm in Columns)
+            {
+                var ci = new ColumnInfo
                 {
-                    dim.IsDuplicate = true;
-                    dim.RaisePropertyChanged(nameof(dim.Name));
-                }
+                    BoardId = bi.Id,
+                    Width = cvm.Size,
+                    Order = cvm.Order,
+                    Name = cvm.Caption
+                };
+                prjService.CreateOrUpdateColumnAsync(ci);
             }
 
-            CanCreate = !AllErrors.Items.Any() &&
-                        ColumnList.Count(col => col.HasErrors) == 0 &&
-                        RowList.Count(row => row.HasErrors) == 0;
+            foreach (var rvm in Rows)
+            {
+                var ri = new RowInfo
+                {
+                    BoardId = bi.Id,
+                    Height = rvm.Size,
+                    Order = rvm.Order,
+                    Name = rvm.Caption
+                };
+                prjService.CreateOrUpdateRowAsync(ri);
+            }
+
+            // TODO: normilize grid
+
+            shell.ShowView<BoardView>(
+                viewRequest: new BoardViewRequest { ViewId = uri, PrjService = prjService },
+                options: new UiShowOptions { Title = BoardName });
+
+            if (IsNewFile)
+            {
+                appModel.AddRecent(uri);
+                appModel.SaveConfig();
+            }
+
+            this.Close();
         }
 
         private string BoardNameToFileName(string boardName)
@@ -161,151 +212,32 @@ namespace Kamban.ViewModels
             return str + ".db";
         }
 
-        public void SelectFolder()
-        {
-            FolderBrowserDialog dialog = new FolderBrowserDialog
-            {
-                ShowNewFolderButton = false,
-                SelectedPath = FolderName
-            };
-            //dialog.RootFolder = Environment.SpecialFolder.MyDocuments;
-
-            if (dialog.ShowDialog() == DialogResult.OK)
-                FolderName = dialog.SelectedPath;
-        }
-
-        public async Task Create()
-        {
-            var uri = FolderName + "\\" + FileName;
-
-            if (!InExistedFile)
-            {
-                prjService = appModel.CreateProjectService(uri);
-            }
-            else
-            {
-                var boards = await prjService.GetAllBoardsInFileAsync();
-                BoardsInFile.AddRange(boards.Select(board => board.Name));
-
-                if (BoardsInFile.Contains(BoardName))
-                {
-                    await dialCoord.ShowMessageAsync(this, "Can not create board",
-                        "Board with such name already exists in file");
-                    return;
-                }
-            }
-
-            appModel.AddRecent(uri);
-
-            appModel.SaveConfig();
-
-            var newBoard = new BoardInfo()
-            {
-                Name = BoardName,
-                Created = DateTime.Now,
-                Modified = DateTime.Now
-            };
-
-            newBoard = prjService.CreateOrUpdateBoardAsync(newBoard);
-
-            foreach (var colName in ColumnList.Select(column => column.Name))
-                prjService.CreateOrUpdateColumnAsync(new ColumnInfo
-                {
-                    Name = colName,
-                    BoardId = newBoard.Id
-                });
-
-            foreach (var rowName in RowList.Select(row => row.Name))
-                prjService.CreateOrUpdateRowAsync(new RowInfo
-                {
-                    Name = rowName,
-                    BoardId = newBoard.Id
-                });
-
-            Close();
-
-            shell.ShowView<BoardView>(
-                viewRequest: new BoardViewRequest { ViewId = uri, PrjService = prjService, NeededBoardName = BoardName },
-                options: new UiShowOptions { Title = uri });
-        }
-
         public void Initialize(ViewRequest viewRequest)
         {
             var request = viewRequest as WizardViewRequest;
 
-            InExistedFile = (bool)request?.InExistedFile;
+            IsNewFile = request.Uri == null;
 
-            if (InExistedFile)
+            if (IsNewFile)
             {
-                var uri = request.Uri;
-                FolderName = Path.GetDirectoryName(uri);
-                FileName = Path.GetFileName(uri);
-                FullTitle = $"Creating new board";
-                FullTitle = $"Creating new board in {uri}";
-                prjService = appModel.CreateProjectService(uri);
-                /*Observable.FromAsync(() => scope.GetAllBoardsInFileAsync())
-                    .ObserveOnDispatcher()
-                    .Subscribe(boards =>
-                        BoardsInFile.PublishCollection(boards.Select(board => board.Name)));*/
+                FolderName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                FileName = "MyBoard.kam";
+                BoardName = "MyBoard";
+            }
+            else
+            {
+                FolderName = Path.GetDirectoryName(request.Uri);
+                FileName = Path.GetFileName(request.Uri);
+                BoardName = "MyBoard";
             }
         }
-
-        public class LocalDimension : ViewModelBase, IDataErrorInfo
-        {
-            public LocalDimension(string name)
-            {
-                Name = name;
-                validator = new LocalDimensionValidator();
-            }
-
-            public bool HasErrors { get; set; }
-            public bool IsDuplicate { get; set; }
-            [Reactive] public string Name { get; set; }
-
-            public new IValidator validator;
-
-            public new string Error
-            {
-                get
-                {
-                    var results = validator?.Validate(this);
-
-                    if (results != null && results.Errors.Any())
-                    {
-                        var errors = string.Join(Environment.NewLine,
-                            results.Errors.Select(x => x.ErrorMessage).ToArray());
-                        return errors;
-                    }
-
-                    return string.Empty;
-                }
-            }
-
-            public new string this[string columnName]
-            {
-                get
-                {
-                    var errs = validator?
-                        .Validate(this).Errors;
-
-                    HasErrors = errs?.Any() ?? false;
-
-                    if (errs != null)
-                        return validator != null
-                            ? string.Join("; ", errs.Select(e => e.ErrorMessage))
-                            : "";
-                    return "";
-                }
-            }
-        } //class
-    }
+    }//end of class
 
     public static class ExtensionMethods
     {
         public static string Replace(this string s, char[] separators, string newVal)
         {
             var temp = s.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-
             return String.Join(newVal, temp);
         }
     }
