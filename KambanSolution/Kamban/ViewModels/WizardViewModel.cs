@@ -199,10 +199,7 @@ namespace Kamban.ViewModels
                 options: new UiShowOptions { Title = BoardName });
 
             if (IsNewFile)
-            {
                 appModel.AddRecent(uri);
-                appModel.SaveConfig();
-            }
 
             this.Close();
         }

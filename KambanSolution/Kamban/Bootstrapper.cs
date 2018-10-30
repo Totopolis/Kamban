@@ -23,6 +23,9 @@ namespace Kamban
             var mon = container.Resolve<IMonik>();
             mon.ApplicationInfo("Bootstrapper initialized");
 
+            var app = container.Resolve<IAppModel>();
+            app.Initialize();
+
             return shell;
         }
 
@@ -65,7 +68,7 @@ namespace Kamban
 
             ConfigureView<StartupViewModel, StartupView>(builder);
             ConfigureView<WizardViewModel, WizardView>(builder);
-            ConfigureView<BoardViewModel, BoardView>(builder);
+            ConfigureView<BoardEditViewModel, BoardView>(builder);
             ConfigureView<ExportViewModel, ExportView>(builder);
 
             return builder.Build();

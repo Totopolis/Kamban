@@ -41,7 +41,7 @@ namespace Kamban.Views.WpfResources
             };
 
             return name.Count(s => s == '.') == 1 && !separators.Any(name.Contains) &&
-                   Path.GetExtension(name)   == ".db";
+                   Path.GetExtension(name)   == ".kam";
         }
 
         private bool HasUserRightsInDirectory(string path)

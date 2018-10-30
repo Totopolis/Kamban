@@ -201,8 +201,10 @@
     </Compile>
     <Compile Include="MatrixControl\Common.cs" />
     <Compile Include="Model\BoardTemplate.cs" />
+    <Compile Include="Model\BoardViewModel.cs" />
     <Compile Include="Model\CardViewModel.cs" />
     <Compile Include="Model\ColumnViewModel.cs" />
+    <Compile Include="Model\DbViewModel.cs" />
     <Compile Include="Model\RowViewModel.cs" />
     <Compile Include="Repository\IRepository.cs" />
     <Compile Include="Repository\LiteDbRepository.cs" />
@@ -211,15 +213,15 @@
     <Compile Include="Repository\Issue.cs" />
     <Compile Include="Repository\RowInfo.cs" />
     <Compile Include="ViewModels\BoardViewModel.Commands.cs" />
-    <Compile Include="ViewModels\BoardViewModel.cs" />
+    <Compile Include="ViewModels\BoardEditViewModel.cs" />
     <Compile Include="ViewModels\ExportViewModel.cs" />
     <Compile Include="ViewModels\IssueViewModel.cs" />
     <Compile Include="ViewModels\IssueViewRequest.cs" />
     <Compile Include="ViewModels\MoveViewModel.cs" />
     <Compile Include="ViewModels\StartupViewModel.cs" />
     <Compile Include="ViewModels\WizardViewModel.cs" />
-    <Compile Include="Views\BoardView.xaml.cs">
-      <DependentUpon>BoardView.xaml</DependentUpon>
+    <Compile Include="Views\BoardEditView.xaml.cs">
+      <DependentUpon>BoardEditView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ExportView.xaml.cs">
       <DependentUpon>ExportView.xaml</DependentUpon>
@@ -285,7 +287,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\BoardView.xaml">
+    <Page Include="Views\BoardEditView.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Kamban.ViewModels
 {
-    public partial class BoardViewModel
+    public partial class BoardEditViewModel
     {
         private async Task HeadRenameCommandExecute(IDim head)
         {

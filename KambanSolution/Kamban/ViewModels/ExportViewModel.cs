@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Threading;
 using DynamicData;
+using DynamicData.Binding;
 using Kamban.Model;
 using Kamban.Views;
 using MahApps.Metro;
@@ -47,8 +48,8 @@ namespace Kamban.ViewModels
         private SourceList<string> files;
         private SourceList<BoardToExport> boards;
 
-        [Reactive] public ReadOnlyObservableCollection<string> AvailableFiles { get; set; }
-        [Reactive] public string SelectedFile { get; set; }
+        [Reactive] public ReadOnlyObservableCollection<DbViewModel> AvailableFiles { get; set; }
+        [Reactive] public DbViewModel SelectedFile { get; set; }
         [Reactive] public ReadOnlyObservableCollection<BoardToExport> AvailableBoards { get; set; }
 
         [Reactive] public bool ExportJson { get; set; }
@@ -76,13 +77,21 @@ namespace Kamban.ViewModels
             files = new SourceList<string>();
             boards = new SourceList<BoardToExport>();
 
-            AvailableFiles = files.SpawnCollection();
+            appModel.RecentsDb
+                .Connect()
+                .AutoRefresh()
+                .Sort(SortExpressionComparer<DbViewModel>.Descending(x => x.LastAccess))
+                //.Top(3) // ?
+                .Bind(out ReadOnlyObservableCollection<DbViewModel> temp)
+                .Subscribe();
+
+            AvailableFiles = temp;
             AvailableBoards = boards.SpawnCollection();
 
             var canExport = boards
                 .Connect()
                 .AutoRefresh()
-                .Select(x => boards.Items.Count(y => y.IsChecked) > 0 && !string.IsNullOrEmpty(SelectedFile));
+                .Select(x => boards.Items.Count(y => y.IsChecked) > 0 && !string.IsNullOrEmpty(SelectedFile.Uri));
 
             SelectTargetFolderCommand = ReactiveCommand.Create(SelectTargetFolderCommandExecute);
             ExportCommand = ReactiveCommand.CreateFromTask(ExportCommandExecute, canExport);
@@ -93,22 +102,18 @@ namespace Kamban.ViewModels
             this.ObservableForProperty(x => x.SelectedFile)
                 .Subscribe(async (sf) =>
                 {
-                    prjService = appModel.LoadProjectService(sf.Value);
+                    prjService = appModel.LoadProjectService(sf.Value.Uri);
 
                     var lst = (await prjService.GetAllBoardsInFileAsync())
                         .Select(x => new BoardToExport { Board = x, IsChecked = true });
 
                     boards.ClearAndAddRange(lst);
 
-                    TargetFile = Path.GetFileNameWithoutExtension(sf.Value) + "_export";
+                    TargetFile = Path.GetFileNameWithoutExtension(sf.Value.Uri) + "_export";
                 });
 
             this.ObservableForProperty(x => x.TargetFolder)
-                .Subscribe(x =>
-                {
-                    appModel.ArchiveFolder = x.Value;
-                    appModel.SaveConfig();
-                });
+                .Subscribe(x => appModel.ArchiveFolder = x.Value);
         }
 
         private async Task ExportCommandExecute()
@@ -181,7 +186,7 @@ namespace Kamban.ViewModels
                 DoExportJson(db, fileName + ".json");
 
             if (ExportKamban)
-                DoExportKamban(db, fileName + ".db");
+                DoExportKamban(db, fileName + ".kam");
         }
 
         private void DoExportJson(DatabaseToExport db, string fileName)
@@ -229,15 +234,15 @@ namespace Kamban.ViewModels
         public void Initialize(ViewRequest viewRequest)
         {
             Title = "Export";
-            
-            files.AddRange(appModel.GetRecentDocuments());
-            SelectedFile = files.Count > 0 ? files.Items.First() : null;
+
+            files.AddRange(appModel.RecentsDb.Items.Select(x => x.Uri));
+            SelectedFile = AvailableFiles.FirstOrDefault();
 
             ExportJson = true;
             DatePostfix = true;
             SplitBoardsToFiles = false;
 
-            var fi = new FileInfo(SelectedFile);
+            var fi = new FileInfo(SelectedFile.Uri);
 
             TargetFolder = appModel.ArchiveFolder ?? fi.DirectoryName;
         }

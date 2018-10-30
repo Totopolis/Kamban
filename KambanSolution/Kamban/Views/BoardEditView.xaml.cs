@@ -8,7 +8,7 @@ namespace Kamban.Views
 {
     public partial class BoardView : IView
     {
-        public BoardView(BoardViewModel localBoardViewModel)
+        public BoardView(BoardEditViewModel localBoardViewModel)
         {
             InitializeComponent();
             ViewModel = localBoardViewModel;

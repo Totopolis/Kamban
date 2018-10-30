@@ -23,7 +23,7 @@ namespace Kamban.ViewModels
 
         private IProjectService prjService;
         private CardViewModel card;
-        private BoardViewModel boardVM;
+        private BoardEditViewModel boardVM;
 
         [Reactive] public Brush Background { get; set; }
         [Reactive] public bool IsOpened { get; set; }

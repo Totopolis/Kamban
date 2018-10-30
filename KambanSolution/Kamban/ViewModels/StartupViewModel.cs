@@ -24,22 +24,13 @@ using Ui.Wpf.Common.ViewModels;
 
 namespace Kamban.ViewModels
 {
-    public class RecentTile : ReactiveObject
-    {
-        [Reactive] public int TotalTickets { get; set; }
-        [Reactive] public string BoardList { get; set; }
-        [Reactive] public string Uri { get; set; }
-        [Reactive] public DateTime LastAccess { get; set; }
-    }
-
     public class StartupViewModel : ViewModelBase, IInitializableViewModel
     {
         private readonly IShell shell;
         private readonly IAppModel appModel;
         private readonly IDialogCoordinator dialCoord;
-        private readonly SourceList<RecentTile> recentList;
 
-        public ReadOnlyObservableCollection<RecentTile> Recents { get; set; }
+        public ReadOnlyObservableCollection<DbViewModel> Recents { get; set; }
         public ReactiveCommand NewFileCommand { get; set; }
         public ReactiveCommand OpenFileCommand { get; set; }
         public ReactiveCommand<string, Unit> OpenRecentDbCommand { get; set; }
@@ -55,13 +46,12 @@ namespace Kamban.ViewModels
             this.appModel = appModel;
             dialCoord = dc;
 
-            recentList = new SourceList<RecentTile>();
-            recentList
+            appModel.RecentsDb
                 .Connect()
                 .AutoRefresh()
-                .Sort(SortExpressionComparer<RecentTile>.Descending(x => x.LastAccess))
+                .Sort(SortExpressionComparer<DbViewModel>.Descending(x => x.LastAccess))
                 //.Top(3) // ?
-                .Bind(out ReadOnlyObservableCollection<RecentTile> temp)
+                .Bind(out ReadOnlyObservableCollection<DbViewModel> temp)
                 .Subscribe();
 
             Recents = temp;
@@ -94,7 +84,7 @@ namespace Kamban.ViewModels
                 }
             });
 
-            var canExport = recentList
+            var canExport = appModel.RecentsDb
                 .Connect()
                 .AutoRefresh()
                 .Select(x => x.Count > 0);
@@ -116,9 +106,6 @@ namespace Kamban.ViewModels
                 await dialCoord.ShowMessageAsync(this, "Error", "File was deleted or moved");
 
                 appModel.RemoveRecent(uri);
-                appModel.SaveConfig();
-
-                recentList.Delete(x => x.Uri == uri);
                 return;
             }
 
@@ -142,16 +129,8 @@ namespace Kamban.ViewModels
                 viewRequest: new BoardViewRequest { ViewId = title, PrjService = service },
                 options: new UiShowOptions { Title = title });
 
-            var tile = recentList.Items.Where(x => x.Uri == uri).FirstOrDefault();
-            if (tile == null)
-            {
-                tile = new RecentTile { Uri = uri };
-                await LoadTileAsync(tile);
-                recentList.Add(tile);
-
-                appModel.AddRecent(uri);
-                appModel.SaveConfig();
-            }
+            var db = appModel.AddRecent(uri);
+            await FillRecentAsync(db);
         }
 
         public void Initialize(ViewRequest viewRequest)
@@ -167,46 +146,37 @@ namespace Kamban.ViewModels
 
             shell.AddGlobalCommand("File", "Exit", "ExitCommand", this);
 
-            Observable.FromAsync(() => LoadRecentsAsync())
+            Observable.FromAsync(() => FillRecentsAsync())
                 .ObserveOnDispatcher()
-                .Subscribe(tiles => recentList.Edit(il =>
-                {
-                    recentList.Clear();
-                    recentList.AddRange(tiles);
-                }));
+                .Subscribe();
         }
 
-        private async Task<RecentTile[]> LoadRecentsAsync()
+        private async Task FillRecentsAsync()
         {
-            this.appModel.LoadConfig();
-            var rcnts = this.appModel.GetRecentDocuments();
-            var tiles = rcnts.Select(x => new RecentTile { Uri = x }).ToList(); //.Take(6);
-
-            foreach (var it in tiles)
-                await LoadTileAsync(it);
-
-            return tiles.ToArray();
+            var toFill = Recents.ToList();
+            foreach (var it in toFill)
+                await FillRecentAsync(it);
         }
 
-        private async Task LoadTileAsync(RecentTile tile)
+        private async Task FillRecentAsync(DbViewModel db)
         {
-            if (!File.Exists(tile.Uri))
+            if (!File.Exists(db.Uri))
                 return;
 
             try
             {
-                tile.LastAccess = File.GetLastWriteTime(tile.Uri);
+                db.LastAccess = File.GetLastWriteTime(db.Uri);
 
-                var prj = appModel.LoadProjectService(tile.Uri);
+                var prj = appModel.LoadProjectService(db.Uri);
                 var boards = await prj.GetAllBoardsInFileAsync();
 
                 var lst = boards.Select(x => x.Name).ToList();
                 var str = string.Join(",", lst);
-                tile.BoardList = str;
+                db.BoardList = str;
 
-                tile.TotalTickets = 0;
+                db.TotalTickets = 0;
                 foreach (var brd in boards)
-                    tile.TotalTickets += (await prj.GetIssuesByBoardIdAsync(brd.Id)).Count();
+                    db.TotalTickets += (await prj.GetIssuesByBoardIdAsync(brd.Id)).Count();
             }
             // Skip broken file
             catch { }

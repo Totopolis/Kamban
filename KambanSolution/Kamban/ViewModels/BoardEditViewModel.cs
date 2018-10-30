@@ -21,7 +21,7 @@ using Ui.Wpf.Common.ViewModels;
 
 namespace Kamban.ViewModels
 {
-    public partial class BoardViewModel : ViewModelBase, IInitializableViewModel
+    public partial class BoardEditViewModel : ViewModelBase, IInitializableViewModel
     {
         private readonly IShell shell;
         private readonly IDialogCoordinator dialCoord;
@@ -75,7 +75,7 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> RenameBoardCommand { get; set; }
         public ReactiveCommand<object, Unit> SelectBoardCommand { get; set; }
 
-        public BoardViewModel(IShell shell, IDialogCoordinator dc, IMonik m, IMapper mp)
+        public BoardEditViewModel(IShell shell, IDialogCoordinator dc, IMonik m, IMapper mp)
         {
             this.shell = shell;
             dialCoord = dc;
