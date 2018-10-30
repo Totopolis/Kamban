@@ -17,5 +17,20 @@ namespace Kamban.Model
         [Reactive] public string BoardList { get; set; }
 
         [Reactive] public SourceList<BoardViewModel> Boards { get; set; }
+
+        public DbViewModel()
+        {
+            Boards = new SourceList<BoardViewModel>();
+
+            Boards
+                .Connect()
+                .AutoRefresh()
+                .Subscribe(bvm =>
+                {
+                    var lst = Boards.Items.Select(x => x.Name).ToList();
+                    var str = string.Join(",", lst);
+                    BoardList = str;
+                });
+        }
     }
 }

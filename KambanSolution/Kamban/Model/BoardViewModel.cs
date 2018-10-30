@@ -11,6 +11,7 @@ namespace Kamban.Model
 {
     public class BoardViewModel : ReactiveObject
     {
+        [Reactive] public int Id { get; set; }
         [Reactive] public string Name { get; set; }
         [Reactive] public DateTime Created { get; set; }
         [Reactive] public DateTime Modified { get; set; }

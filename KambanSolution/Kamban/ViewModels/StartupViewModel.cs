@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Threading;
+using AutoMapper;
 using DynamicData;
 using DynamicData.Binding;
 using Kamban.Model;
@@ -29,6 +30,7 @@ namespace Kamban.ViewModels
         private readonly IShell shell;
         private readonly IAppModel appModel;
         private readonly IDialogCoordinator dialCoord;
+        private readonly IMapper mapper;
 
         public ReadOnlyObservableCollection<DbViewModel> Recents { get; set; }
         public ReactiveCommand NewFileCommand { get; set; }
@@ -40,11 +42,13 @@ namespace Kamban.ViewModels
         [Reactive]
         public bool IsLoading { get; set; }
 
-        public StartupViewModel(IShell shell, IAppModel appModel, IDialogCoordinator dc)
+        public StartupViewModel(IShell shell, IAppModel appModel, IDialogCoordinator dc,
+            IMapper mp)
         {
             this.shell = shell as IShell;
             this.appModel = appModel;
             dialCoord = dc;
+            mapper = mp;
 
             appModel.RecentsDb
                 .Connect()
@@ -170,9 +174,8 @@ namespace Kamban.ViewModels
                 var prj = appModel.LoadProjectService(db.Uri);
                 var boards = await prj.GetAllBoardsInFileAsync();
 
-                var lst = boards.Select(x => x.Name).ToList();
-                var str = string.Join(",", lst);
-                db.BoardList = str;
+                db.Boards.AddRange(boards.Select(x =>
+                    mapper.Map<BoardInfo, BoardViewModel>(x)));
 
                 db.TotalTickets = 0;
                 foreach (var brd in boards)

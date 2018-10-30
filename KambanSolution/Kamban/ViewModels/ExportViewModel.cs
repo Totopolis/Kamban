@@ -45,7 +45,6 @@ namespace Kamban.ViewModels
         private readonly IAppModel appModel;
         private readonly IDialogCoordinator dialCoord;
         private IProjectService prjService;
-        private SourceList<string> files;
         private SourceList<BoardToExport> boards;
 
         [Reactive] public ReadOnlyObservableCollection<DbViewModel> AvailableFiles { get; set; }
@@ -74,7 +73,6 @@ namespace Kamban.ViewModels
             this.appModel = am;
             dialCoord = dc;
 
-            files = new SourceList<string>();
             boards = new SourceList<BoardToExport>();
 
             appModel.RecentsDb
@@ -235,7 +233,6 @@ namespace Kamban.ViewModels
         {
             Title = "Export";
 
-            files.AddRange(appModel.RecentsDb.Items.Select(x => x.Uri));
             SelectedFile = AvailableFiles.FirstOrDefault();
 
             ExportJson = true;

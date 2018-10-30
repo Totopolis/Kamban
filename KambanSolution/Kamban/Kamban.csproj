@@ -212,7 +212,7 @@
     <Compile Include="Repository\ColumnInfo.cs" />
     <Compile Include="Repository\Issue.cs" />
     <Compile Include="Repository\RowInfo.cs" />
-    <Compile Include="ViewModels\BoardViewModel.Commands.cs" />
+    <Compile Include="ViewModels\BoardEditViewModel.Commands.cs" />
     <Compile Include="ViewModels\BoardEditViewModel.cs" />
     <Compile Include="ViewModels\ExportViewModel.cs" />
     <Compile Include="ViewModels\IssueViewModel.cs" />

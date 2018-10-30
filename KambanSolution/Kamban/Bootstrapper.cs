@@ -79,6 +79,9 @@ namespace Kamban
             return new MapperConfiguration(cfg =>
             {
                 //cfg.AddProfile<AppProfile>();
+                cfg.CreateMap<BoardViewModel, BoardInfo>();
+                cfg.CreateMap<BoardInfo, BoardViewModel>();
+
                 cfg.CreateMap<CardViewModel, Issue>()
                     .ForMember(dst => dst.Head, opt => opt.MapFrom(src => src.Header))
                     .ForMember(dst => dst.ColumnId, opt => opt.MapFrom(src => src.ColumnDeterminant))
