@@ -16,6 +16,9 @@ namespace Kamban.Repository
         Issue CreateOrUpdateIssue(Issue issue);
         BoardInfo CreateOrUpdateBoardInfo(BoardInfo info);
 
+        List<ColumnInfo> GetAllColumns();
+        List<RowInfo> GetAllRows();
+
         List<Issue> GetIssuesByBoardId(int boardId);
         List<RowInfo> GetRows(int boardId);
         List<ColumnInfo> GetColumns(int boardId);

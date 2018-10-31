@@ -135,7 +135,7 @@ namespace Kamban.ViewModels
                 viewRequest: new BoardViewRequest { ViewId = title, Db = db },
                 options: new UiShowOptions { Title = title });
 
-            await FillRecentAsync(db);
+            //await FillRecentAsync(db);
         }
 
         public void Initialize(ViewRequest viewRequest)
@@ -173,10 +173,14 @@ namespace Kamban.ViewModels
                 db.LastAccess = File.GetLastWriteTime(db.Uri);
 
                 var prj = appModel.LoadProjectService(db.Uri);
+
+                var columns = await prj.GetAllColumns();
+                var rows = await prj.GetAllRows();
                 var boards = await prj.GetAllBoardsInFileAsync();
 
-                db.Boards.AddRange(boards.Select(x =>
-                    mapper.Map<BoardInfo, BoardViewModel>(x)));
+                db.Columns.AddRange(columns.Select(x => mapper.Map<ColumnInfo, ColumnViewModel>(x)));
+                db.Rows.AddRange(rows.Select(x => mapper.Map<RowInfo, RowViewModel>(x)));
+                db.Boards.AddRange(boards.Select(x => mapper.Map<BoardInfo, BoardViewModel>(x)));
 
                 db.TotalTickets = 0;
                 foreach (var brd in boards)

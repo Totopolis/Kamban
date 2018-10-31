@@ -16,10 +16,16 @@ namespace Kamban.Model
         [Reactive] public int TotalTickets { get; set; }
         [Reactive] public string BoardList { get; set; }
 
+        [Reactive] public SourceList<ColumnViewModel> Columns { get; set; }
+        [Reactive] public SourceList<RowViewModel> Rows { get; set; }
+
         [Reactive] public SourceList<BoardViewModel> Boards { get; set; }
 
         public DbViewModel()
         {
+            Columns = new SourceList<ColumnViewModel>();
+            Rows = new SourceList<RowViewModel>();
+
             Boards = new SourceList<BoardViewModel>();
 
             Boards

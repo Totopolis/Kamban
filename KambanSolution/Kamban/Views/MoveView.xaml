@@ -48,7 +48,7 @@
                 <ListView 
                     ItemsSource="{Binding AvailableColumns}"
                     SelectedItem="{Binding SelectedColumn}"
-                    DisplayMemberPath="Name"
+                    DisplayMemberPath="Caption"
                     Background="{Binding Background}"/>
             </StackPanel>
 
@@ -57,7 +57,7 @@
                 <ListView 
                     ItemsSource="{Binding AvailableRows}"
                     SelectedItem="{Binding SelectedRow}"
-                    DisplayMemberPath="Name"
+                    DisplayMemberPath="Caption"
                     Background="{Binding Background}"/>
             </StackPanel>
         </StackPanel>

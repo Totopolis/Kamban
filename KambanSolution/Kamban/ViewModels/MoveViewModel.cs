@@ -21,6 +21,7 @@ namespace Kamban.ViewModels
     {
         private readonly IMapper mapper;
 
+        private DbViewModel db;
         private IProjectService prjService;
         private CardViewModel card;
         private BoardEditViewModel boardVM;
@@ -28,15 +29,14 @@ namespace Kamban.ViewModels
         [Reactive] public Brush Background { get; set; }
         [Reactive] public bool IsOpened { get; set; }
 
-        [Reactive] public SourceList<BoardInfo> AvailableBoards { get; set; }
-        [Reactive] public BoardInfo SelectedBoard { get; set; }
+        [Reactive] public List<BoardViewModel> AvailableBoards { get; set; }
+        [Reactive] public BoardViewModel SelectedBoard { get; set; }
 
-        [Reactive] public SourceList<ColumnInfo> AvailableColumns { get; set; }
-        [Reactive] public ColumnInfo SelectedColumn { get; set; }
-        [Reactive] public SourceList<RowInfo> AvailableRows { get; set; }
-        [Reactive] public RowInfo SelectedRow { get; set; }
+        [Reactive] public List<ColumnViewModel> AvailableColumns { get; set; }
+        [Reactive] public ColumnViewModel SelectedColumn { get; set; }
+        [Reactive] public List<RowViewModel> AvailableRows { get; set; }
+        [Reactive] public RowViewModel SelectedRow { get; set; }
 
-        [Reactive] public string Url { get; set; }
         [Reactive] public string CardHeader { get; set; }
 
         public ReactiveCommand CancelCommand { get; set; }
@@ -47,21 +47,40 @@ namespace Kamban.ViewModels
         {
             mapper = mp;
 
-            AvailableBoards = new SourceList<BoardInfo>();
-            AvailableColumns = new SourceList<ColumnInfo>();
-            AvailableRows = new SourceList<RowInfo>();
+            AvailableBoards = null;
+            AvailableColumns = null;
+            AvailableRows = null;
 
             CancelCommand = ReactiveCommand.Create(() => IsOpened = false);
-            CopyToCommand = ReactiveCommand.Create(CopyToCommandExecute);
 
-            var canExecuteMove = this.WhenAnyValue(x => x.SelectedBoard,
-                board => board != null && board.Id != card.BoardId);
+            var canExecuteCopy = this.WhenAnyValue(
+                x => x.SelectedBoard, x => x.SelectedRow, x => x.SelectedColumn,
+                (brd, row, column) => brd != null && row != null && column != null);
+
+            CopyToCommand = ReactiveCommand.Create(CopyToCommandExecute, canExecuteCopy);
+
+            var canExecuteMove = this.WhenAnyValue(
+                x => x.SelectedBoard, x => x.SelectedRow, x => x.SelectedColumn,
+                (brd, row, column) => brd != null && brd.Id != card.BoardId 
+                    && row != null && column != null);
 
             MoveToCommand = ReactiveCommand.Create(MoveToCommandExecute, canExecuteMove);
 
             this.WhenAnyValue(x => x.SelectedBoard)
                 .Where(x => x != null)
-                .Subscribe(async _ => await ChangeBoard(SelectedBoard.Id));
+                .Subscribe(_ =>
+                {
+                    AvailableColumns = db.Columns.Items
+                        .Where(x => x.BoardId == SelectedBoard.Id)
+                        .ToList();
+
+                    AvailableRows = db.Rows.Items
+                        .Where(x => x.BoardId == SelectedBoard.Id)
+                        .ToList();
+
+                    SelectedColumn = null;
+                    SelectedRow = null;
+                });
         }
 
         private void CopyToCommandExecute()
@@ -72,16 +91,17 @@ namespace Kamban.ViewModels
                 Head = "[Copy] " + card.Header,
                 ColumnId = SelectedColumn.Id,
                 RowId = SelectedRow.Id,
-                Order = card.Order,
+                Order = 0,
                 Color = card.Color,
                 Body = card.Body,
-                Created = card.Created,
+                Created = DateTime.Now,
                 Modified = DateTime.Now,
                 BoardId = SelectedBoard.Id
             };
 
             prjService.CreateOrUpdateIssueAsync(issue);
 
+            // TODO: add to Db.Cards
             var cvm = mapper.Map<Issue, CardViewModel>(issue);
             boardVM.Cards.Add(cvm);
 
@@ -90,48 +110,15 @@ namespace Kamban.ViewModels
 
         private void MoveToCommandExecute()
         {
-            var issue = new Issue
-            {
-                Id = card.Id,
-                Head = card.Header,
-                ColumnId = SelectedColumn.Id,
-                RowId = SelectedRow.Id,
-                Order = card.Order,
-                Color = card.Color,
-                Body = card.Body,
-                Created = card.Created,
-                Modified = DateTime.Now,
-                BoardId = SelectedBoard.Id
-            };
+            card.BoardId = SelectedBoard.Id;
+            card.ColumnDeterminant = SelectedColumn.Id;
+            card.RowDeterminant = SelectedRow.Id;
+            card.Order = 0;
+            card.Modified = DateTime.Now;
 
-            prjService.CreateOrUpdateIssueAsync(issue);
             boardVM.Cards.Remove(card);
 
             IsOpened = false;
-        }
-
-        private async Task ChangeProject(IProjectService ps)
-        {
-            prjService = ps;
-            Url = ps.Uri;
-
-            var boards = await ps.GetAllBoardsInFileAsync();
-            AvailableBoards.ClearAndAddRange(boards);
-
-            await ChangeBoard(AvailableBoards.Items.First().Id);
-        }
-
-        private async Task ChangeBoard(int boardId)
-        {
-            SelectedBoard = AvailableBoards.Items.Where(x => x.Id == boardId).First();
-
-            var columns = await prjService.GetColumnsByBoardIdAsync(SelectedBoard.Id);
-            AvailableColumns.ClearAndAddRange(columns);
-            SelectedColumn = AvailableColumns.First();
-
-            var rows = await prjService.GetRowsByBoardIdAsync(SelectedBoard.Id);
-            AvailableRows.ClearAndAddRange(rows);
-            SelectedRow = AvailableRows.First();
         }
 
         public void Initialize(ViewRequest viewRequest)
@@ -140,18 +127,19 @@ namespace Kamban.ViewModels
             if (request == null)
                 return;
 
+            db = request.Db;
             card = request.Card;
             boardVM = request.BoardVM;
+            prjService = request.PrjService;
+
+            AvailableBoards = db.Boards.Items.ToList();
+            SelectedBoard = AvailableBoards.First();
 
             var str = request.Card.Header;
             var maxLen = str.Length >= 22 ? 22 : str.Length;
             CardHeader = "Select destination board and cell to make move \"" +
                 request.Card.Header.Substring(0, maxLen) +
                 (str.Length > 22 ? "..." : "") + "\"";
-
-            Observable.FromAsync(() => ChangeProject(request.PrjService))
-                .ObserveOnDispatcher()
-                .Subscribe(async _ => await ChangeBoard(request.Board.Id));
 
             Title = $"Move issue {card.Header} to";
             IsOpened = true;

@@ -13,6 +13,9 @@ namespace Kamban.Model
     {
         string Uri { get; set; }
 
+        Task<List<ColumnInfo>> GetAllColumns();
+        Task<List<RowInfo>> GetAllRows();
+
         // Actual
 
         Task<List<BoardInfo>> GetAllBoardsInFileAsync();
@@ -53,6 +56,16 @@ namespace Kamban.Model
         }
 
         public string Uri { get; set; }
+
+        public async Task<List<ColumnInfo>> GetAllColumns()
+        {
+            return await Task.Run(() => repo.GetAllColumns());
+        }
+
+        public async Task<List<RowInfo>> GetAllRows()
+        {
+            return await Task.Run(() => repo.GetAllRows());
+        }
 
         public async Task<List<BoardInfo>> GetAllBoardsInFileAsync()
         {

@@ -67,6 +67,26 @@ namespace Kamban.Repository
             return Upsert(info);
         }
 
+        public List<ColumnInfo> GetAllColumns()
+        {
+            using (var db = new LiteDatabase(fileName))
+            {
+                var columns = db.GetCollection<ColumnInfo>(Name<ColumnInfo>());
+                var results = columns.FindAll();
+                return results.ToList();
+            }
+        }
+
+        public List<RowInfo> GetAllRows()
+        {
+            using (var db = new LiteDatabase(fileName))
+            {
+                var rows = db.GetCollection<RowInfo>(Name<RowInfo>());
+                var results = rows.FindAll();
+                return results.ToList();
+            }
+        }
+
         public List<Issue> GetIssuesByBoardId(int boardId)
         {
             using (var db = new LiteDatabase(fileName))

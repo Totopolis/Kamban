@@ -22,7 +22,8 @@ using Ui.Wpf.Common.ViewModels;
 
 namespace Kamban.ViewModels
 {
-    public partial class BoardEditViewModel : ViewModelBase, IInitializableViewModel
+    public partial class BoardEditViewModel : ViewModelBase, 
+        IInitializableViewModel, IActivatableViewModel
     {
         private readonly IShell shell;
         private readonly IDialogCoordinator dialCoord;
@@ -65,7 +66,7 @@ namespace Kamban.ViewModels
         [Reactive] private ColumnInfo SelectedColumn { get; set; }
 
         private ReadOnlyObservableCollection<BoardViewModel> BoardsInFile;
-        private List<CommandItem> BoardsMenuItems;
+        private ReadOnlyObservableCollection<CommandItem> BoardsMenuItems;
 
         public ReactiveCommand<Unit, Unit> CreateTiketCommand { get; set; }
         public ReactiveCommand<(object column, object row), Unit> CellDoubleClickCommand { get; set; }
@@ -87,7 +88,7 @@ namespace Kamban.ViewModels
             mapper = mp;
             appModel = am;
 
-            BoardsMenuItems = new List<CommandItem>();
+            BoardsMenuItems = null;
 
             mon.LogicVerbose("BoardViewModel.ctor started");
 
@@ -219,7 +220,7 @@ namespace Kamban.ViewModels
                 {
                     mon.LogicVerbose("BoardViewModel.CurrentBoard changed");
 
-                    BoardsMenuItems.ForEach(x => x.IsChecked = false);
+                    BoardsMenuItems.ToList().ForEach(x => x.IsChecked = false);
 
                     BoardsMenuItems
                         .Where(x => x.Name == CurrentBoard.Name)
@@ -292,6 +293,7 @@ namespace Kamban.ViewModels
         {
             vm.Initialize(new IssueViewRequest
             {
+                Db = this.Db,
                 ColumnId = column,
                 RowId = row,
                 Card = cvm as CardViewModel,
@@ -333,23 +335,34 @@ namespace Kamban.ViewModels
             Db.Boards
                 .Connect()
                 .AutoRefresh()
+                .Sort(SortExpressionComparer<BoardViewModel>.Ascending(t => t.Created))
                 .Bind(out ReadOnlyObservableCollection<BoardViewModel> temp)
                 .Subscribe();
 
             BoardsInFile = temp;
-            BoardsMenuItems.Clear();
 
-            // TODO: temp.change
+            Db.Boards
+                .Connect()
+                .AutoRefresh()
+                .Sort(SortExpressionComparer<BoardViewModel>.Ascending(t => t.Created))
+                .Transform(x => shell.AddInstanceCommand("Boards", x.Name, "SelectBoardCommand", this))
+                .Bind(out ReadOnlyObservableCollection<CommandItem> temp2)
+                .Subscribe();
 
-            foreach (var brd in BoardsInFile.ToList())
-            {
-                var cmd = shell.AddInstanceCommand("Boards", brd.Name, "SelectBoardCommand", this);
-                BoardsMenuItems.Add(cmd);
-            }
-
-            CurrentBoard = BoardsInFile.First();
+            // TODO: use for checks and renames - original BoardsInFile
+            BoardsMenuItems = temp2;
 
             mon.LogicVerbose("BoardViewModel.Initialize finished");
+        }
+
+        public void Activate(ViewRequest viewRequest)
+        {
+            mon.LogicVerbose("BoardViewModel.Activate started");
+
+            var request = viewRequest as BoardViewRequest;
+            CurrentBoard = request.Board ?? BoardsInFile.First();
+
+            mon.LogicVerbose("BoardViewModel.Activate finished");
         }
     }//end of class
 }

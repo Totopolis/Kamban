@@ -39,7 +39,7 @@ namespace Kamban.ViewModels
         [Reactive] public ObservableCollection<ColumnViewModel> Columns { get; set; }
         [Reactive] public ObservableCollection<RowViewModel> Rows { get; set; }
 
-        public ReactiveCommand FillFromTemplateCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> FillFromTemplateCommand { get; set; }
         public ReactiveCommand AddColumnCommand { get; set; }
         public ReactiveCommand AddRowCommand { get; set; }
         public ReactiveCommand ClearAllCommand { get; set; }
@@ -66,6 +66,9 @@ namespace Kamban.ViewModels
 
             FillFromTemplateCommand = ReactiveCommand.Create(() =>
             {
+                if (SelectedTemplate == null)
+                    return;
+
                 Columns.Clear();
                 Columns.AddRange(SelectedTemplate.Columns);
 
@@ -145,7 +148,7 @@ namespace Kamban.ViewModels
                 return;
             }
 
-            // 2. Create board
+            // 2. Create board (or get from preloaded)
             var db = appModel.AddRecent(uri);
             IProjectService prjService;
 
@@ -193,6 +196,9 @@ namespace Kamban.ViewModels
                     Name = cvm.Caption
                 };
                 prjService.CreateOrUpdateColumnAsync(ci);
+
+                cvm.Id = ci.Id;
+                db.Columns.Add(cvm);
             }
 
             // 5. Create rows
@@ -206,10 +212,13 @@ namespace Kamban.ViewModels
                     Name = rvm.Caption
                 };
                 prjService.CreateOrUpdateRowAsync(ri);
+
+                rvm.Id = ri.Id;
+                db.Rows.Add(rvm);
             }
 
             shell.ShowView<BoardView>(
-                viewRequest: new BoardViewRequest { ViewId = uri, Db = db },
+                viewRequest: new BoardViewRequest { ViewId = uri, Db = db, Board = bvm },
                 options: new UiShowOptions { Title = BoardName });
 
             this.Close();
@@ -247,6 +256,12 @@ namespace Kamban.ViewModels
                 FileName = Path.GetFileName(request.Uri);
                 BoardName = "MyBoard";
             }
+
+            SelectedTemplate = Templates.First();
+
+            FillFromTemplateCommand
+                .Execute()
+                .Subscribe();
         }
     }//end of class
 
