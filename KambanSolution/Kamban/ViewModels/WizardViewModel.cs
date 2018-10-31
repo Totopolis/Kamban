@@ -8,6 +8,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using AutoMapper;
 using DynamicData;
 using FluentValidation;
 using Kamban.Model;
@@ -51,12 +52,14 @@ namespace Kamban.ViewModels
         private readonly IAppModel appModel;
         private readonly IShell shell;
         private readonly IDialogCoordinator dialCoord;
+        private readonly IMapper mapper;
 
-        public WizardViewModel(IAppModel appModel, IShell shell, IDialogCoordinator dc)
+        public WizardViewModel(IAppModel appModel, IShell shell, IDialogCoordinator dc, IMapper mp)
         {
             this.appModel = appModel;
             this.shell = shell;
             dialCoord = dc;
+            mapper = mp;
 
             Columns = new ObservableCollection<ColumnViewModel>();
             Rows = new ObservableCollection<RowViewModel>();
@@ -102,6 +105,7 @@ namespace Kamban.ViewModels
 
         private async Task CreateCommandExecute()
         {
+            // 1. Checks
             if (string.IsNullOrWhiteSpace(BoardName) || string.IsNullOrWhiteSpace(FileName)
                 || string.IsNullOrWhiteSpace(FolderName))
             {
@@ -141,14 +145,21 @@ namespace Kamban.ViewModels
                 return;
             }
 
-            var prjService = IsNewFile ? appModel.CreateProjectService(uri) :
-                appModel.LoadProjectService(uri);
+            // 2. Create board
+            var db = appModel.AddRecent(uri);
+            IProjectService prjService;
 
-            var boards = await prjService.GetAllBoardsInFileAsync();
-            if (boards.Where(x => x.Name == BoardName).Count() > 0)
+            if (IsNewFile)
+                prjService = appModel.CreateProjectService(uri);
+            else
             {
-                await dialCoord.ShowMessageAsync(this, "Error", "Board name already used");
-                return;
+                if (db.Boards.Items.Where(x => x.Name == BoardName).Count() > 0)
+                {
+                    await dialCoord.ShowMessageAsync(this, "Error", "Board name already used");
+                    return;
+                }
+
+                prjService = appModel.LoadProjectService(uri);
             }
 
             var bi = new BoardInfo
@@ -159,7 +170,10 @@ namespace Kamban.ViewModels
             };
             prjService.CreateOrUpdateBoardAsync(bi);
 
-            // Normilize grid
+            var bvm = mapper.Map<BoardInfo, BoardViewModel>(bi);
+            db.Boards.Add(bvm);
+
+            // 3. Normalize grid
             double colSize = 100 / (Columns.Count - 1);
             for (int i = 0; i < Columns.Count; i++)
                 Columns[i].Size = (int)colSize * 10;
@@ -168,7 +182,7 @@ namespace Kamban.ViewModels
             for (int i = 0; i < Rows.Count; i++)
                 Rows[i].Size = (int)rowSize * 10;
 
-            // Create columns
+            // 4. Create columns
             foreach (var cvm in Columns)
             {
                 var ci = new ColumnInfo
@@ -181,7 +195,7 @@ namespace Kamban.ViewModels
                 prjService.CreateOrUpdateColumnAsync(ci);
             }
 
-            // Create rows
+            // 5. Create rows
             foreach (var rvm in Rows)
             {
                 var ri = new RowInfo
@@ -195,11 +209,8 @@ namespace Kamban.ViewModels
             }
 
             shell.ShowView<BoardView>(
-                viewRequest: new BoardViewRequest { ViewId = uri, PrjService = prjService },
+                viewRequest: new BoardViewRequest { ViewId = uri, Db = db },
                 options: new UiShowOptions { Title = BoardName });
-
-            if (IsNewFile)
-                appModel.AddRecent(uri);
 
             this.Close();
         }

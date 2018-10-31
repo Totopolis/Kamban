@@ -98,6 +98,7 @@ namespace Kamban.ViewModels
             // TODO: handle not found file
 
             this.ObservableForProperty(x => x.SelectedFile)
+                .Where(x => x.Value != null)
                 .Subscribe(async (sf) =>
                 {
                     prjService = appModel.LoadProjectService(sf.Value.Uri);

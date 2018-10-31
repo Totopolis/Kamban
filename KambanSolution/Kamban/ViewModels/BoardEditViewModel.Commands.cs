@@ -174,7 +174,8 @@ namespace Kamban.ViewModels
                 return;
 
             CurrentBoard.Name = newName;
-            prjService.CreateOrUpdateBoardAsync(CurrentBoard);
+            var bi = mapper.Map<BoardViewModel, BoardInfo>(CurrentBoard);
+            prjService.CreateOrUpdateBoardAsync(bi);
             Title = newName;
 
             BoardsMenuItems

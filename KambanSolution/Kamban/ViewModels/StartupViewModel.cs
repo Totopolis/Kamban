@@ -129,11 +129,12 @@ namespace Kamban.ViewModels
 
             await Task.Delay(200);
 
+            var db = appModel.AddRecent(uri);
+
             shell.ShowView<BoardView>(
-                viewRequest: new BoardViewRequest { ViewId = title, PrjService = service },
+                viewRequest: new BoardViewRequest { ViewId = title, Db = db },
                 options: new UiShowOptions { Title = title });
 
-            var db = appModel.AddRecent(uri);
             await FillRecentAsync(db);
         }
 

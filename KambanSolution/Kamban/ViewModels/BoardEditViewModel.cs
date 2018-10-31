@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -27,13 +28,16 @@ namespace Kamban.ViewModels
         private readonly IDialogCoordinator dialCoord;
         private readonly IMonik mon;
         private readonly IMapper mapper;
+        private readonly IAppModel appModel;
 
         private IProjectService prjService;
+
+        private DbViewModel Db { get; set; }
 
         [Reactive] public bool EnableMatrix { get; set; }
         [Reactive] public IMonik Monik { get; set; }
 
-        [Reactive] public BoardInfo CurrentBoard { get; set; }
+        [Reactive] public BoardViewModel CurrentBoard { get; set; }
 
         [Reactive] public SourceList<IDim> Columns { get; set; }
         [Reactive] public SourceList<IDim> Rows { get; set; }
@@ -60,7 +64,7 @@ namespace Kamban.ViewModels
         [Reactive] private RowInfo SelectedRow { get; set; }
         [Reactive] private ColumnInfo SelectedColumn { get; set; }
 
-        private List<BoardInfo> BoardsInFile;
+        private ReadOnlyObservableCollection<BoardViewModel> BoardsInFile;
         private List<CommandItem> BoardsMenuItems;
 
         public ReactiveCommand<Unit, Unit> CreateTiketCommand { get; set; }
@@ -75,12 +79,13 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> RenameBoardCommand { get; set; }
         public ReactiveCommand<object, Unit> SelectBoardCommand { get; set; }
 
-        public BoardEditViewModel(IShell shell, IDialogCoordinator dc, IMonik m, IMapper mp)
+        public BoardEditViewModel(IShell shell, IDialogCoordinator dc, IMonik m, IMapper mp, IAppModel am)
         {
             this.shell = shell;
             dialCoord = dc;
             mon = m;
             mapper = mp;
+            appModel = am;
 
             BoardsMenuItems = new List<CommandItem>();
 
@@ -93,7 +98,7 @@ namespace Kamban.ViewModels
             Rows = new SourceList<IDim>();
             Cards = new SourceList<ICard>();
 
-            BoardsInFile = new List<BoardInfo>();
+            BoardsInFile = null;
             IssueFlyout = new IssueViewModel();
             MoveFlyout = new MoveViewModel(mapper);
 
@@ -322,27 +327,27 @@ namespace Kamban.ViewModels
 
             var request = viewRequest as BoardViewRequest;
 
-            prjService = request.PrjService;
+            Db = request.Db;
+            prjService = appModel.LoadProjectService(request.Db.Uri);
 
-            Observable.FromAsync(() => prjService.GetAllBoardsInFileAsync())
-                .ObserveOnDispatcher()
-                .Subscribe(boards =>
-                {
-                    BoardsInFile.AddRange(boards);
-                    BoardsMenuItems.Clear();
+            Db.Boards
+                .Connect()
+                .AutoRefresh()
+                .Bind(out ReadOnlyObservableCollection<BoardViewModel> temp)
+                .Subscribe();
 
-                    foreach (var brd in boards)
-                    { 
-                        var cmd = shell.AddInstanceCommand("Boards", brd.Name, "SelectBoardCommand", this);
-                        BoardsMenuItems.Add(cmd);
-                    }
+            BoardsInFile = temp;
+            BoardsMenuItems.Clear();
 
-                    CurrentBoard = !string.IsNullOrEmpty(request.NeededBoardName)
-                        ? BoardsInFile.First(board => board.Name == request.NeededBoardName)
-                        : BoardsInFile.First();
+            // TODO: temp.change
 
-                    mon.LogicVerbose("BoardViewModel.Initialize setup current board finished");
-                });
+            foreach (var brd in BoardsInFile.ToList())
+            {
+                var cmd = shell.AddInstanceCommand("Boards", brd.Name, "SelectBoardCommand", this);
+                BoardsMenuItems.Add(cmd);
+            }
+
+            CurrentBoard = BoardsInFile.First();
 
             mon.LogicVerbose("BoardViewModel.Initialize finished");
         }

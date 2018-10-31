@@ -48,7 +48,7 @@ namespace Kamban.ViewModels
     public class IssueViewModel : ViewModelBase, IInitializableViewModel
     {
         private IProjectService prjService;
-        private BoardInfo board;
+        private BoardViewModel board;
         private int requestedColumnId;
         private int requestedRowId;
 
@@ -164,6 +164,7 @@ namespace Kamban.ViewModels
 
         public async Task UpdateViewModel()
         {
+            // TODO: get from AppModel.Db.Board
             var columnsInfo = await prjService.GetColumnsByBoardIdAsync(board.Id);
             var rowsInfo = await prjService.GetRowsByBoardIdAsync(board.Id);
 
