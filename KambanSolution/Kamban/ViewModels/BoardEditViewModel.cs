@@ -66,7 +66,7 @@ namespace Kamban.ViewModels
         [Reactive] private RowInfo SelectedRow { get; set; }
         [Reactive] private ColumnInfo SelectedColumn { get; set; }
 
-        private ReadOnlyObservableCollection<BoardViewModel> BoardsInFile;
+        [Reactive] public ReadOnlyObservableCollection<BoardViewModel> BoardsInFile { get; set; }
         private ReadOnlyObservableCollection<CommandItem> BoardsMenuItems;
 
         public ReactiveCommand<Unit, Unit> CreateTiketCommand { get; set; }
@@ -144,14 +144,11 @@ namespace Kamban.ViewModels
                 });
             });
 
-            // TODO: can prev/next
-
-            /*var prevNextCommandEnabled = this
+            var prevNextCommandEnabled = this
                 .WhenAnyValue(x => x.BoardsInFile)
                 .Where(x => x != null)
-                .Select(x => BoardsInFile.Count > 1)
-                .AsObservable();*/
-            
+                .Select(x => x.Count > 1);
+
             PrevBoardCommand = ReactiveCommand.Create(() =>
             {
                 int indx = BoardsInFile.IndexOf(CurrentBoard);
@@ -159,7 +156,7 @@ namespace Kamban.ViewModels
                 CurrentBoard = indx > 0 ?
                     BoardsInFile[indx - 1] :
                     BoardsInFile[BoardsInFile.Count - 1];
-            });
+            }, prevNextCommandEnabled);
 
             NextBoardCommand = ReactiveCommand.Create(() =>
             {
@@ -168,7 +165,7 @@ namespace Kamban.ViewModels
                 CurrentBoard = indx < BoardsInFile.Count - 1 ?
                     BoardsInFile[indx + 1] :
                     BoardsInFile[0];
-            });
+            }, prevNextCommandEnabled);
 
             RenameBoardCommand = ReactiveCommand.CreateFromTask(RenameBoardCommandExecute);
 
