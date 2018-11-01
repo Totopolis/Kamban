@@ -151,7 +151,7 @@ namespace Kamban.ViewModels
                 .Where(x => x != null)
                 .Select(x => BoardsInFile.Count > 1)
                 .AsObservable();*/
-
+            
             PrevBoardCommand = ReactiveCommand.Create(() =>
             {
                 int indx = BoardsInFile.IndexOf(CurrentBoard);
@@ -244,6 +244,7 @@ namespace Kamban.ViewModels
 
             Db.Rows
                 .Connect()
+                .AutoRefresh()
                 .Filter(x => x.BoardId == CurrentBoard.Id)
                 .Sort(SortExpressionComparer<RowViewModel>.Ascending(x => x.Order))
                 .Bind(out ReadOnlyObservableCollection<RowViewModel> temp4)
@@ -330,24 +331,78 @@ namespace Kamban.ViewModels
             Db.Columns
                 .Connect()
                 //.AutoRefresh()
-                .WhenAnyPropertyChanged()
+                .WhenAnyPropertyChanged("Caption", "Order", "Size", "BoardId")
                 .Subscribe(cvm =>
                 {
-                    mon.LogicVerbose("BoardViewModel.Columns.ItemChanged");
-                    var col = mapper.Map<ColumnViewModel, ColumnInfo>(cvm);
-                    prjService.CreateOrUpdateColumnAsync(col);
+                    mon.LogicVerbose($"BoardViewModel.Columns.ItemChanged {cvm.Id}::{cvm.Caption}::{cvm.Order}");
+                    var ci = mapper.Map<ColumnViewModel, ColumnInfo>(cvm);
+                    prjService.CreateOrUpdateColumnAsync(ci);
                 });
 
             Db.Rows
                 .Connect()
                 //.AutoRefresh()
-                .WhenAnyPropertyChanged()
+                .WhenAnyPropertyChanged("Caption", "Order", "Size", "BoardId")
                 .Subscribe(rvm =>
                 {
-                    mon.LogicVerbose("BoardViewModel.Rows.ItemChanged");
+                    mon.LogicVerbose($"BoardViewModel.Rows.ItemChanged {rvm.Id}::{rvm.Caption}::{rvm.Order}");
                     var row = mapper.Map<RowViewModel, RowInfo>(rvm);
                     prjService.CreateOrUpdateRowAsync(row);
                 });
+
+            Db.Columns
+                .Connect()
+                //.AutoRefresh()
+                .WhereReasonsAre(ListChangeReason.Add)
+                .Subscribe(x => x
+                    .Select(q => q.Item.Current)
+                    .ToList()
+                    .ForEach(cvm =>
+                {
+                    mon.LogicVerbose($"BoardViewModel.Column add {cvm.Id}::{cvm.Caption}::{cvm.Order}");
+
+                    var ci = mapper.Map<ColumnViewModel, ColumnInfo>(cvm);
+                    prjService.CreateOrUpdateColumnAsync(ci);
+
+                    cvm.Id = ci.Id;
+                    cvm.Determinant = ci.Id;
+                }));
+
+            Db.Columns
+                .Connect()
+                //.AutoRefresh()
+                .WhereReasonsAre(ListChangeReason.Remove)
+                .Subscribe(x => x
+                    .Select(q => q.Item.Current)
+                    .ToList()
+                    .ForEach(cvm => prjService.DeleteColumnAsync(cvm.Id)));
+
+            Db.Rows
+                .Connect()
+                //.AutoRefresh()
+                .WhereReasonsAre(ListChangeReason.Add)
+                .Subscribe(x => x
+                    .Select(q => q.Item.Current)
+                    .ToList()
+                    .ForEach(rvm =>
+                    {
+                        mon.LogicVerbose($"BoardViewModel.Row add {rvm.Id}::{rvm.Caption}::{rvm.Order}");
+
+                        var ri = mapper.Map<RowViewModel, RowInfo>(rvm);
+                        prjService.CreateOrUpdateRowAsync(ri);
+
+                        rvm.Id = ri.Id;
+                        rvm.Determinant = ri.Id;
+                    }));
+
+            Db.Rows
+                .Connect()
+                //.AutoRefresh()
+                .WhereReasonsAre(ListChangeReason.Remove)
+                .Subscribe(x => x
+                    .Select(q => q.Item.Current)
+                    .ToList()
+                    .ForEach(rvm => prjService.DeleteRowAsync(rvm.Id)));
 
             // TODO: use for checks and renames - original BoardsInFile
             BoardsMenuItems = temp2;

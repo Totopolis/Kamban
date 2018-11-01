@@ -94,7 +94,7 @@ namespace Kamban
 
                 cfg.CreateMap<ColumnViewModel, ColumnInfo>()
                     .ForMember(dst => dst.Name, opt => opt.MapFrom(src => src.Caption))
-                    .ForMember(dst => dst.Id, opt => opt.MapFrom(src => src.Determinant))
+                    // incorrect .ForMember(dst => dst.Id, opt => opt.MapFrom(src => src.Determinant))
                     .ForMember(dst => dst.Width, opt => opt.MapFrom(src => src.Size));
 
                 cfg.CreateMap<ColumnInfo, ColumnViewModel>()
@@ -104,7 +104,7 @@ namespace Kamban
 
                 cfg.CreateMap<RowViewModel, RowInfo>()
                     .ForMember(dst => dst.Name, opt => opt.MapFrom(src => src.Caption))
-                    .ForMember(dst => dst.Id, opt => opt.MapFrom(src => src.Determinant))
+                    // incorrect: .ForMember(dst => dst.Id, opt => opt.MapFrom(src => src.Determinant))
                     .ForMember(dst => dst.Height, opt => opt.MapFrom(src => src.Size));
 
                 cfg.CreateMap<RowInfo, RowViewModel>()

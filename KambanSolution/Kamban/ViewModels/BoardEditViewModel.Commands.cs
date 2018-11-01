@@ -63,26 +63,20 @@ namespace Kamban.ViewModels
             // delete head and move cards from deleted cells to first head
             if (column != null)
             {
-                // TODO: remove, subscribe at initialize()
-                prjService.DeleteColumnAsync(column.Id);
+                // Shift cards
                 var firstColumn = Columns.OrderBy(x => x.Order).First();
-
                 foreach (CardViewModel it in Cards.Items.Where(x => (int)x.ColumnDeterminant == column.Id))
                     it.ColumnDeterminant = firstColumn.Determinant;
 
-                // remove after Matrix update !!!
                 Db.Columns.Remove(column);
             }
             else
             {
-                // TODO: remove, subscribe at initialize()
-                prjService.DeleteRowAsync(row.Id);
+                // Shift cards
                 var firstRow = Rows.OrderBy(x => x.Order).First();
-
                 foreach (CardViewModel it in Cards.Items.Where(x => (int)x.RowDeterminant == row.Id))
                     it.RowDeterminant = firstRow.Determinant;
 
-                // remove after Matrix update !!!
                 Db.Rows.Remove(row);
             }
 
@@ -125,21 +119,20 @@ namespace Kamban.ViewModels
 
             if (column != null)
             {
-                ColumnInfo ci = new ColumnInfo
+                var tempColumns = Columns.ToList();
+                var indx = tempColumns.IndexOf(head) + after;
+
+                var cvm = new ColumnViewModel
                 {
-                    Name = ts,
+                    Caption = ts,
                     BoardId = column.BoardId
                 };
 
-                // TODO: remove, subscribe at initialize()
-                prjService.CreateOrUpdateColumnAsync(ci);
-                var indx = Columns.IndexOf(head) + after;
-                var temp = mapper.Map<ColumnInfo, ColumnViewModel>(ci);
-
-                Db.Columns.Insert(indx, temp);
+                tempColumns.Insert(indx, cvm);
+                Db.Columns.Add(cvm);
 
                 int i = 0;
-                foreach (var it in Columns)
+                foreach (var it in tempColumns)
                 {
                     it.Order = i;
                     i++;
@@ -147,20 +140,20 @@ namespace Kamban.ViewModels
             }
             else
             {
-                RowInfo ri = new RowInfo
+                var tempRows = Rows.ToList();
+                var indx = tempRows.IndexOf(head) + after;
+
+                var rvm = new RowViewModel
                 {
-                    Name = ts,
+                    Caption = ts,
                     BoardId = row.BoardId
                 };
 
-                prjService.CreateOrUpdateRowAsync(ri);
-                var indx = Rows.IndexOf(head) + after;
-                var temp = mapper.Map<RowInfo, RowViewModel>(ri);
-
-                Db.Rows.Insert(indx, temp);
+                tempRows.Insert(indx, rvm);
+                Db.Rows.Add(rvm);
 
                 int i = 0;
-                foreach (var it in Rows)
+                foreach (var it in tempRows)
                 {
                     it.Order = i;
                     i++;
@@ -192,8 +185,8 @@ namespace Kamban.ViewModels
                 return;
 
             CurrentBoard.Name = newName;
-            var bi = mapper.Map<BoardViewModel, BoardInfo>(CurrentBoard);
-            prjService.CreateOrUpdateBoardAsync(bi);
+            //var bi = mapper.Map<BoardViewModel, BoardInfo>(CurrentBoard);
+            //prjService.CreateOrUpdateBoardAsync(bi);
             Title = newName;
 
             BoardsMenuItems

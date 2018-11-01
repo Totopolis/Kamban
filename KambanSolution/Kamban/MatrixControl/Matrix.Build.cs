@@ -44,6 +44,7 @@ namespace Kamban.MatrixControl
             for (int i = 0; i < columnCount; i++)
             {
                 var it = columns[i];
+                Monik?.ApplicationVerbose($"Matrix.RebuildGrid add column {it.Id}::{it.Caption}::{it.Order}");
 
                 var cd = new ColumnDefinition();
                 cd.DataContext = it;
@@ -80,6 +81,7 @@ namespace Kamban.MatrixControl
             for (int i = 0; i < rowCount; i++)
             {
                 var it = rows[i];
+                Monik?.ApplicationVerbose($"Matrix.RebuildGrid add row {it.Id}::{it.Caption}::{it.Order}");
 
                 var rd = new RowDefinition();
                 rd.DataContext = it;
@@ -162,8 +164,6 @@ namespace Kamban.MatrixControl
 
             Grid.SetRow(newSpliter, index + 1);
 
-            Monik?.ApplicationVerbose($"Matrix.BuildHorizontalSpliter rowIndx={index + 1} columnSpan={horizontalCategoriescount + 1}");
-
             return newSpliter;
         }
 
@@ -182,8 +182,6 @@ namespace Kamban.MatrixControl
 
             Grid.SetColumn(newSpliter, index + 1);
             
-            Monik?.ApplicationVerbose($"Matrix.BuildVerticalSpliter columnIndx={index + 1} rowSpan={verticalCategoriesCount + 1}");
-
             return newSpliter;
         }
 

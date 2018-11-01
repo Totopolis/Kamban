@@ -185,6 +185,8 @@ namespace Kamban.ViewModels
             for (int i = 0; i < Rows.Count; i++)
                 Rows[i].Size = (int)rowSize * 10;
 
+            // TODO: fill order 
+
             // 4. Create columns
             foreach (var cvm in Columns)
             {
