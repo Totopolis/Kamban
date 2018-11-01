@@ -15,9 +15,5 @@ namespace Kamban.Model
         [Reactive] public string Name { get; set; }
         [Reactive] public DateTime Created { get; set; }
         [Reactive] public DateTime Modified { get; set; }
-        
-        [Reactive] public SourceList<ColumnViewModel> Columns { get; set; }
-        [Reactive] public SourceList<RowViewModel> Rows { get; set; }
-        [Reactive] public SourceList<CardViewModel> Cards { get; set; }
     }
 }

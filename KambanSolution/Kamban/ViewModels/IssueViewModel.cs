@@ -47,24 +47,22 @@ namespace Kamban.ViewModels
 
     public class IssueViewModel : ViewModelBase, IInitializableViewModel
     {
-        private IProjectService prjService;
+        private DbViewModel db;
         private BoardViewModel board;
         private int requestedColumnId;
         private int requestedRowId;
 
-        private SourceList<ColumnInfo> columns;
-        private SourceList<RowInfo> rows;
-
         [Reactive] public CardViewModel Card { get; set; }
         [Reactive] public IssueEditResult Result { get; set; }
 
-        public ReadOnlyObservableCollection<ColumnInfo> AvailableColumns { get; set; }
-        public ReadOnlyObservableCollection<RowInfo> AvailableRows { get; set; }
+        [Reactive] public ReadOnlyObservableCollection<ColumnViewModel> AvailableColumns { get; set; }
+        [Reactive] public ReadOnlyObservableCollection<RowViewModel> AvailableRows { get; set; }
 
         [Reactive] public string Head { get; set; }
         [Reactive] public string Body { get; set; }
-        [Reactive] public RowInfo SelectedRow { get; set; }
-        [Reactive] public ColumnInfo SelectedColumn { get; set; }
+
+        [Reactive] public ColumnViewModel SelectedColumn { get; set; }
+        [Reactive] public RowViewModel SelectedRow { get; set; }
 
         public ReactiveCommand CancelCommand { get; set; }
         public ReactiveCommand SaveCommand { get; set; }
@@ -88,12 +86,6 @@ namespace Kamban.ViewModels
         public IssueViewModel()
         {
             Card = null;
-
-            columns = new SourceList<ColumnInfo>();
-            AvailableColumns = columns.SpawnCollection();
-
-            rows = new SourceList<RowInfo>();
-            AvailableRows = rows.SpawnCollection();
 
             var issueFilled = this.WhenAnyValue(
                 t => t.Head, t => t.SelectedRow, t => t.SelectedColumn, t => t.SelectedColor,
@@ -162,17 +154,28 @@ namespace Kamban.ViewModels
             IsOpened = false;
         }
 
-        public async Task UpdateViewModel()
+        public void UpdateViewModel()
         {
-            // TODO: get from AppModel.Db.Board
-            var columnsInfo = await prjService.GetColumnsByBoardIdAsync(board.Id);
-            var rowsInfo = await prjService.GetRowsByBoardIdAsync(board.Id);
+            db.Columns
+                .Connect()
+                .AutoRefresh()
+                .Filter(x => x.BoardId == board.Id)
+                .Bind(out ReadOnlyObservableCollection<ColumnViewModel> temp)
+                .Subscribe();
 
-            columns.ClearAndAddRange(columnsInfo);
-            SelectedColumn = columns.First();
+            AvailableColumns = temp;
 
-            rows.ClearAndAddRange(rowsInfo);
-            SelectedRow = rows.First();
+            db.Rows
+                .Connect()
+                .AutoRefresh()
+                .Filter(x => x.BoardId == board.Id)
+                .Bind(out ReadOnlyObservableCollection<RowViewModel> temp2)
+                .Subscribe();
+
+            AvailableRows = temp2;
+
+            SelectedColumn = AvailableColumns.First();
+            SelectedRow = AvailableRows.First();
 
             if (Card == null)
             {
@@ -181,10 +184,10 @@ namespace Kamban.ViewModels
                 SelectedColor = ColorItems.First();
 
                 if (requestedColumnId != 0)
-                    SelectedColumn = columns.First(c => c.Id == requestedColumnId);
+                    SelectedColumn = AvailableColumns.First(c => c.Id == requestedColumnId);
 
                 if (requestedRowId != 0)
-                    SelectedRow = rows.First(c => c.Id == requestedRowId);
+                    SelectedRow = AvailableRows.First(c => c.Id == requestedRowId);
 
                 Result = IssueEditResult.Created;
             }
@@ -193,8 +196,8 @@ namespace Kamban.ViewModels
                 Head = Card.Header;
                 Body = Card.Body;
 
-                SelectedColumn = columns.First(c => c.Id == Card.ColumnDeterminant);
-                SelectedRow = rows.First(r => r.Id == Card.RowDeterminant);
+                SelectedColumn = AvailableColumns.First(c => c.Id == Card.ColumnDeterminant);
+                SelectedRow = AvailableRows.First(r => r.Id == Card.RowDeterminant);
 
                 SelectedColor = ColorItems.
                     FirstOrDefault(c => c.SystemName == Card.Color)
@@ -210,16 +213,14 @@ namespace Kamban.ViewModels
             if (request == null)
                 return;
 
-            prjService = request.PrjService;
+            db = request.Db;
             board = request.Board;
             Card = request.Card;
 
             requestedColumnId = request.ColumnId;
             requestedRowId = request.RowId;
 
-            Observable.FromAsync(() => UpdateViewModel())
-                .ObserveOnDispatcher()
-                .Subscribe();
+            UpdateViewModel();
 
             Title = $"Issue edit {Head}";
             IsOpened = true;
