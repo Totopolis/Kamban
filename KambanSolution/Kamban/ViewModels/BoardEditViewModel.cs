@@ -195,19 +195,7 @@ namespace Kamban.ViewModels
             this.ObservableForProperty(w => w.CurrentBoard)
                 .Where(v => v != null)
                 .ObserveOnDispatcher()
-                .Subscribe(async _ =>
-                {
-                    mon.LogicVerbose("BoardViewModel.CurrentBoard changed");
-
-                    BoardsMenuItems.ToList().ForEach(x => x.IsChecked = false);
-
-                    BoardsMenuItems
-                        .Where(x => x.Name == CurrentBoard.Name)
-                        .First()
-                        .IsChecked = true;
-
-                    await RefreshContent();
-                });
+                .Subscribe(async _ => await OnBoardChanged());
 
             this.ObservableForProperty(w => w.IssueFlyout.IsOpened)
                 .Where(x => x.Value == false && IssueFlyout.Result == IssueEditResult.Created)
@@ -233,38 +221,50 @@ namespace Kamban.ViewModels
             mon.LogicVerbose("BoardViewModel.ctor finished");
         }
 
-        private async Task RefreshContent()
+        private async Task OnBoardChanged()
         {
-            mon.LogicVerbose("BoardViewModel.RefreshContent started");
+            mon.LogicVerbose("BoardViewModel.CurrentBoard changed");
 
-            try
-            {
-                Title = CurrentBoard.Name;
-                FullTitle = prjService.Uri;
-                EnableMatrix = false;
+            BoardsMenuItems.ToList().ForEach(x => x.IsChecked = false);
 
-                var columns = await prjService.GetColumnsByBoardIdAsync(CurrentBoard.Id);
-                columns.Sort((x, y) => x.Order.CompareTo(y.Order));
+            BoardsMenuItems
+                .Where(x => x.Name == CurrentBoard.Name)
+                .First()
+                .IsChecked = true;
 
-                var rows = await prjService.GetRowsByBoardIdAsync(CurrentBoard.Id);
-                rows.Sort((x, y) => x.Order.CompareTo(y.Order));
+            Db.Columns
+                .Connect()
+                .AutoRefresh()
+                .Filter(x => x.BoardId == CurrentBoard.Id)
+                .Sort(SortExpressionComparer<ColumnViewModel>.Ascending(x => x.Order))
+                .Bind(out ReadOnlyObservableCollection<ColumnViewModel> temp3)
+                .Subscribe();
 
-                var issues = await prjService.GetIssuesByBoardIdAsync(CurrentBoard.Id);
+            Columns = temp3;
 
-                //var toDel = issues.Where(x => x.ColumnId == 0 || x.RowId == 0).ToArray();
-                //foreach (var it in toDel)
-                //    scope.DeleteIssueAsync(it.Id);
+            Db.Rows
+                .Connect()
+                .Filter(x => x.BoardId == CurrentBoard.Id)
+                .Sort(SortExpressionComparer<RowViewModel>.Ascending(x => x.Order))
+                .Bind(out ReadOnlyObservableCollection<RowViewModel> temp4)
+                .Subscribe();
 
-                Cards.ClearAndAddRange(issues.Select(x => mapper.Map<Issue, CardViewModel>(x)));
+            Rows = temp4;
 
-                EnableMatrix = true;
+            Title = CurrentBoard.Name;
+            FullTitle = prjService.Uri;
 
-                mon.LogicVerbose("BoardViewModel.RefreshContent finished");
-            }
-            catch (Exception ex)
-            {
-                mon.ApplicationError("BoardViewModel.RefreshContent: " + ex.Message);
-            }
+            EnableMatrix = false;
+
+            var issues = await prjService.GetIssuesByBoardIdAsync(CurrentBoard.Id);
+
+            //var toDel = issues.Where(x => x.ColumnId == 0 || x.RowId == 0).ToArray();
+            //foreach (var it in toDel)
+            //    scope.DeleteIssueAsync(it.Id);
+
+            Cards.ClearAndAddRange(issues.Select(x => mapper.Map<Issue, CardViewModel>(x)));
+
+            EnableMatrix = true;
         }
 
         private void ShowFlyout(IInitializableViewModel vm, ICard cvm, int column = 0, int row = 0)
@@ -361,22 +361,6 @@ namespace Kamban.ViewModels
 
             var request = viewRequest as BoardViewRequest;
             CurrentBoard = request.Board ?? BoardsInFile.First();
-
-            Db.Columns
-                .Connect()
-                .Filter(x => x.BoardId == CurrentBoard.Id)
-                .Bind(out ReadOnlyObservableCollection<ColumnViewModel> temp3)
-                .Subscribe();
-
-            Columns = temp3;
-
-            Db.Rows
-                .Connect()
-                .Filter(x => x.BoardId == CurrentBoard.Id)
-                .Bind(out ReadOnlyObservableCollection<RowViewModel> temp4)
-                .Subscribe();
-
-            Rows = temp4;
 
             mon.LogicVerbose("BoardViewModel.Activate finished");
         }

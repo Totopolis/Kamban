@@ -58,6 +58,8 @@ namespace Kamban.ViewModels
             if (ts == MessageDialogResult.Negative)
                 return;
 
+            this.EnableMatrix = false;
+
             // delete head and move cards from deleted cells to first head
             if (column != null)
             {
@@ -84,8 +86,12 @@ namespace Kamban.ViewModels
                 Db.Rows.Remove(row);
             }
 
-            NormalizeGridCommand.Execute().Subscribe();
-            await RefreshContent();
+            // Rebuild Matrix
+            this.EnableMatrix = true;
+
+            NormalizeGridCommand
+                .Execute()
+                .Subscribe();
         }
 
         private async Task InsertHeadBeforeCommandExecute(IDim head)
@@ -114,6 +120,8 @@ namespace Kamban.ViewModels
 
             var column = head as ColumnViewModel;
             var row = head as RowViewModel;
+
+            this.EnableMatrix = false;
 
             if (column != null)
             {
@@ -159,7 +167,12 @@ namespace Kamban.ViewModels
                 }
             }
 
-            NormalizeGridCommand.Execute().Subscribe();
+            // Rebuild matrix
+            this.EnableMatrix = true;
+
+            NormalizeGridCommand
+                .Execute()
+                .Subscribe();
         }
 
         private async Task RenameBoardCommandExecute()
