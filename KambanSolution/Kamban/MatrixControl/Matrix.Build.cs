@@ -27,9 +27,9 @@ namespace Kamban.MatrixControl
                 return;
             }
 
-            var columns = Columns.Items.ToList();
+            var columns = Columns.ToList();
             int columnCount = Columns.Count;
-            var rows = Rows.Items.ToList();
+            var rows = Rows.ToList();
             int rowCount = Rows.Count;
 
             //////////////////

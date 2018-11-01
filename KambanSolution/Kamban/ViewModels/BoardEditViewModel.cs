@@ -40,8 +40,9 @@ namespace Kamban.ViewModels
 
         [Reactive] public BoardViewModel CurrentBoard { get; set; }
 
-        [Reactive] public SourceList<IDim> Columns { get; set; }
-        [Reactive] public SourceList<IDim> Rows { get; set; }
+        [Reactive] public ReadOnlyObservableCollection<ColumnViewModel> Columns { get; set; }
+        [Reactive] public ReadOnlyObservableCollection<RowViewModel> Rows { get; set; }
+
         [Reactive] public SourceList<ICard> Cards { get; set; }
 
         [Reactive] public ICard IssueOfContextMenu { get; set; }
@@ -95,8 +96,8 @@ namespace Kamban.ViewModels
             EnableMatrix = false;
             Monik = mon;
 
-            Columns = new SourceList<IDim>();
-            Rows = new SourceList<IDim>();
+            Columns = null;
+            Rows = null;
             Cards = new SourceList<ICard>();
 
             BoardsInFile = null;
@@ -129,10 +130,10 @@ namespace Kamban.ViewModels
                 (tup) => ShowFlyout(IssueFlyout, null, (int)tup.column, (int)tup.row));
 
             CreateColumnCommand = ReactiveCommand.CreateFromTask(() =>
-                InsertHeadAfterCommandExecute(Columns.Items.Last()));
+                InsertHeadAfterCommandExecute(Columns.Last()));
 
             CreateRowCommand = ReactiveCommand.CreateFromTask(() =>
-                InsertHeadAfterCommandExecute(Rows.Items.Last()));
+                InsertHeadAfterCommandExecute(Rows.Last()));
 
             AddBoardCommand = ReactiveCommand.Create(() =>
             {
@@ -178,28 +179,6 @@ namespace Kamban.ViewModels
 
                     string name = ((MenuItem)mi).Header as string;
                     CurrentBoard = BoardsInFile.Where(x => x.Name == name).First();
-                });
-
-            Columns
-                .Connect()
-                .Transform(x => x as ColumnViewModel)
-                .WhenAnyPropertyChanged()
-                .Subscribe(cvm =>
-                {
-                    mon.LogicVerbose("BoardViewModel.Columns.ItemChanged");
-                    var col = mapper.Map<ColumnViewModel, ColumnInfo>(cvm);
-                    prjService.CreateOrUpdateColumnAsync(col);
-                });
-
-            Rows
-                .Connect()
-                .Transform(x => x as RowViewModel)
-                .WhenAnyPropertyChanged()
-                .Subscribe(rvm =>
-                {
-                    mon.LogicVerbose("BoardViewModel.Rows.ItemChanged");
-                    var row = mapper.Map<RowViewModel, RowInfo>(rvm);
-                    prjService.CreateOrUpdateRowAsync(row);
                 });
 
             Cards
@@ -275,8 +254,7 @@ namespace Kamban.ViewModels
                 //var toDel = issues.Where(x => x.ColumnId == 0 || x.RowId == 0).ToArray();
                 //foreach (var it in toDel)
                 //    scope.DeleteIssueAsync(it.Id);
-                Columns.ClearAndAddRange(columns.Select(x => mapper.Map<ColumnInfo, ColumnViewModel>(x)));
-                Rows.ClearAndAddRange(rows.Select(x => mapper.Map<RowInfo, RowViewModel>(x)));
+
                 Cards.ClearAndAddRange(issues.Select(x => mapper.Map<Issue, CardViewModel>(x)));
 
                 EnableMatrix = true;
@@ -349,6 +327,28 @@ namespace Kamban.ViewModels
                 .Bind(out ReadOnlyObservableCollection<CommandItem> temp2)
                 .Subscribe();
 
+            Db.Columns
+                .Connect()
+                //.AutoRefresh()
+                .WhenAnyPropertyChanged()
+                .Subscribe(cvm =>
+                {
+                    mon.LogicVerbose("BoardViewModel.Columns.ItemChanged");
+                    var col = mapper.Map<ColumnViewModel, ColumnInfo>(cvm);
+                    prjService.CreateOrUpdateColumnAsync(col);
+                });
+
+            Db.Rows
+                .Connect()
+                //.AutoRefresh()
+                .WhenAnyPropertyChanged()
+                .Subscribe(rvm =>
+                {
+                    mon.LogicVerbose("BoardViewModel.Rows.ItemChanged");
+                    var row = mapper.Map<RowViewModel, RowInfo>(rvm);
+                    prjService.CreateOrUpdateRowAsync(row);
+                });
+
             // TODO: use for checks and renames - original BoardsInFile
             BoardsMenuItems = temp2;
 
@@ -361,6 +361,22 @@ namespace Kamban.ViewModels
 
             var request = viewRequest as BoardViewRequest;
             CurrentBoard = request.Board ?? BoardsInFile.First();
+
+            Db.Columns
+                .Connect()
+                .Filter(x => x.BoardId == CurrentBoard.Id)
+                .Bind(out ReadOnlyObservableCollection<ColumnViewModel> temp3)
+                .Subscribe();
+
+            Columns = temp3;
+
+            Db.Rows
+                .Connect()
+                .Filter(x => x.BoardId == CurrentBoard.Id)
+                .Bind(out ReadOnlyObservableCollection<RowViewModel> temp4)
+                .Subscribe();
+
+            Rows = temp4;
 
             mon.LogicVerbose("BoardViewModel.Activate finished");
         }

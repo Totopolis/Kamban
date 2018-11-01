@@ -1,5 +1,6 @@
 ﻿using DynamicData;
 using GongSolutions.Wpf.DragDrop;
+using Kamban.Model;
 using Monik.Common;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -7,6 +8,7 @@ using ReactiveUI.Legacy;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Numerics;
 using System.Reactive;
@@ -63,31 +65,29 @@ namespace Kamban.MatrixControl
                 new PropertyMetadata(new SourceList<ICard>(),
                     new PropertyChangedCallback(OnCardsPropertyChanged)));
 
-        public SourceList<IDim> Columns
+        public ReadOnlyObservableCollection<ColumnViewModel> Columns
         {
-            get => (SourceList<IDim>)GetValue(ColumnsProperty);
+            get => (ReadOnlyObservableCollection<ColumnViewModel>)GetValue(ColumnsProperty);
             set => SetValue(ColumnsProperty, value);
         }
 
         public static readonly DependencyProperty ColumnsProperty =
             DependencyProperty.Register("Columns",
-                typeof(SourceList<IDim>),
+                typeof(ReadOnlyObservableCollection<ColumnViewModel>),
                 typeof(Matrix),
-                new PropertyMetadata(new SourceList<IDim>(),
-                    new PropertyChangedCallback(OnColumnsPropertyChanged)));
+                new PropertyMetadata(null, new PropertyChangedCallback(OnColumnsPropertyChanged)));
 
-        public SourceList<IDim> Rows
+        public ReadOnlyObservableCollection<RowViewModel> Rows
         {
-            get => (SourceList<IDim>)GetValue(RowsProperty);
+            get => (ReadOnlyObservableCollection<RowViewModel>)GetValue(RowsProperty);
             set => SetValue(RowsProperty, value);
         }
 
         public static readonly DependencyProperty RowsProperty =
             DependencyProperty.Register("Rows",
-                typeof(SourceList<IDim>),
+                typeof(ReadOnlyObservableCollection<RowViewModel>),
                 typeof(Matrix),
-                new PropertyMetadata(new SourceList<IDim>(),
-                    new PropertyChangedCallback(OnRowsPropertyChanged)));
+                new PropertyMetadata(null, new PropertyChangedCallback(OnRowsPropertyChanged)));
 
         public ICard CardUnderMouse
         {

@@ -61,25 +61,27 @@ namespace Kamban.ViewModels
             // delete head and move cards from deleted cells to first head
             if (column != null)
             {
+                // TODO: remove, subscribe at initialize()
                 prjService.DeleteColumnAsync(column.Id);
-                var firstColumn = Columns.Items.OrderBy(x => x.Order).First();
+                var firstColumn = Columns.OrderBy(x => x.Order).First();
 
                 foreach (CardViewModel it in Cards.Items.Where(x => (int)x.ColumnDeterminant == column.Id))
                     it.ColumnDeterminant = firstColumn.Determinant;
 
                 // remove after Matrix update !!!
-                Columns.Remove(column);
+                Db.Columns.Remove(column);
             }
             else
             {
+                // TODO: remove, subscribe at initialize()
                 prjService.DeleteRowAsync(row.Id);
-                var firstRow = Rows.Items.OrderBy(x => x.Order).First();
+                var firstRow = Rows.OrderBy(x => x.Order).First();
 
                 foreach (CardViewModel it in Cards.Items.Where(x => (int)x.RowDeterminant == row.Id))
                     it.RowDeterminant = firstRow.Determinant;
 
                 // remove after Matrix update !!!
-                Rows.Remove(row);
+                Db.Rows.Remove(row);
             }
 
             NormalizeGridCommand.Execute().Subscribe();
@@ -121,13 +123,15 @@ namespace Kamban.ViewModels
                     BoardId = column.BoardId
                 };
 
+                // TODO: remove, subscribe at initialize()
                 prjService.CreateOrUpdateColumnAsync(ci);
-                var indx = Columns.Items.IndexOf(head) + after;
+                var indx = Columns.IndexOf(head) + after;
                 var temp = mapper.Map<ColumnInfo, ColumnViewModel>(ci);
-                Columns.Insert(indx, temp);
+
+                Db.Columns.Insert(indx, temp);
 
                 int i = 0;
-                foreach (var it in Columns.Items)
+                foreach (var it in Columns)
                 {
                     it.Order = i;
                     i++;
@@ -142,12 +146,13 @@ namespace Kamban.ViewModels
                 };
 
                 prjService.CreateOrUpdateRowAsync(ri);
-                var indx = Rows.Items.IndexOf(head) + after;
+                var indx = Rows.IndexOf(head) + after;
                 var temp = mapper.Map<RowInfo, RowViewModel>(ri);
-                Rows.Insert(indx, temp);
+
+                Db.Rows.Insert(indx, temp);
 
                 int i = 0;
-                foreach (var it in Rows.Items)
+                foreach (var it in Rows)
                 {
                     it.Order = i;
                     i++;

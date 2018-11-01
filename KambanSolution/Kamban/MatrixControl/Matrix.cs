@@ -42,15 +42,6 @@ namespace Kamban.MatrixControl
 
             if (mx.Columns == null)
                 return;
-
-            mx.Columns
-                .Connect()
-                .Where(x => mx.EnableWork)
-                .Subscribe(_ =>
-                {
-                    mx.Monik?.ApplicationVerbose("Matrix.Columns.Changed");
-                    mx.RebuildGrid();
-                });
         }
 
         public static void OnRowsPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
@@ -60,15 +51,6 @@ namespace Kamban.MatrixControl
 
             if (mx.Rows == null)
                 return;
-
-            mx.Rows
-                .Connect()
-                .Where(x => mx.EnableWork)
-                .Subscribe(_ =>
-                {
-                    mx.Monik?.ApplicationVerbose("Matrix.Rows.Changed");
-                    mx.RebuildGrid();
-                });
         }
 
         private ColumnDefinition columnWidthChanging = null;
@@ -84,7 +66,7 @@ namespace Kamban.MatrixControl
         {
             if (columnWidthChanging != null)
             {
-                var columns = Columns.Items.ToList();
+                var columns = Columns.ToList();
                 var cd = MainGrid.ColumnDefinitions;
                 for (int i = 1; i < cd.Count; i++)
                     columns[i - 1].Size = (int)cd[i].Width.Value;
@@ -104,7 +86,7 @@ namespace Kamban.MatrixControl
         {
             if (rowHeightChanging != null)
             {
-                var rows = Rows.Items.ToList();
+                var rows = Rows.ToList();
                 var rd = MainGrid.RowDefinitions;
                 for (int i = 1; i < rd.Count; i++)
                     rows[i - 1].Size = (int)rd[i].Height.Value;
@@ -126,7 +108,7 @@ namespace Kamban.MatrixControl
 
                 double colSize = 100 / (self.Columns.Count - 1);
 
-                var columns = self.Columns.Items.ToList();
+                var columns = self.Columns.ToList();
                 var colDefs = self.MainGrid.ColumnDefinitions;
                 for (int i = 1; i < colDefs.Count; i++)
                 {
@@ -141,7 +123,7 @@ namespace Kamban.MatrixControl
 
                 double rowSize = 100 / (self.Rows.Count - 1);
 
-                var rows = self.Rows.Items.ToList();
+                var rows = self.Rows.ToList();
                 var rowDefs = self.MainGrid.RowDefinitions;
                 for (int i = 1; i < rowDefs.Count; i++)
                 {
