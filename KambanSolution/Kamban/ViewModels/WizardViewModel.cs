@@ -179,13 +179,17 @@ namespace Kamban.ViewModels
             // 3. Normalize grid
             double colSize = 100 / (Columns.Count - 1);
             for (int i = 0; i < Columns.Count; i++)
+            {
+                Columns[i].Order = i;
                 Columns[i].Size = (int)colSize * 10;
+            }
 
             double rowSize = 100 / (Rows.Count - 1);
             for (int i = 0; i < Rows.Count; i++)
+            {
+                Rows[i].Order = i;
                 Rows[i].Size = (int)rowSize * 10;
-
-            // TODO: fill order 
+            }
 
             // 4. Create columns
             foreach (var cvm in Columns)
