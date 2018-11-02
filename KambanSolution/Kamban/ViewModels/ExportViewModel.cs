@@ -27,7 +27,7 @@ namespace Kamban.ViewModels
 {
     public class BoardToExport : ReactiveObject
     {
-        [Reactive] public BoardInfo Board { get; set; }
+        [Reactive] public BoardViewModel Board { get; set; }
         [Reactive] public bool IsChecked { get; set; }
     }
 
@@ -47,8 +47,8 @@ namespace Kamban.ViewModels
         private IProjectService prjService;
         private SourceList<BoardToExport> boards;
 
-        [Reactive] public ReadOnlyObservableCollection<DbViewModel> AvailableFiles { get; set; }
-        [Reactive] public DbViewModel SelectedFile { get; set; }
+        [Reactive] public ReadOnlyObservableCollection<DbViewModel> AvailableDbs { get; set; }
+        [Reactive] public DbViewModel SelectedDb { get; set; }
         [Reactive] public ReadOnlyObservableCollection<BoardToExport> AvailableBoards { get; set; }
 
         [Reactive] public bool ExportJson { get; set; }
@@ -73,55 +73,62 @@ namespace Kamban.ViewModels
             this.appModel = am;
             dialCoord = dc;
 
-            boards = new SourceList<BoardToExport>();
-
             appModel.RecentsDb
                 .Connect()
                 .AutoRefresh()
                 .Sort(SortExpressionComparer<DbViewModel>.Descending(x => x.LastAccess))
-                //.Top(3) // ?
                 .Bind(out ReadOnlyObservableCollection<DbViewModel> temp)
                 .Subscribe();
 
-            AvailableFiles = temp;
+            AvailableDbs = temp;
+
+            boards = new SourceList<BoardToExport>();
             AvailableBoards = boards.SpawnCollection();
+
+            ExportJson = true;
+            DatePostfix = true;
+            SplitBoardsToFiles = false;
 
             var canExport = boards
                 .Connect()
                 .AutoRefresh()
-                .Select(x => boards.Items.Count(y => y.IsChecked) > 0 && !string.IsNullOrEmpty(SelectedFile.Uri));
+                .Filter(x=>x.IsChecked)
+                .Select(x => AvailableBoards.Count(y => y.IsChecked) > 0
+                    && !string.IsNullOrEmpty(SelectedDb.Uri) && File.Exists(SelectedDb.Uri));
 
-            SelectTargetFolderCommand = ReactiveCommand.Create(SelectTargetFolderCommandExecute);
             ExportCommand = ReactiveCommand.CreateFromTask(ExportCommandExecute, canExport);
+            SelectTargetFolderCommand = ReactiveCommand.Create(SelectTargetFolderCommandExecute);
             CancelCommand = ReactiveCommand.Create(() => this.Close());
 
-            // TODO: handle not found file
-
-            this.ObservableForProperty(x => x.SelectedFile)
+            this.ObservableForProperty(x => x.SelectedDb)
                 .Where(x => x.Value != null)
-                .Subscribe(async (sf) =>
+                .Select(x => x.Value)
+                .Subscribe(db =>
                 {
-                    prjService = appModel.LoadProjectService(sf.Value.Uri);
-
-                    var lst = (await prjService.GetAllBoardsInFileAsync())
-                        .Select(x => new BoardToExport { Board = x, IsChecked = true });
-
-                    boards.ClearAndAddRange(lst);
-
-                    TargetFile = Path.GetFileNameWithoutExtension(sf.Value.Uri) + "_export";
+                    boards.ClearAndAddRange(db.Boards.Items
+                        .Select(x => new BoardToExport { Board = x, IsChecked = true }));
+                    
+                    TargetFile = Path.GetFileNameWithoutExtension(db.Uri) + "_export";
                 });
 
             this.ObservableForProperty(x => x.TargetFolder)
                 .Subscribe(x => appModel.ArchiveFolder = x.Value);
+
+            SelectedDb = AvailableDbs.FirstOrDefault();
+
+            var fi = new FileInfo(SelectedDb.Uri);
+            TargetFolder = appModel.ArchiveFolder ?? fi.DirectoryName;
         }
 
         private async Task ExportCommandExecute()
         {
             if (!Directory.Exists(TargetFolder))
             {
-                await dialCoord.ShowMessageAsync(this, "Warning", "Target directory not found");
+                await dialCoord.ShowMessageAsync(this, "Error", "Target directory not found");
                 return;
             }
+
+            prjService = appModel.LoadProjectService(SelectedDb.Uri);
 
             string fileName = TargetFolder + "\\" + TargetFile;
             if (DatePostfix)
@@ -190,7 +197,11 @@ namespace Kamban.ViewModels
 
         private void DoExportJson(DatabaseToExport db, string fileName)
         {
-            // TODO: check target file not exists
+            if (File.Exists(fileName))
+            {
+                dialCoord.ShowMessageAsync(this, "Error", "Target file already exists");
+                return;
+            }
 
             string output = JsonConvert.SerializeObject(db, Formatting.Indented);
             File.WriteAllText(fileName, output);
@@ -198,7 +209,11 @@ namespace Kamban.ViewModels
 
         private void DoExportKamban(DatabaseToExport db, string fileName)
         {
-            // TODO: check target file not exists
+            if (File.Exists(fileName))
+            {
+                dialCoord.ShowMessageAsync(this, "Error", "Target file already exists");
+                return;
+            }
 
             var prj = appModel.CreateProjectService(fileName);
 
@@ -233,16 +248,6 @@ namespace Kamban.ViewModels
         public void Initialize(ViewRequest viewRequest)
         {
             Title = "Export";
-
-            SelectedFile = AvailableFiles.FirstOrDefault();
-
-            ExportJson = true;
-            DatePostfix = true;
-            SplitBoardsToFiles = false;
-
-            var fi = new FileInfo(SelectedFile.Uri);
-
-            TargetFolder = appModel.ArchiveFolder ?? fi.DirectoryName;
         }
     }
 }
