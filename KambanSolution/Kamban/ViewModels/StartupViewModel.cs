@@ -31,6 +31,7 @@ namespace Kamban.ViewModels
         private readonly IAppModel appModel;
         private readonly IDialogCoordinator dialCoord;
         private readonly IMapper mapper;
+        private readonly IAppConfig appConfig;
 
         public ReadOnlyObservableCollection<DbViewModel> Recents { get; set; }
         public ReactiveCommand NewFileCommand { get; set; }
@@ -43,22 +44,15 @@ namespace Kamban.ViewModels
         public bool IsLoading { get; set; }
 
         public StartupViewModel(IShell shell, IAppModel appModel, IDialogCoordinator dc,
-            IMapper mp)
+            IMapper mp, IAppConfig cfg)
         {
             this.shell = shell as IShell;
             this.appModel = appModel;
             dialCoord = dc;
             mapper = mp;
+            appConfig = cfg;
 
-            appModel.RecentsDb
-                .Connect()
-                .AutoRefresh()
-                .Sort(SortExpressionComparer<DbViewModel>.Descending(x => x.LastAccess))
-                //.Top(3) // ?
-                .Bind(out ReadOnlyObservableCollection<DbViewModel> temp)
-                .Subscribe();
-
-            Recents = temp;
+            Recents = appModel.Dbs;
 
             OpenRecentDbCommand = ReactiveCommand.Create<string>(async (uri) =>
             {
@@ -88,13 +82,8 @@ namespace Kamban.ViewModels
                 }
             });
 
-            var canExport = appModel.RecentsDb
-                .Connect()
-                .AutoRefresh()
-                .Select(x => x.Count > 0);
-
             ExportCommand = ReactiveCommand.Create(() => 
-                this.shell.ShowView<ExportView>(), canExport);
+                this.shell.ShowView<ExportView>(), appModel.DbsCountMoreZero);
 
             ExitCommand = ReactiveCommand.Create(() => App.Current.Shutdown());
 
@@ -107,20 +96,19 @@ namespace Kamban.ViewModels
 
             if (!file.Exists)
             {
-                await dialCoord.ShowMessageAsync(this, "Error", "File was deleted or moved");
+                appConfig.RemoveRecent(uri);
+                appModel.RemoveDb(uri);
 
-                appModel.RemoveRecent(uri);
+                await dialCoord.ShowMessageAsync(this, "Error", "File was deleted or moved");
                 return;
             }
 
-            IProjectService service;
+            var db = await appModel.LoadDb(uri);
+            if (!db.Loaded)
+            {
+                appConfig.RemoveRecent(uri);
+                appModel.RemoveDb(uri);
 
-            try
-            {
-                service = await Task.Run(() => appModel.LoadProjectService(uri));
-            }
-            catch
-            {
                 await dialCoord.ShowMessageAsync(this, "Error", "File was damaged");
                 return;
             }
@@ -129,13 +117,9 @@ namespace Kamban.ViewModels
 
             await Task.Delay(200);
 
-            var db = appModel.AddRecent(uri);
-
             shell.ShowView<BoardView>(
                 viewRequest: new BoardViewRequest { ViewId = title, Db = db },
                 options: new UiShowOptions { Title = title });
-
-            //await FillRecentAsync(db);
         }
 
         public void Initialize(ViewRequest viewRequest)
@@ -158,36 +142,10 @@ namespace Kamban.ViewModels
 
         private async Task FillRecentsAsync()
         {
-            var toFill = Recents.ToList();
-            foreach (var it in toFill)
-                await FillRecentAsync(it);
-        }
+            var toFill = appConfig.Recent;
 
-        private async Task FillRecentAsync(DbViewModel db)
-        {
-            if (!File.Exists(db.Uri))
-                return;
-
-            try
-            {
-                db.LastAccess = File.GetLastWriteTime(db.Uri);
-
-                var prj = appModel.LoadProjectService(db.Uri);
-
-                var columns = await prj.GetAllColumns();
-                var rows = await prj.GetAllRows();
-                var boards = await prj.GetAllBoardsInFileAsync();
-
-                db.Columns.AddRange(columns.Select(x => mapper.Map<ColumnInfo, ColumnViewModel>(x)));
-                db.Rows.AddRange(rows.Select(x => mapper.Map<RowInfo, RowViewModel>(x)));
-                db.Boards.AddRange(boards.Select(x => mapper.Map<BoardInfo, BoardViewModel>(x)));
-
-                db.TotalTickets = 0;
-                foreach (var brd in boards)
-                    db.TotalTickets += (await prj.GetIssuesByBoardIdAsync(brd.Id)).Count();
-            }
-            // Skip broken file
-            catch { }
+            foreach (var uri in toFill)
+                await appModel.LoadDb(uri);
         }
 
     }//end of classs

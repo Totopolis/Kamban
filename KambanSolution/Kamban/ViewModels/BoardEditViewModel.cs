@@ -43,6 +43,7 @@ namespace Kamban.ViewModels
         [Reactive] public ReadOnlyObservableCollection<ColumnViewModel> Columns { get; set; }
         [Reactive] public ReadOnlyObservableCollection<RowViewModel> Rows { get; set; }
 
+        // TODO: use global cards
         [Reactive] public SourceList<ICard> Cards { get; set; }
 
         [Reactive] public ICard IssueOfContextMenu { get; set; }
@@ -63,11 +64,7 @@ namespace Kamban.ViewModels
         public ReactiveCommand<IDim, Unit> InsertHeadBeforeCommand { get; set; }
         public ReactiveCommand<IDim, Unit> InsertHeadAfterCommand { get; set; }
 
-        [Reactive] private RowInfo SelectedRow { get; set; }
-        [Reactive] private ColumnInfo SelectedColumn { get; set; }
-
         [Reactive] public ReadOnlyObservableCollection<BoardViewModel> BoardsInFile { get; set; }
-        private ReadOnlyObservableCollection<CommandItem> BoardsMenuItems;
 
         public ReactiveCommand<Unit, Unit> CreateTiketCommand { get; set; }
         public ReactiveCommand<(object column, object row), Unit> CellDoubleClickCommand { get; set; }
@@ -79,6 +76,7 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> PrevBoardCommand { get; set; }
         public ReactiveCommand<Unit, Unit> NextBoardCommand { get; set; }
         public ReactiveCommand<Unit, Unit> RenameBoardCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> DeleteBoardCommand { get; set; }
         public ReactiveCommand<object, Unit> SelectBoardCommand { get; set; }
 
         public BoardEditViewModel(IShell shell, IDialogCoordinator dc, IMonik m, IMapper mp, IAppModel am)
@@ -88,8 +86,6 @@ namespace Kamban.ViewModels
             mon = m;
             mapper = mp;
             appModel = am;
-
-            BoardsMenuItems = null;
 
             mon.LogicVerbose("BoardViewModel.ctor started");
 
@@ -169,6 +165,8 @@ namespace Kamban.ViewModels
 
             RenameBoardCommand = ReactiveCommand.CreateFromTask(RenameBoardCommandExecute);
 
+            DeleteBoardCommand = ReactiveCommand.CreateFromTask(DeleteBoardCommandExecute, appModel.DbsCountMoreOne);
+
             SelectBoardCommand = ReactiveCommand
                 .Create((object mi) =>
                 {
@@ -222,12 +220,11 @@ namespace Kamban.ViewModels
         {
             mon.LogicVerbose("BoardViewModel.CurrentBoard changed");
 
-            BoardsMenuItems.ToList().ForEach(x => x.IsChecked = false);
+            BoardsInFile.ToList().ForEach(x => x.IsChecked = false);
 
-            BoardsMenuItems
-                .Where(x => x.Name == CurrentBoard.Name)
-                .First()
-                .IsChecked = true;
+            CurrentBoard.IsChecked = true;
+
+            EnableMatrix = false;
 
             Db.Columns
                 .Connect()
@@ -252,8 +249,6 @@ namespace Kamban.ViewModels
             Title = CurrentBoard.Name;
             FullTitle = prjService.Uri;
 
-            EnableMatrix = false;
-
             var issues = await prjService.GetIssuesByBoardIdAsync(CurrentBoard.Id);
 
             //var toDel = issues.Where(x => x.ColumnId == 0 || x.RowId == 0).ToArray();
@@ -261,6 +256,8 @@ namespace Kamban.ViewModels
             //    scope.DeleteIssueAsync(it.Id);
 
             Cards.ClearAndAddRange(issues.Select(x => mapper.Map<Issue, CardViewModel>(x)));
+
+            // TODO: reimplement without EnableMatrix
 
             EnableMatrix = true;
         }
@@ -296,6 +293,7 @@ namespace Kamban.ViewModels
                 .SetHotKey(ModifierKeys.Control | ModifierKeys.Shift, Key.N);
 
             shell.AddVMCommand("Boards", "Rename board", "RenameBoardCommand", this);
+            shell.AddVMCommand("Boards", "Delete board", "DeleteBoardCommand", this);
 
             shell.AddVMCommand("Boards", "Prev board", "PrevBoardCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.Q);
@@ -306,7 +304,7 @@ namespace Kamban.ViewModels
             var request = viewRequest as BoardViewRequest;
 
             Db = request.Db;
-            prjService = appModel.LoadProjectService(request.Db.Uri);
+            prjService = appModel.GetProjectService(request.Db.Uri);
 
             Db.Boards
                 .Connect()
@@ -317,13 +315,37 @@ namespace Kamban.ViewModels
 
             BoardsInFile = temp;
 
+            BoardsInFile
+                .ToList()
+                .ForEach(x => x.MenuCommand = shell.AddInstanceCommand("Boards", x.Name, "SelectBoardCommand", this));
+
             Db.Boards
                 .Connect()
-                .AutoRefresh()
-                .Sort(SortExpressionComparer<BoardViewModel>.Ascending(t => t.Created))
-                .Transform(x => shell.AddInstanceCommand("Boards", x.Name, "SelectBoardCommand", this))
-                .Bind(out ReadOnlyObservableCollection<CommandItem> temp2)
-                .Subscribe();
+                .WhereReasonsAre(ListChangeReason.Add)
+                .Select(x => x.Select(q => q.Item.Current).First())
+                .Subscribe(bvm => bvm.MenuCommand = shell.AddInstanceCommand("Boards", bvm.Name, "SelectBoardCommand", this));
+
+            Db.Boards
+                .Connect()
+                .WhereReasonsAre(ListChangeReason.Remove)
+                .Select(x => x.Select(q => q.Item.Current).First())
+                .Subscribe(bvm =>
+                {
+                    shell.RemoveCommand(bvm.MenuCommand);
+                    bvm.MenuCommand = null;
+                });
+
+            Db.Boards
+                .Connect()
+                .WhenAnyPropertyChanged("Name", "Modified")
+                .Subscribe(bvm =>
+                {
+                    mon.LogicVerbose($"BoardViewModel.Boards.ItemChanged {bvm.Id}::{bvm.Name}::{bvm.Modified}");
+                    var bi = mapper.Map<BoardViewModel, BoardInfo>(bvm);
+                    prjService.CreateOrUpdateBoardAsync(bi);
+                });
+
+            // TODO: move actions to AppModel
 
             Db.Columns
                 .Connect()
@@ -400,9 +422,6 @@ namespace Kamban.ViewModels
                     .Select(q => q.Item.Current)
                     .ToList()
                     .ForEach(rvm => prjService.DeleteRowAsync(rvm.Id)));
-
-            // TODO: use for checks and renames - original BoardsInFile
-            BoardsMenuItems = temp2;
 
             mon.LogicVerbose("BoardViewModel.Initialize finished");
         }

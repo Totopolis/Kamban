@@ -67,20 +67,13 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> ExportCommand { get; set; }
         public ReactiveCommand CancelCommand { get; set; }
 
-        public ExportViewModel(IShell shell, IAppModel am, IDialogCoordinator dc)
+        public ExportViewModel(IShell shell, IAppModel am, IDialogCoordinator dc, IAppConfig cfg)
         {
             this.shell = shell as IShell;
             this.appModel = am;
             dialCoord = dc;
 
-            appModel.RecentsDb
-                .Connect()
-                .AutoRefresh()
-                .Sort(SortExpressionComparer<DbViewModel>.Descending(x => x.LastAccess))
-                .Bind(out ReadOnlyObservableCollection<DbViewModel> temp)
-                .Subscribe();
-
-            AvailableDbs = temp;
+            AvailableDbs = appModel.Dbs;
 
             boards = new SourceList<BoardToExport>();
             AvailableBoards = boards.SpawnCollection();
@@ -112,12 +105,12 @@ namespace Kamban.ViewModels
                 });
 
             this.ObservableForProperty(x => x.TargetFolder)
-                .Subscribe(x => appModel.ArchiveFolder = x.Value);
+                .Subscribe(x => cfg.ArchiveFolder = x.Value);
 
             SelectedDb = AvailableDbs.FirstOrDefault();
 
             var fi = new FileInfo(SelectedDb.Uri);
-            TargetFolder = appModel.ArchiveFolder ?? fi.DirectoryName;
+            TargetFolder = cfg.ArchiveFolder ?? fi.DirectoryName;
         }
 
         private async Task ExportCommandExecute()
@@ -128,7 +121,7 @@ namespace Kamban.ViewModels
                 return;
             }
 
-            prjService = appModel.LoadProjectService(SelectedDb.Uri);
+            prjService = appModel.GetProjectService(SelectedDb.Uri);
 
             string fileName = TargetFolder + "\\" + TargetFile;
             if (DatePostfix)
@@ -215,7 +208,7 @@ namespace Kamban.ViewModels
                 return;
             }
 
-            var prj = appModel.CreateProjectService(fileName);
+            var prj = appModel.GetProjectService(fileName);
 
             foreach (var brd in db.BoardList)
             {

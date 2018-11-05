@@ -23,16 +23,16 @@
         </Grid.ColumnDefinitions>
 
         <mykanban:Matrix
-            EnableWork="{Binding EnableMatrix}"
             Monik="{Binding Monik}"
+            Columns="{Binding Columns}"
+            Rows="{Binding Rows}"
+            Cards="{Binding Cards}"
+            EnableWork="{Binding EnableMatrix}"
             Grid.Column="0"
             Grid.ColumnSpan="4"
             IsTabStop="False"
             NormalizeGridCommand="{Binding NormalizeGridCommand}"
             CardClickCommand="{Binding CardClickCommand}"
-            Columns="{Binding Columns}"
-            Rows="{Binding Rows}"
-            Cards="{Binding Cards}"
             CardOfContextMenu="{Binding IssueOfContextMenu, Mode=TwoWay}"
             HeadOfContextMenu="{Binding HeadOfContextMenu, Mode=TwoWay}"
             CellDoubleClickCommand="{Binding CellDoubleClickCommand}"

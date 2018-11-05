@@ -53,13 +53,16 @@ namespace Kamban.ViewModels
         private readonly IShell shell;
         private readonly IDialogCoordinator dialCoord;
         private readonly IMapper mapper;
+        private readonly IAppConfig appConfig;
 
-        public WizardViewModel(IAppModel appModel, IShell shell, IDialogCoordinator dc, IMapper mp)
+        public WizardViewModel(IAppModel appModel, IShell shell, IDialogCoordinator dc, IMapper mp,
+            IAppConfig cfg)
         {
             this.appModel = appModel;
             this.shell = shell;
             dialCoord = dc;
             mapper = mp;
+            appConfig = cfg;
 
             Columns = new ObservableCollection<ColumnViewModel>();
             Rows = new ObservableCollection<RowViewModel>();
@@ -69,6 +72,7 @@ namespace Kamban.ViewModels
                 if (SelectedTemplate == null)
                     return;
 
+                // TODO: make copies because they go to global !!!
                 Columns.Clear();
                 Columns.AddRange(SelectedTemplate.Columns);
 
@@ -149,21 +153,36 @@ namespace Kamban.ViewModels
             }
 
             // 2. Create board (or get from preloaded)
-            var db = appModel.AddRecent(uri);
+            DbViewModel db;
             IProjectService prjService;
 
             if (IsNewFile)
-                prjService = appModel.CreateProjectService(uri);
+            {
+                db = await appModel.CreateDb(uri);
+                if (!db.Loaded)
+                    throw new Exception("File not loaded");
+
+                appConfig.AddRecent(uri);
+            }
             else
             {
+                db = await appModel.LoadDb(uri);
+                if (!db.Loaded)
+                {
+                    appConfig.RemoveRecent(uri);
+                    appModel.RemoveDb(uri);
+                    await dialCoord.ShowMessageAsync(this, "Error", "File was damaged");
+                    return;
+                }
+
                 if (db.Boards.Items.Where(x => x.Name == BoardName).Count() > 0)
                 {
                     await dialCoord.ShowMessageAsync(this, "Error", "Board name already used");
                     return;
                 }
-
-                prjService = appModel.LoadProjectService(uri);
             }
+
+            prjService = appModel.GetProjectService(uri);
 
             var bi = new BoardInfo
             {
@@ -204,6 +223,9 @@ namespace Kamban.ViewModels
                 prjService.CreateOrUpdateColumnAsync(ci);
 
                 cvm.Id = ci.Id;
+                cvm.BoardId = bi.Id;
+                cvm.Determinant = ci.Id;
+
                 db.Columns.Add(cvm);
             }
 
@@ -220,6 +242,9 @@ namespace Kamban.ViewModels
                 prjService.CreateOrUpdateRowAsync(ri);
 
                 rvm.Id = ri.Id;
+                rvm.BoardId = bi.Id;
+                rvm.Determinant = ri.Id;
+
                 db.Rows.Add(rvm);
             }
 

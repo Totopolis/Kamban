@@ -12,6 +12,8 @@ namespace Kamban.Model
     public class DbViewModel : ReactiveObject
     {
         [Reactive] public string Uri { get; set; }
+        [Reactive] public bool Loaded { get; set; }
+
         [Reactive] public DateTime LastAccess { get; set; }
         [Reactive] public int TotalTickets { get; set; }
         [Reactive] public string BoardList { get; set; }

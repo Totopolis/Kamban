@@ -32,6 +32,7 @@ namespace Kamban.Model
         void DeleteColumnAsync(int columnId);
         void DeleteRowAsync(int rowId);
         void DeleteIssueAsync(int issueId);
+        void DeleteBoard(int boardId);
 
         // Obsolete
 
@@ -124,7 +125,14 @@ namespace Kamban.Model
             repo.DeleteIssue(issueId);
         }
 
+        public void DeleteBoard(int boardId)
+        {
+            repo.DeleteBoard(boardId);
+        }
+
         #region Obsolete
+
+        // TODO: remove obsolete
 
         public RowInfo GetSelectedRow(string rowName)
         {

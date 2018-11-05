@@ -23,9 +23,6 @@ namespace Kamban
             var mon = container.Resolve<IMonik>();
             mon.ApplicationInfo("Bootstrapper initialized");
 
-            var app = container.Resolve<IAppModel>();
-            app.Initialize();
-
             return shell;
         }
 
@@ -48,6 +45,11 @@ namespace Kamban
             builder
                 .RegisterType<ProjectService>()
                 .As<IProjectService>();
+
+            builder
+                .RegisterType<AppConfig>()
+                .As<IAppConfig>()
+                .SingleInstance();
 
             builder
                 .RegisterType<AppModel>()

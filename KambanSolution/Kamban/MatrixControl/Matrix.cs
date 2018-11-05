@@ -39,18 +39,12 @@ namespace Kamban.MatrixControl
         {
             var mx = obj as Matrix;
             mx.Monik?.ApplicationVerbose("Matrix.OnColumnsPropertyChanged");
-
-            if (mx.Columns == null)
-                return;
         }
 
         public static void OnRowsPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
             var mx = obj as Matrix;
             mx.Monik?.ApplicationVerbose("Matrix.OnRowsPropertyChanged");
-
-            if (mx.Rows == null)
-                return;
         }
 
         private ColumnDefinition columnWidthChanging = null;

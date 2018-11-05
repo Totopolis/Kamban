@@ -6,124 +6,135 @@ using System.Linq;
 using Ui.Wpf.Common;
 using Autofac;
 using DynamicData;
+using System.Collections.ObjectModel;
+using DynamicData.Binding;
+using System.Threading.Tasks;
+using AutoMapper;
+using System.Reactive.Linq;
 
 namespace Kamban.Model
 {
     public interface IAppModel
     {
-        SourceList<DbViewModel> RecentsDb { get; }
+        ReadOnlyObservableCollection<DbViewModel> Dbs { get; }
+        IObservable<bool> DbsCountMoreZero { get; }
+        IObservable<bool> DbsCountMoreOne { get; }
 
-        void Initialize();
-        DbViewModel AddRecent(string uri);
-        void RemoveRecent(string uri);
+        Task<DbViewModel> CreateDb(string uri);
+        Task<DbViewModel> LoadDb(string uri);
+        void RemoveDb(string uri);
 
-        string Caption { get; set; }
-        string ArchiveFolder { get; set; }
-
-        IProjectService CreateProjectService(string uri);
-        IProjectService LoadProjectService(string uri);
-    }
-
-    public class AppConfig
-    {
-        public List<string> Recent { get; set; }
-        public string Caption { get; set; }
-        public string ArchiveFolder { get; set; }
-
-        public AppConfig()
-        {
-            Recent = new List<string>();
-            Caption = "";
-            ArchiveFolder = "";
-        }
+        IProjectService GetProjectService(string uri);
     }
 
     public class AppModel : IAppModel
     {
         private readonly IShell shell;
-        public SourceList<DbViewModel> RecentsDb { get; private set; }
+        private readonly IMapper mapper;
+        private SourceList<DbViewModel> dbList;
 
-        public AppModel(IShell shell)
+        public AppModel(IShell shell, IMapper mp)
         {
             this.shell = shell;
-            RecentsDb = new SourceList<DbViewModel>();
+            mapper = mp;
 
-            path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            path += "\\kanban.config";
+            dbList = new SourceList<DbViewModel>();
+
+            dbList
+                .Connect()
+                .AutoRefresh()
+                .Sort(SortExpressionComparer<DbViewModel>.Descending(x => x.LastAccess))
+                .Bind(out ReadOnlyObservableCollection<DbViewModel> temp)
+                .Subscribe();
+
+            Dbs = temp;
+
+            DbsCountMoreZero = dbList
+                .Connect()
+                .AutoRefresh()
+                .Select(x => x.Count > 0);
+
+            DbsCountMoreOne = dbList
+                .Connect()
+                .AutoRefresh()
+                .Select(x => x.Count > 1);
         }
 
-        public void Initialize()
+        public ReadOnlyObservableCollection<DbViewModel> Dbs { get; private set; }
+        public IObservable<bool> DbsCountMoreZero { get; private set; }
+        public IObservable<bool> DbsCountMoreOne { get; private set; }
+
+        public async Task<DbViewModel> CreateDb(string uri)
         {
-            if (File.Exists(path))
-            {
-                string data = File.ReadAllText(path);
-                appConfig = JsonConvert.DeserializeObject<AppConfig>(data);
-            }
-            else
-                appConfig = new AppConfig();
+            var db = dbList.Items.Where(x => x.Uri == uri).FirstOrDefault();
+            if (db != null)
+                throw new Exception("Db already exists");
 
-            RecentsDb.AddRange(appConfig.Recent.Select(x => new DbViewModel { Uri = x }));
-        }
+            if (File.Exists(uri))
+                throw new Exception("File already exists");
 
-        private AppConfig appConfig;
-        private readonly string path;
+            var prj = GetProjectService(uri);
 
-        public string Caption
-        {
-            get => appConfig.Caption;
-            set
-            {
-                appConfig.Caption = value;
-                SaveConfig();
-            }
-        }
+            // init tables
+            var columns = await prj.GetAllColumns();
+            var rows = await prj.GetAllRows();
+            var boards = await prj.GetAllBoardsInFileAsync();
+            var cards = await prj.GetIssuesByBoardIdAsync(666);
 
-        public string ArchiveFolder
-        {
-            get => appConfig.ArchiveFolder;
-            set
-            {
-                appConfig.ArchiveFolder = value;
-                SaveConfig();
-            }
-        }
-
-        // Obsolete
-        public DbViewModel AddRecent(string uri)
-        {
-            var db = RecentsDb.Items.Where(x => x.Uri == uri).FirstOrDefault();
-            if (db == null)
-            {
-                db = new DbViewModel { Uri = uri };
-                RecentsDb.Add(db);
-
-                appConfig.Recent.Insert(0, uri);
-                appConfig.Recent = appConfig.Recent.Distinct().ToList();
-                SaveConfig();
-            }
-
-            db.LastAccess = DateTime.Now;
+            db = new DbViewModel { Uri = uri, Loaded = true };
+            dbList.Add(db);
 
             return db;
         }
 
-        public void RemoveRecent(string uri)
+        public async Task<DbViewModel> LoadDb(string uri)
         {
-            appConfig.Recent.Remove(uri);
-            SaveConfig();
+            var db = dbList.Items.Where(x => x.Uri == uri).FirstOrDefault();
+            if (db == null)
+            {
+                db = new DbViewModel { Uri = uri };
 
-            var db = RecentsDb.Items.Where(x => x.Uri == uri).FirstOrDefault();
+                if (!File.Exists(db.Uri))
+                    return db;
+
+                try
+                {
+                    db.LastAccess = File.GetLastWriteTime(db.Uri);
+
+                    var prj = GetProjectService(db.Uri);
+
+                    var columns = await prj.GetAllColumns();
+                    var rows = await prj.GetAllRows();
+                    var boards = await prj.GetAllBoardsInFileAsync();
+
+                    db.Columns.AddRange(columns.Select(x => mapper.Map<ColumnInfo, ColumnViewModel>(x)));
+                    db.Rows.AddRange(rows.Select(x => mapper.Map<RowInfo, RowViewModel>(x)));
+                    db.Boards.AddRange(boards.Select(x => mapper.Map<BoardInfo, BoardViewModel>(x)));
+
+                    db.TotalTickets = 0;
+                    foreach (var brd in boards)
+                        db.TotalTickets += (await prj.GetIssuesByBoardIdAsync(brd.Id)).Count();
+
+                    db.Loaded = true;
+                }
+                // Skip broken file
+                catch { }
+
+                dbList.Add(db);
+            }
+
+            return db;
+        }
+
+        public void RemoveDb(string uri)
+        {
+            var db = dbList.Items.Where(x => x.Uri == uri).FirstOrDefault();
+
             if (db != null)
-                RecentsDb.Remove(db);
+                dbList.Remove(db);
         }
 
-        private void SaveConfig()
-        {
-            string data = JsonConvert.SerializeObject(appConfig);
-            File.WriteAllText(path, data);
-        }
-
-        public IProjectService CreateProjectService(string uri)
+        public IProjectService GetProjectService(string uri)
         {
             var scope = shell
                 .Container
@@ -131,14 +142,5 @@ namespace Kamban.Model
 
             return scope;
         }
-
-        public IProjectService LoadProjectService(string uri)//future? taking from env too?
-        {
-            var scope = shell
-                .Container
-                .Resolve<IProjectService>(new NamedParameter("uri", uri));
-
-            return scope;
-        }
-    }
+    }//end of class
 }

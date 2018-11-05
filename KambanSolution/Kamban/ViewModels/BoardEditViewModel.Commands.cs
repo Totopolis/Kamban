@@ -178,21 +178,56 @@ namespace Kamban.ViewModels
                 {
                     AffirmativeButtonText = "OK",
                     NegativeButtonText = "Cancel",
-                    DefaultText = SelectedColumn?.Name
+                    DefaultText = CurrentBoard?.Name
                 });
 
             if (string.IsNullOrEmpty(newName))
                 return;
 
+            // TODO: save new board name
+
             CurrentBoard.Name = newName;
             //var bi = mapper.Map<BoardViewModel, BoardInfo>(CurrentBoard);
             //prjService.CreateOrUpdateBoardAsync(bi);
             Title = newName;
+        }
 
-            BoardsMenuItems
-                .Where(x => x.Name == oldName)
-                .First()
-                .Name = newName;
+        private async Task DeleteBoardCommandExecute()
+        {
+            var ts = await dialCoord.ShowMessageAsync(this, "Warning",
+                $"Are you shure to delete board '{CurrentBoard.Name}'?"
+                , MessageDialogStyle.AffirmativeAndNegative);
+
+            if (ts == MessageDialogResult.Negative)
+                return;
+
+            // protect
+            if (Db.Boards.Count <= 1)
+                return;
+
+            // TODO: use global cards
+
+            // Remove cards
+            foreach (var card in Cards.Items.ToList())
+                prjService.DeleteIssueAsync(card.Id);
+
+            Cards.Clear();
+
+            // Remove headers
+            Db.Columns.Items
+                .Where(x => x.BoardId == CurrentBoard.Id)
+                .ToList()
+                .ForEach(x => Db.Columns.Remove(x));
+
+            Db.Rows.Items
+                .Where(x => x.BoardId == CurrentBoard.Id)
+                .ToList()
+                .ForEach(x => Db.Rows.Remove(x));
+
+            // Remove board
+            prjService.DeleteBoard(CurrentBoard.Id);
+            Db.Boards.Remove(CurrentBoard);
+            CurrentBoard = Db.Boards.Items.First();
         }
 
         private async Task DeleteCardCommandExecuteAsync(ICard cvm)
@@ -203,6 +238,8 @@ namespace Kamban.ViewModels
 
             if (ts == MessageDialogResult.Negative)
                 return;
+
+            // TODO: use global cards
 
             prjService.DeleteIssueAsync(cvm.Id);
             Cards.Remove(cvm);

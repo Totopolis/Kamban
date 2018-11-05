@@ -28,5 +28,6 @@ namespace Kamban.Repository
         void DeleteRow(int rowId);
         void DeleteColumn(int columnId);
         void DeleteIssue(int issueId);
+        void DeleteBoard(int boardId);
     }
 }

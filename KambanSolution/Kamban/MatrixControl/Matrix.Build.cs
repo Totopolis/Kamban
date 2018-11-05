@@ -21,7 +21,8 @@ namespace Kamban.MatrixControl
 
             MainGrid.Children.Clear();
 
-            if (Rows.Count == 0 || Columns.Count == 0)
+            if (Rows == null || Columns == null ||
+                Rows.Count == 0 || Columns.Count == 0)
             {
                 Monik?.ApplicationVerbose("Matrix.RebuildGrid skip func");
                 return;

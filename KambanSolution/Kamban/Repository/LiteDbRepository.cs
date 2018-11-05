@@ -169,5 +169,13 @@ namespace Kamban.Repository
             }
         }
 
+        public void DeleteBoard(int boardId)
+        {
+            using (var db = new LiteDatabase(fileName))
+            {
+                var boards = db.GetCollection<BoardInfo>(Name<BoardInfo>());
+                boards.Delete(x => x.Id == boardId);
+            }
+        }
     }//end of class
 }

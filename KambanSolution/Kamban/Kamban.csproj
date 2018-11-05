@@ -200,6 +200,7 @@
       <DependentUpon>Matrix.xaml</DependentUpon>
     </Compile>
     <Compile Include="MatrixControl\Common.cs" />
+    <Compile Include="Model\AppConfig.cs" />
     <Compile Include="Model\BoardTemplate.cs" />
     <Compile Include="Model\BoardViewModel.cs" />
     <Compile Include="Model\CardViewModel.cs" />
