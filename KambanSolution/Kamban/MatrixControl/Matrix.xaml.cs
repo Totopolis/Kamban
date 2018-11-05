@@ -24,8 +24,6 @@ namespace Kamban.MatrixControl
     /// </summary>
     public partial class Matrix : UserControl, IDropTarget
     {
-        private ReadOnlyObservableCollection<ICard> cardList;
-
         public Matrix()
         {
             InitializeComponent();

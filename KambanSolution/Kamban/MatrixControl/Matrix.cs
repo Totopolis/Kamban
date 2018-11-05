@@ -34,14 +34,6 @@ namespace Kamban.MatrixControl
         {
             var mx = obj as Matrix;
             mx.Monik?.ApplicationVerbose("Matrix.OnCardsObservablePropertyChanged");
-
-            // TODO: remove bind
-
-            mx.CardsObservable
-                .Bind(out ReadOnlyObservableCollection<ICard> temp)
-                .Subscribe();
-
-            mx.cardList = temp;
         }
 
         public static void OnCardsPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
@@ -184,19 +176,20 @@ namespace Kamban.MatrixControl
             // Reorder
             card.Order = targetCard != null ? targetCard.Order - 1 : int.MaxValue;
 
-            // TODO: bind temp from CardsObservable and dispose?
-
-            var targetCards = cardList
-                        .Where(x => x.ColumnDeterminant == card.ColumnDeterminant
-                            && x.RowDeterminant == card.RowDeterminant)
-                        .OrderBy(x => x.Order);
-
-            int i = 0;
-            foreach (var it in targetCards)
+            using (CardsObservable.Bind(out ReadOnlyObservableCollection<ICard> temp).Subscribe())
             {
-                it.Order = i;
-                i += 10;
-            }
+                var targetCards = temp
+                            .Where(x => x.ColumnDeterminant == card.ColumnDeterminant
+                                && x.RowDeterminant == card.RowDeterminant)
+                            .OrderBy(x => x.Order);
+
+                int i = 0;
+                foreach (var it in targetCards)
+                {
+                    it.Order = i;
+                    i += 10;
+                }
+            }//using
         }
 
     }//end of class
