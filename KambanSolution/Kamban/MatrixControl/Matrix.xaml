@@ -20,7 +20,7 @@
                 VerticalAlignment="Center"
                 FontSize="14"
                 FontWeight="Bold"
-                Text="{Binding Caption}"/>
+                Text="{Binding Name}"/>
             </Border>
         </DataTemplate>
 
@@ -35,7 +35,7 @@
                 FontSize="14"
                 FontWeight="Bold"
                 VerticalAlignment="Center"
-                Text="{Binding Caption}">
+                Text="{Binding Name}">
                     <TextBlock.LayoutTransform>
                         <RotateTransform Angle="270"/>
                     </TextBlock.LayoutTransform>

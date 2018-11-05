@@ -212,7 +212,7 @@ namespace Kamban.ViewModels
                     BoardId = bvm.Id,
                     Size = cvm.Size,
                     Order = cvm.Order,
-                    Caption = cvm.Caption
+                    Name = cvm.Name
                 };
 
                 db.Columns.Add(colToAdd);
@@ -226,7 +226,7 @@ namespace Kamban.ViewModels
                     BoardId = bvm.Id,
                     Size = rvm.Size,
                     Order = rvm.Order,
-                    Caption = rvm.Caption
+                    Name = rvm.Name
                 };
 
                 db.Rows.Add(rowToAdd);

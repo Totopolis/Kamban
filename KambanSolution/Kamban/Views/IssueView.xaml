@@ -54,14 +54,14 @@
                       SelectedItem="{Binding SelectedColumn}"
                       BorderThickness="0"
                       BorderBrush="{DynamicResource AccentBaseColorBrush}"
-                      DisplayMemberPath="Caption"/>
+                      DisplayMemberPath="Name"/>
             
             <ComboBox Foreground="Gray"
                       BorderThickness="0"
                       Background="{Binding Background}"
                       BorderBrush="{DynamicResource AccentBaseColorBrush}"
                       ItemsSource="{Binding AvailableRows}"
-                      DisplayMemberPath="Caption"
+                      DisplayMemberPath="Name"
                       SelectedItem="{Binding SelectedRow}"
                       />
 

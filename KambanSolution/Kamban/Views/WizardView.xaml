@@ -89,7 +89,7 @@
                     <ListBox ItemsSource="{Binding Columns}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Path=Caption}"/>
+                                <TextBlock Text="{Binding Path=Name}"/>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
@@ -100,7 +100,7 @@
                     <ListBox ItemsSource="{Binding Rows}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Path=Caption}"/>
+                                <TextBlock Text="{Binding Path=Name}"/>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>

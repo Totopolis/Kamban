@@ -18,7 +18,7 @@ namespace Kamban.MatrixControl
     /// </summary>
     public interface IDim
     {
-        string Caption { get; set; }
+        string Name { get; set; }
         int Determinant { get; set; }
         int Size { get; set; }
         int Order { get; set; }

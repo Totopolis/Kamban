@@ -17,7 +17,7 @@ namespace Kamban.ViewModels
         private async Task HeadRenameCommandExecute(IDim head)
         {
             var headTxt = head is ColumnViewModel ? "column" : "row";
-            headTxt += $" {head.Caption}";
+            headTxt += $" {head.Name}";
 
             var ts = await dialCoord
                 .ShowInputAsync(this, "Warning", $"Enter new name for {headTxt}",
@@ -25,7 +25,7 @@ namespace Kamban.ViewModels
                     {
                         AffirmativeButtonText = "OK",
                         NegativeButtonText = "Cancel",
-                        DefaultText = head.Caption
+                        DefaultText = head.Name
                     });
 
             if (string.IsNullOrEmpty(ts))
@@ -35,9 +35,9 @@ namespace Kamban.ViewModels
             var row = head as RowViewModel;
 
             if (column!=null)
-                column.Caption = ts;
+                column.Name = ts;
             else
-                row.Caption = ts;
+                row.Name = ts;
         }
 
         private async Task HeadDeleteCommandExecute(IDim head)
@@ -46,7 +46,7 @@ namespace Kamban.ViewModels
             var row = head as RowViewModel;
 
             var headTxt = head is ColumnViewModel ? "column" : "row";
-            headTxt += $" '{head.Caption}'";
+            headTxt += $" '{head.Name}'";
 
             if (column != null && Columns.Count <= 1) return;
             if (row != null && Rows.Count <= 1) return;
@@ -106,7 +106,7 @@ namespace Kamban.ViewModels
                     {
                         AffirmativeButtonText = "OK",
                         NegativeButtonText = "Cancel",
-                        DefaultText = head.Caption
+                        DefaultText = head.Name
                     });
 
             if (string.IsNullOrEmpty(ts))
@@ -124,7 +124,7 @@ namespace Kamban.ViewModels
 
                 var cvm = new ColumnViewModel
                 {
-                    Caption = ts,
+                    Name = ts,
                     BoardId = column.BoardId
                 };
 
@@ -145,7 +145,7 @@ namespace Kamban.ViewModels
 
                 var rvm = new RowViewModel
                 {
-                    Caption = ts,
+                    Name = ts,
                     BoardId = row.BoardId
                 };
 

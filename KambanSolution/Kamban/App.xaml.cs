@@ -28,9 +28,6 @@ namespace Kamban
                     ToolPaneWidth = 100
                 });
 
-            // TODO: used hack, need fix WPFToolkit
-            shell.Title = "Kamban";
-
             shell.ShowView<StartupView>(options: new UiShowOptions() { Title = "Start Page", CanClose = false });
         }
     }

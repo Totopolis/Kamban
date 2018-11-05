@@ -45,7 +45,7 @@ namespace Kamban.MatrixControl
             for (int i = 0; i < columnCount; i++)
             {
                 var it = columns[i];
-                Monik?.ApplicationVerbose($"Matrix.RebuildGrid add column {it.Id}::{it.Caption}::{it.Order}");
+                Monik?.ApplicationVerbose($"Matrix.RebuildGrid add column {it.Id}::{it.Name}::{it.Order}");
 
                 var cd = new ColumnDefinition();
                 cd.DataContext = it;
@@ -82,7 +82,7 @@ namespace Kamban.MatrixControl
             for (int i = 0; i < rowCount; i++)
             {
                 var it = rows[i];
-                Monik?.ApplicationVerbose($"Matrix.RebuildGrid add row {it.Id}::{it.Caption}::{it.Order}");
+                Monik?.ApplicationVerbose($"Matrix.RebuildGrid add row {it.Id}::{it.Name}::{it.Order}");
 
                 var rd = new RowDefinition();
                 rd.DataContext = it;

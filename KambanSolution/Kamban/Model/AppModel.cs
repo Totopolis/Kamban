@@ -196,10 +196,10 @@ namespace Kamban.Model
             db.Columns
                 .Connect()
                 //.AutoRefresh()
-                .WhenAnyPropertyChanged("Caption", "Order", "Size", "BoardId")
+                .WhenAnyPropertyChanged("Name", "Order", "Size", "BoardId")
                 .Subscribe(cvm =>
                 {
-                    mon.LogicVerbose($"BoardViewModel.Columns.ItemChanged {cvm.Id}::{cvm.Caption}::{cvm.Order}");
+                    mon.LogicVerbose($"BoardViewModel.Columns.ItemChanged {cvm.Id}::{cvm.Name}::{cvm.Order}");
                     var ci = mapper.Map<ColumnViewModel, ColumnInfo>(cvm);
                     prjService.CreateOrUpdateColumnAsync(ci);
                 });
@@ -213,7 +213,7 @@ namespace Kamban.Model
                     .ToList()
                     .ForEach(cvm =>
                     {
-                        mon.LogicVerbose($"BoardViewModel.Column add {cvm.Id}::{cvm.Caption}::{cvm.Order}");
+                        mon.LogicVerbose($"BoardViewModel.Column add {cvm.Id}::{cvm.Name}::{cvm.Order}");
 
                         var ci = mapper.Map<ColumnViewModel, ColumnInfo>(cvm);
                         prjService.CreateOrUpdateColumnAsync(ci);
@@ -237,10 +237,10 @@ namespace Kamban.Model
             db.Rows
                 .Connect()
                 //.AutoRefresh()
-                .WhenAnyPropertyChanged("Caption", "Order", "Size", "BoardId")
+                .WhenAnyPropertyChanged("Name", "Order", "Size", "BoardId")
                 .Subscribe(rvm =>
                 {
-                    mon.LogicVerbose($"BoardViewModel.Rows.ItemChanged {rvm.Id}::{rvm.Caption}::{rvm.Order}");
+                    mon.LogicVerbose($"BoardViewModel.Rows.ItemChanged {rvm.Id}::{rvm.Name}::{rvm.Order}");
                     var row = mapper.Map<RowViewModel, RowInfo>(rvm);
                     prjService.CreateOrUpdateRowAsync(row);
                 });
@@ -254,7 +254,7 @@ namespace Kamban.Model
                     .ToList()
                     .ForEach(rvm =>
                     {
-                        mon.LogicVerbose($"BoardViewModel.Row add {rvm.Id}::{rvm.Caption}::{rvm.Order}");
+                        mon.LogicVerbose($"BoardViewModel.Row add {rvm.Id}::{rvm.Name}::{rvm.Order}");
 
                         var ri = mapper.Map<RowViewModel, RowInfo>(rvm);
                         prjService.CreateOrUpdateRowAsync(ri);

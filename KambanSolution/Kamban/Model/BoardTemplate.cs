@@ -20,7 +20,7 @@ namespace Kamban.Model
         [Reactive] public List<RowViewModel> Rows { get; set; }
         [Reactive] public List<CardViewModel> Cards { get; set; }
 
-        // TODO: [Reactive] properties[]
+        // [Reactive] properties[]
     }
 
     public static class InternalBoardTemplates
@@ -64,7 +64,7 @@ namespace Kamban.Model
         {
             tmp.Columns.Add(new ColumnViewModel
             {
-                Caption = name,
+                Name = name,
                 Determinant = determ,
                 Order = determ
             });
@@ -74,7 +74,7 @@ namespace Kamban.Model
         {
             tmp.Rows.Add(new RowViewModel
             {
-                Caption = name,
+                Name = name,
                 Determinant = determ,
                 Order = determ
             });
