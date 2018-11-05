@@ -101,6 +101,32 @@ namespace Kamban.ViewModels
                     FolderName = dialog.SelectedPath;
             });
 
+            AddColumnCommand = ReactiveCommand.CreateFromTask(async _ =>
+            {
+                var ts = await dialCoord.ShowInputAsync(this, "Info", $"Enter new column name");
+
+                if (string.IsNullOrEmpty(ts))
+                    return;
+
+                if (Columns.Where(x => x.Name == ts).Count() > 0)
+                    return;
+
+                Columns.Add(new ColumnViewModel { Name = ts });
+            });
+
+            AddRowCommand = ReactiveCommand.CreateFromTask(async _ =>
+            {
+                var ts = await dialCoord.ShowInputAsync(this, "Info", $"Enter new row name");
+
+                if (string.IsNullOrEmpty(ts))
+                    return;
+
+                if (Rows.Where(x => x.Name == ts).Count() > 0)
+                    return;
+
+                Rows.Add(new RowViewModel { Name = ts });
+            });
+
             Title = "Creating new board";
             FullTitle = Title;
 
@@ -190,14 +216,14 @@ namespace Kamban.ViewModels
             db.Boards.Add(bvm);
 
             // 3. Normalize grid
-            double colSize = 100 / (Columns.Count - 1);
+            double colSize = Columns.Count == 1 ? 100 : 100 / (Columns.Count - 1);
             for (int i = 0; i < Columns.Count; i++)
             {
                 Columns[i].Order = i;
                 Columns[i].Size = (int)colSize * 10;
             }
 
-            double rowSize = 100 / (Rows.Count - 1);
+            double rowSize = Rows.Count == 1 ? 100 : 100 / (Rows.Count - 1);
             for (int i = 0; i < Rows.Count; i++)
             {
                 Rows[i].Order = i;
