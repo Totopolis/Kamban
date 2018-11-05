@@ -65,7 +65,7 @@ namespace Kamban.ViewModels
             {
                 // Shift cards
                 var firstColumn = Columns.OrderBy(x => x.Order).First();
-                foreach (CardViewModel it in cardList.Where(x => (int)x.ColumnDeterminant == column.Id))
+                foreach (CardViewModel it in cardList.Where(x => (int)x.ColumnDeterminant == column.Id).ToList())
                     it.ColumnDeterminant = firstColumn.Id;
 
                 Db.Columns.Remove(column);
@@ -74,7 +74,7 @@ namespace Kamban.ViewModels
             {
                 // Shift cards
                 var firstRow = Rows.OrderBy(x => x.Order).First();
-                foreach (CardViewModel it in cardList.Where(x => (int)x.RowDeterminant == row.Id))
+                foreach (CardViewModel it in cardList.Where(x => (int)x.RowDeterminant == row.Id).ToList())
                     it.RowDeterminant = firstRow.Id;
 
                 Db.Rows.Remove(row);
