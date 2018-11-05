@@ -113,7 +113,12 @@ namespace Kamban.Model
 
                     db.TotalTickets = 0;
                     foreach (var brd in boards)
-                        db.TotalTickets += (await prj.GetIssuesByBoardIdAsync(brd.Id)).Count();
+                    {
+                        var issues = await prj.GetIssuesByBoardIdAsync(brd.Id);
+
+                        db.Cards.AddRange(issues.Select(x => mapper.Map<Issue, CardViewModel>(x)));
+                        db.TotalTickets += issues.Count();
+                    }
 
                     db.Loaded = true;
                 }
@@ -146,7 +151,7 @@ namespace Kamban.Model
 
         private void EnableAutoSaver(DbViewModel db)
         {
-            var prjService = GetProjectService(db.Uri);
+            var prj = GetProjectService(db.Uri);
 
             ///////////////////
             // Boards AutoSaver
@@ -158,7 +163,7 @@ namespace Kamban.Model
                 {
                     mon.LogicVerbose($"AppModel.Boards.ItemChanged {bvm.Id}::{bvm.Name}::{bvm.Modified}");
                     var bi = mapper.Map<BoardViewModel, BoardInfo>(bvm);
-                    prjService.CreateOrUpdateBoardAsync(bi);
+                    prj.CreateOrUpdateBoardAsync(bi);
                 });
 
             db.Boards
@@ -172,7 +177,7 @@ namespace Kamban.Model
                         mon.LogicVerbose($"AppModel.Board add {bvm.Id}::{bvm.Name}");
 
                         var bi = mapper.Map<BoardViewModel, BoardInfo>(bvm);
-                        prjService.CreateOrUpdateBoardAsync(bi);
+                        prj.CreateOrUpdateBoardAsync(bi);
 
                         bvm.Id = bi.Id;
                     }));
@@ -187,7 +192,7 @@ namespace Kamban.Model
                     {
                         mon.LogicVerbose($"AppModel.Board remove {bvm.Id}::{bvm.Name}");
 
-                        prjService.DeleteBoard(bvm.Id);
+                        prj.DeleteBoard(bvm.Id);
                     }));
 
             ////////////////////
@@ -199,9 +204,9 @@ namespace Kamban.Model
                 .WhenAnyPropertyChanged("Name", "Order", "Size", "BoardId")
                 .Subscribe(cvm =>
                 {
-                    mon.LogicVerbose($"BoardViewModel.Columns.ItemChanged {cvm.Id}::{cvm.Name}::{cvm.Order}");
+                    mon.LogicVerbose($"AppModel.Columns.ItemChanged {cvm.Id}::{cvm.Name}::{cvm.Order}");
                     var ci = mapper.Map<ColumnViewModel, ColumnInfo>(cvm);
-                    prjService.CreateOrUpdateColumnAsync(ci);
+                    prj.CreateOrUpdateColumnAsync(ci);
                 });
 
             db.Columns
@@ -213,10 +218,10 @@ namespace Kamban.Model
                     .ToList()
                     .ForEach(cvm =>
                     {
-                        mon.LogicVerbose($"BoardViewModel.Column add {cvm.Id}::{cvm.Name}::{cvm.Order}");
+                        mon.LogicVerbose($"AppModel.Column add {cvm.Id}::{cvm.Name}::{cvm.Order}");
 
                         var ci = mapper.Map<ColumnViewModel, ColumnInfo>(cvm);
-                        prjService.CreateOrUpdateColumnAsync(ci);
+                        prj.CreateOrUpdateColumnAsync(ci);
 
                         cvm.Id = ci.Id;
                     }));
@@ -228,7 +233,7 @@ namespace Kamban.Model
                 .Subscribe(x => x
                     .Select(q => q.Item.Current)
                     .ToList()
-                    .ForEach(cvm => prjService.DeleteColumnAsync(cvm.Id)));
+                    .ForEach(cvm => prj.DeleteColumnAsync(cvm.Id)));
 
             /////////////////
             // Rows AutoSaver
@@ -239,9 +244,9 @@ namespace Kamban.Model
                 .WhenAnyPropertyChanged("Name", "Order", "Size", "BoardId")
                 .Subscribe(rvm =>
                 {
-                    mon.LogicVerbose($"BoardViewModel.Rows.ItemChanged {rvm.Id}::{rvm.Name}::{rvm.Order}");
+                    mon.LogicVerbose($"AppModel.Rows.ItemChanged {rvm.Id}::{rvm.Name}::{rvm.Order}");
                     var row = mapper.Map<RowViewModel, RowInfo>(rvm);
-                    prjService.CreateOrUpdateRowAsync(row);
+                    prj.CreateOrUpdateRowAsync(row);
                 });
 
             db.Rows
@@ -253,10 +258,10 @@ namespace Kamban.Model
                     .ToList()
                     .ForEach(rvm =>
                     {
-                        mon.LogicVerbose($"BoardViewModel.Row add {rvm.Id}::{rvm.Name}::{rvm.Order}");
+                        mon.LogicVerbose($"AppModel.Row add {rvm.Id}::{rvm.Name}::{rvm.Order}");
 
                         var ri = mapper.Map<RowViewModel, RowInfo>(rvm);
-                        prjService.CreateOrUpdateRowAsync(ri);
+                        prj.CreateOrUpdateRowAsync(ri);
 
                         rvm.Id = ri.Id;
                     }));
@@ -268,7 +273,48 @@ namespace Kamban.Model
                 .Subscribe(x => x
                     .Select(q => q.Item.Current)
                     .ToList()
-                    .ForEach(rvm => prjService.DeleteRowAsync(rvm.Id)));
+                    .ForEach(rvm => prj.DeleteRowAsync(rvm.Id)));
+
+            //////////////////
+            // Cards AutoSaver
+            //////////////////
+            db.Cards
+                .Connect()
+                .WhenAnyPropertyChanged("Header", "Color", "ColumnDeterminant", "RowDeterminant",
+                    "Order", "Body", "Modified", "BoardId")
+                .Subscribe(cvm =>
+                {
+                    mon.LogicVerbose("AppModel.Cards.WhenAnyPropertyChanged");
+                    var iss = mapper.Map<CardViewModel, Issue>(cvm);
+                    prj.CreateOrUpdateIssueAsync(iss);
+                });
+
+            db.Cards
+                .Connect()
+                .WhereReasonsAre(ListChangeReason.Add)
+                .Subscribe(x => x
+                    .Select(q => q.Item.Current)
+                    .ToList()
+                    .ForEach(cvm =>
+                  {
+                      mon.LogicVerbose("AppModel.Cards add");
+                      var iss = mapper.Map<CardViewModel, Issue>(cvm);
+                      prj.CreateOrUpdateIssueAsync(iss);
+
+                      cvm.Id = iss.Id;
+                  }));
+
+            db.Cards
+                .Connect()
+                .WhereReasonsAre(ListChangeReason.Remove)
+                .Subscribe(x => x
+                    .Select(q => q.Item.Current)
+                    .ToList()
+                    .ForEach(cvm =>
+                    {
+                        mon.LogicVerbose("AppModel.Cards remove");
+                        prj.DeleteIssueAsync(cvm.Id);
+                    }));
         }
     }//end of class
 }

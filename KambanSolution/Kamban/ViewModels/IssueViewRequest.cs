@@ -16,7 +16,6 @@ namespace Kamban.ViewModels
 
         public int ColumnId { get; set; }
         public int RowId { get; set; }
-        public IProjectService PrjService { get; set; }
         public BoardEditViewModel BoardVM { get; set; }
         public BoardViewModel Board { get; set; }
     }

@@ -60,21 +60,21 @@ namespace Kamban.Model
             Templates.Add(t1);
         }
 
-        private static void AddColumn(this BoardTemplate tmp, string name, int determ)
+        private static void AddColumn(this BoardTemplate tmp, string name, int order)
         {
             tmp.Columns.Add(new ColumnViewModel
             {
                 Name = name,
-                Order = determ
+                Order = order
             });
         }
 
-        private static void AddRow(this BoardTemplate tmp, string name, int determ)
+        private static void AddRow(this BoardTemplate tmp, string name, int order)
         {
             tmp.Rows.Add(new RowViewModel
             {
                 Name = name,
-                Order = determ
+                Order = order
             });
         }
     }//end of class

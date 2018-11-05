@@ -19,6 +19,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
+using CardsObservableType = System.IObservable<DynamicData.IChangeSet<Kamban.MatrixControl.ICard>>;
 
 namespace Kamban.ViewModels
 {
@@ -31,7 +32,7 @@ namespace Kamban.ViewModels
         private readonly IMapper mapper;
         private readonly IAppModel appModel;
 
-        private IProjectService prjService;
+        private ReadOnlyObservableCollection<CardViewModel> cardList;
 
         private DbViewModel Db { get; set; }
 
@@ -43,8 +44,7 @@ namespace Kamban.ViewModels
         [Reactive] public ReadOnlyObservableCollection<ColumnViewModel> Columns { get; set; }
         [Reactive] public ReadOnlyObservableCollection<RowViewModel> Rows { get; set; }
 
-        // TODO: use global cards
-        [Reactive] public SourceList<ICard> Cards { get; set; }
+        [Reactive] public CardsObservableType CardsObservable { get; set; }
 
         [Reactive] public ICard IssueOfContextMenu { get; set; }
 
@@ -94,7 +94,8 @@ namespace Kamban.ViewModels
 
             Columns = null;
             Rows = null;
-            Cards = new SourceList<ICard>();
+            cardList = null;
+            CardsObservable = null;
 
             BoardsInFile = null;
             IssueFlyout = new IssueViewModel();
@@ -135,8 +136,8 @@ namespace Kamban.ViewModels
             {
                 this.shell.ShowView<WizardView>(new WizardViewRequest
                 {
-                    ViewId = $"Creating new board in {prjService.Uri}",
-                    Uri = prjService.Uri
+                    ViewId = $"Creating new board in {Db.Uri}",
+                    Uri = Db.Uri
                 });
             });
 
@@ -151,21 +152,10 @@ namespace Kamban.ViewModels
                     CurrentBoard = BoardsInFile.Where(x => x.Name == name).First();
                 });
 
-            Cards
-                .Connect()
-                .Transform(x => x as CardViewModel)
-                .WhenAnyPropertyChanged()
-                .Subscribe(cvm =>
-                {
-                    mon.LogicVerbose("BoardViewModel.Cards.WhenAnyPropertyChanged");
-                    var iss = mapper.Map<CardViewModel, Issue>(cvm);
-                    prjService.CreateOrUpdateIssueAsync(iss);
-                });
-
             this.ObservableForProperty(w => w.CurrentBoard)
                 .Where(v => v != null)
                 .ObserveOnDispatcher()
-                .Subscribe(async _ => await OnBoardChanged());
+                .Subscribe(_ => OnBoardChanged());
 
             this.ObservableForProperty(w => w.IssueFlyout.IsOpened)
                 .Where(x => x.Value == false && IssueFlyout.Result == IssueEditResult.Created)
@@ -174,24 +164,20 @@ namespace Kamban.ViewModels
                     mon.LogicVerbose("BoardViewModel.IssueFlyout closed and issue need create");
 
                     var card = IssueFlyout.Card;
-                    var targetCards = Cards.Items
+                    var targetCards = cardList
                         .Where(x => x.ColumnDeterminant == card.ColumnDeterminant
                             && x.RowDeterminant == card.RowDeterminant);
 
                     card.Order = targetCards.Count() == 0 ? 0 :
                         targetCards.Max(x => x.Order) + 10;
 
-                    var iss = mapper.Map<CardViewModel, Issue>(card);
-                    prjService.CreateOrUpdateIssueAsync(iss);
-                    card.Id = iss.Id;
-
-                    Cards.Add(card);
+                    Db.Cards.Add(card);
                 });
 
             mon.LogicVerbose("BoardViewModel.ctor finished");
         }
 
-        private async Task OnBoardChanged()
+        private void OnBoardChanged()
         {
             mon.LogicVerbose("BoardViewModel.CurrentBoard changed");
 
@@ -222,15 +208,26 @@ namespace Kamban.ViewModels
             Rows = temp4;
 
             Title = CurrentBoard.Name;
-            FullTitle = prjService.Uri;
+            FullTitle = Db.Uri;
 
-            var issues = await prjService.GetIssuesByBoardIdAsync(CurrentBoard.Id);
+            CardsObservable = Db.Cards
+                .Connect()
+                .AutoRefresh()
+                .Filter(x => x.BoardId == CurrentBoard.Id)
+                .Transform(x => x as ICard);
+
+            Db.Cards
+                .Connect()
+                .AutoRefresh()
+                .Filter(x => x.BoardId == CurrentBoard.Id)
+                .Bind(out ReadOnlyObservableCollection<CardViewModel> temp5)
+                .Subscribe();
+
+            cardList = temp5;
 
             //var toDel = issues.Where(x => x.ColumnId == 0 || x.RowId == 0).ToArray();
             //foreach (var it in toDel)
             //    scope.DeleteIssueAsync(it.Id);
-
-            Cards.ClearAndAddRange(issues.Select(x => mapper.Map<Issue, CardViewModel>(x)));
 
             // TODO: reimplement without EnableMatrix
 
@@ -245,7 +242,6 @@ namespace Kamban.ViewModels
                 ColumnId = column,
                 RowId = row,
                 Card = cvm as CardViewModel,
-                PrjService = prjService,
                 BoardVM = this,
                 Board = CurrentBoard
             });
@@ -299,8 +295,6 @@ namespace Kamban.ViewModels
                     BoardsInFile[indx + 1] :
                     BoardsInFile[0];
             }, Db.BoardsCountMoreOne);
-
-            prjService = appModel.GetProjectService(request.Db.Uri);
 
             Db.Boards
                 .Connect()

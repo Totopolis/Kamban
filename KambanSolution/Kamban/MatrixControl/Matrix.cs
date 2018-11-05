@@ -4,6 +4,7 @@ using Kamban.Model;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
@@ -27,6 +28,20 @@ namespace Kamban.MatrixControl
 
             if (mx.EnableWork)
                 mx.RebuildGrid();
+        }
+
+        public static void OnCardsObservablePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
+        {
+            var mx = obj as Matrix;
+            mx.Monik?.ApplicationVerbose("Matrix.OnCardsObservablePropertyChanged");
+
+            // TODO: remove bind
+
+            mx.CardsObservable
+                .Bind(out ReadOnlyObservableCollection<ICard> temp)
+                .Subscribe();
+
+            mx.cardList = temp;
         }
 
         public static void OnCardsPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
@@ -169,9 +184,9 @@ namespace Kamban.MatrixControl
             // Reorder
             card.Order = targetCard != null ? targetCard.Order - 1 : int.MaxValue;
 
-            // OPTIMiZE: Use R/O/ObservableCollection projection
+            // TODO: bind temp from CardsObservable and dispose?
 
-            var targetCards = Cards.Items
+            var targetCards = cardList
                         .Where(x => x.ColumnDeterminant == card.ColumnDeterminant
                             && x.RowDeterminant == card.RowDeterminant)
                         .OrderBy(x => x.Order);

@@ -22,10 +22,7 @@ namespace Kamban.ViewModels
         private readonly IMapper mapper;
 
         private DbViewModel db;
-        private BoardEditViewModel boardVM;
         private CardViewModel card;
-
-        private IProjectService prjService;
 
         [Reactive] public Brush Background { get; set; }
         [Reactive] public bool IsOpened { get; set; }
@@ -86,12 +83,12 @@ namespace Kamban.ViewModels
 
         private void CopyToCommandExecute()
         {
-            var issue = new Issue
+            var copyCard = new CardViewModel
             {
                 Id = 0,
-                Head = "[Copy] " + card.Header,
-                ColumnId = SelectedColumn.Id,
-                RowId = SelectedRow.Id,
+                Header = "[Copy] " + card.Header,
+                ColumnDeterminant = SelectedColumn.Id,
+                RowDeterminant = SelectedRow.Id,
                 Order = 0,
                 Color = card.Color,
                 Body = card.Body,
@@ -100,15 +97,8 @@ namespace Kamban.ViewModels
                 BoardId = SelectedBoard.Id
             };
 
-            prjService.CreateOrUpdateIssueAsync(issue);
-
-            // TODO: add to Db.Cards
-
             if (card.BoardId == SelectedBoard.Id)
-            {
-                var cvm = mapper.Map<Issue, CardViewModel>(issue);
-                boardVM.Cards.Add(cvm);
-            }
+                db.Cards.Add(copyCard);
 
             IsOpened = false;
         }
@@ -124,8 +114,6 @@ namespace Kamban.ViewModels
             card.Order = 0;
             card.Modified = DateTime.Now;
 
-            boardVM.Cards.Remove(card);
-
             IsOpened = false;
         }
 
@@ -137,8 +125,6 @@ namespace Kamban.ViewModels
 
             db = request.Db;
             card = request.Card;
-            boardVM = request.BoardVM;
-            prjService = request.PrjService;
 
             AvailableBoards = db.Boards.Items.ToList();
             SelectedBoard = AvailableBoards.First();

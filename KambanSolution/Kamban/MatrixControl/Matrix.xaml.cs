@@ -15,6 +15,7 @@ using System.Reactive;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using CardsObservableType = System.IObservable<DynamicData.IChangeSet<Kamban.MatrixControl.ICard>>;
 
 namespace Kamban.MatrixControl
 {
@@ -23,6 +24,8 @@ namespace Kamban.MatrixControl
     /// </summary>
     public partial class Matrix : UserControl, IDropTarget
     {
+        private ReadOnlyObservableCollection<ICard> cardList;
+
         public Matrix()
         {
             InitializeComponent();
@@ -52,18 +55,18 @@ namespace Kamban.MatrixControl
                 typeof(Matrix),
                 new PropertyMetadata(null));
 
-        public SourceList<ICard> Cards
+        public CardsObservableType CardsObservable
         {
-            get => (SourceList<ICard>)GetValue(CardsProperty);
-            set => SetValue(CardsProperty, value);
+            get => (CardsObservableType)GetValue(CardsObservableProperty);
+            set => SetValue(CardsObservableProperty, value);
         }
 
-        public static readonly DependencyProperty CardsProperty =
-            DependencyProperty.Register("Cards",
-                typeof(SourceList<ICard>),
+        public static readonly DependencyProperty CardsObservableProperty =
+            DependencyProperty.Register("CardsObservable",
+                typeof(CardsObservableType),
                 typeof(Matrix),
-                new PropertyMetadata(new SourceList<ICard>(),
-                    new PropertyChangedCallback(OnCardsPropertyChanged)));
+                new PropertyMetadata(null,
+                    new PropertyChangedCallback(OnCardsObservablePropertyChanged)));
 
         public ReadOnlyObservableCollection<ColumnViewModel> Columns
         {

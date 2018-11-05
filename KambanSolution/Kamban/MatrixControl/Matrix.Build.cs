@@ -116,9 +116,7 @@ namespace Kamban.MatrixControl
                     int colDet = columns[i].Id;
                     int rowDet = rows[j].Id;
 
-                    Cards
-                        .Connect()
-                        .AutoRefresh()
+                    CardsObservable
                         .Filter(x => x.ColumnDeterminant == colDet && x.RowDeterminant == rowDet)
                         .Sort(SortExpressionComparer<ICard>.Ascending(c => c.Order))
                         .ObserveOnDispatcher()

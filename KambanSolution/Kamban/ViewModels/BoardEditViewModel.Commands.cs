@@ -65,7 +65,7 @@ namespace Kamban.ViewModels
             {
                 // Shift cards
                 var firstColumn = Columns.OrderBy(x => x.Order).First();
-                foreach (CardViewModel it in Cards.Items.Where(x => (int)x.ColumnDeterminant == column.Id))
+                foreach (CardViewModel it in cardList.Where(x => (int)x.ColumnDeterminant == column.Id))
                     it.ColumnDeterminant = firstColumn.Id;
 
                 Db.Columns.Remove(column);
@@ -74,7 +74,7 @@ namespace Kamban.ViewModels
             {
                 // Shift cards
                 var firstRow = Rows.OrderBy(x => x.Order).First();
-                foreach (CardViewModel it in Cards.Items.Where(x => (int)x.RowDeterminant == row.Id))
+                foreach (CardViewModel it in cardList.Where(x => (int)x.RowDeterminant == row.Id))
                     it.RowDeterminant = firstRow.Id;
 
                 Db.Rows.Remove(row);
@@ -185,8 +185,6 @@ namespace Kamban.ViewModels
                 return;
 
             CurrentBoard.Name = newName;
-            //var bi = mapper.Map<BoardViewModel, BoardInfo>(CurrentBoard);
-            //prjService.CreateOrUpdateBoardAsync(bi);
             Title = newName;
         }
 
@@ -203,13 +201,9 @@ namespace Kamban.ViewModels
             if (Db.Boards.Count <= 1)
                 return;
 
-            // TODO: use global cards
-
             // Remove cards
-            foreach (var card in Cards.Items.ToList())
-                prjService.DeleteIssueAsync(card.Id);
-
-            Cards.Clear();
+            foreach (var card in cardList.ToList())
+                Db.Cards.Remove(card);
 
             // Remove headers
             Db.Columns.Items
@@ -236,10 +230,7 @@ namespace Kamban.ViewModels
             if (ts == MessageDialogResult.Negative)
                 return;
 
-            // TODO: use global cards
-
-            prjService.DeleteIssueAsync(cvm.Id);
-            Cards.Remove(cvm);
+            Db.Cards.Remove(cvm as CardViewModel);
         }
 
     }//end of class

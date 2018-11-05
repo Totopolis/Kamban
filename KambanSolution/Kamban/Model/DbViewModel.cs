@@ -26,12 +26,15 @@ namespace Kamban.Model
 
         public IObservable<bool> BoardsCountMoreOne { get; set; }
 
+        [Reactive] public SourceList<CardViewModel> Cards { get; set; }
+
         public DbViewModel()
         {
             Columns = new SourceList<ColumnViewModel>();
             Rows = new SourceList<RowViewModel>();
 
             Boards = new SourceList<BoardViewModel>();
+            Cards = new SourceList<CardViewModel>();
 
             BoardsCountMoreOne = Boards
                 .Connect()
