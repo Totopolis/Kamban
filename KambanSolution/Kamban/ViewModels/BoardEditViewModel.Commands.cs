@@ -184,8 +184,6 @@ namespace Kamban.ViewModels
             if (string.IsNullOrEmpty(newName))
                 return;
 
-            // TODO: save new board name
-
             CurrentBoard.Name = newName;
             //var bi = mapper.Map<BoardViewModel, BoardInfo>(CurrentBoard);
             //prjService.CreateOrUpdateBoardAsync(bi);

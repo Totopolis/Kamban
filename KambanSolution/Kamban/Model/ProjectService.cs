@@ -33,13 +33,6 @@ namespace Kamban.Model
         void DeleteRowAsync(int rowId);
         void DeleteIssueAsync(int issueId);
         void DeleteBoard(int boardId);
-
-        // Obsolete
-
-        RowInfo GetSelectedRow(string rowName);
-        ColumnInfo GetSelectedColumn(string colName);
-
-        Task<Issue> LoadOrCreateIssueAsync(int? issueId);
     }
 
     public class ProjectService : IProjectService
@@ -129,32 +122,6 @@ namespace Kamban.Model
         {
             repo.DeleteBoard(boardId);
         }
-
-        #region Obsolete
-
-        // TODO: remove obsolete
-
-        public RowInfo GetSelectedRow(string rowName)
-        {
-            return rows.FirstOrDefault(r => r.Name == rowName);
-        }
-
-        public ColumnInfo GetSelectedColumn(string colName)
-        {
-            return columns.FirstOrDefault(c => c.Name == colName);
-        }
-
-        
-        public async Task<Issue> LoadOrCreateIssueAsync(int? issueId)
-        {
-            var t = new Issue();
-            if (issueId.HasValue)
-                t = await Task.Run(() => repo.GetIssue(issueId.Value));
-
-            return t;
-        }
-
-        #endregion
 
     }//end of class
 }
