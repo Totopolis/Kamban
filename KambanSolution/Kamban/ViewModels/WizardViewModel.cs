@@ -72,7 +72,6 @@ namespace Kamban.ViewModels
                 if (SelectedTemplate == null)
                     return;
 
-                // TODO: make copies because they go to global !!!
                 Columns.Clear();
                 Columns.AddRange(SelectedTemplate.Columns);
 
@@ -154,7 +153,6 @@ namespace Kamban.ViewModels
 
             // 2. Create board (or get from preloaded)
             DbViewModel db;
-            IProjectService prjService;
 
             if (IsNewFile)
             {
@@ -182,17 +180,13 @@ namespace Kamban.ViewModels
                 }
             }
 
-            prjService = appModel.GetProjectService(uri);
-
-            var bi = new BoardInfo
+            var bvm = new BoardViewModel
             {
                 Name = BoardName,
                 Created = DateTime.Now,
                 Modified = DateTime.Now
             };
-            prjService.CreateOrUpdateBoardAsync(bi);
 
-            var bvm = mapper.Map<BoardInfo, BoardViewModel>(bi);
             db.Boards.Add(bvm);
 
             // 3. Normalize grid
@@ -213,39 +207,29 @@ namespace Kamban.ViewModels
             // 4. Create columns
             foreach (var cvm in Columns)
             {
-                var ci = new ColumnInfo
+                var colToAdd = new ColumnViewModel
                 {
-                    BoardId = bi.Id,
-                    Width = cvm.Size,
+                    BoardId = bvm.Id,
+                    Size = cvm.Size,
                     Order = cvm.Order,
-                    Name = cvm.Caption
+                    Caption = cvm.Caption
                 };
-                prjService.CreateOrUpdateColumnAsync(ci);
 
-                cvm.Id = ci.Id;
-                cvm.BoardId = bi.Id;
-                cvm.Determinant = ci.Id;
-
-                db.Columns.Add(cvm);
+                db.Columns.Add(colToAdd);
             }
 
             // 5. Create rows
             foreach (var rvm in Rows)
             {
-                var ri = new RowInfo
+                var rowToAdd = new RowViewModel
                 {
-                    BoardId = bi.Id,
-                    Height = rvm.Size,
+                    BoardId = bvm.Id,
+                    Size = rvm.Size,
                     Order = rvm.Order,
-                    Name = rvm.Caption
+                    Caption = rvm.Caption
                 };
-                prjService.CreateOrUpdateRowAsync(ri);
 
-                rvm.Id = ri.Id;
-                rvm.BoardId = bi.Id;
-                rvm.Determinant = ri.Id;
-
-                db.Rows.Add(rvm);
+                db.Rows.Add(rowToAdd);
             }
 
             shell.ShowView<BoardView>(

@@ -11,6 +11,7 @@ using DynamicData.Binding;
 using System.Threading.Tasks;
 using AutoMapper;
 using System.Reactive.Linq;
+using Monik.Common;
 
 namespace Kamban.Model
 {
@@ -30,12 +31,15 @@ namespace Kamban.Model
     {
         private readonly IShell shell;
         private readonly IMapper mapper;
+        private readonly IMonik mon;
+
         private SourceList<DbViewModel> dbList;
 
-        public AppModel(IShell shell, IMapper mp)
+        public AppModel(IShell shell, IMapper mp, IMonik m)
         {
             this.shell = shell;
             mapper = mp;
+            mon = m;
 
             dbList = new SourceList<DbViewModel>();
 
@@ -52,6 +56,8 @@ namespace Kamban.Model
                 .Connect()
                 .AutoRefresh()
                 .Select(x => dbList.Count > 0);
+
+            m.LogicVerbose("AppModel.ctor");
         }
 
         public ReadOnlyObservableCollection<DbViewModel> Dbs { get; private set; }
@@ -76,6 +82,7 @@ namespace Kamban.Model
 
             db = new DbViewModel { Uri = uri, Loaded = true };
             dbList.Add(db);
+            EnableAutoSaver(db);
 
             return db;
         }
@@ -114,6 +121,7 @@ namespace Kamban.Model
                 catch { }
 
                 dbList.Add(db);
+                EnableAutoSaver(db);
             }
 
             return db;
@@ -134,6 +142,135 @@ namespace Kamban.Model
                 .Resolve<IProjectService>(new NamedParameter("uri", uri));
 
             return scope;
+        }
+
+        private void EnableAutoSaver(DbViewModel db)
+        {
+            var prjService = GetProjectService(db.Uri);
+
+            ///////////////////
+            // Boards AutoSaver
+            ///////////////////
+            db.Boards
+                .Connect()
+                .WhenAnyPropertyChanged("Name", "Modified")
+                .Subscribe(bvm =>
+                {
+                    mon.LogicVerbose($"AppModel.Boards.ItemChanged {bvm.Id}::{bvm.Name}::{bvm.Modified}");
+                    var bi = mapper.Map<BoardViewModel, BoardInfo>(bvm);
+                    prjService.CreateOrUpdateBoardAsync(bi);
+                });
+
+            db.Boards
+                .Connect()
+                .WhereReasonsAre(ListChangeReason.Add)
+                .Subscribe(x => x
+                    .Select(q => q.Item.Current)
+                    .ToList()
+                    .ForEach(bvm =>
+                    {
+                        mon.LogicVerbose($"AppModel.Board add {bvm.Id}::{bvm.Name}");
+
+                        var bi = mapper.Map<BoardViewModel, BoardInfo>(bvm);
+                        prjService.CreateOrUpdateBoardAsync(bi);
+
+                        bvm.Id = bi.Id;
+                    }));
+
+            db.Boards
+                .Connect()
+                .WhereReasonsAre(ListChangeReason.Remove)
+                .Subscribe(x => x
+                    .Select(q => q.Item.Current)
+                    .ToList()
+                    .ForEach(bvm =>
+                    {
+                        mon.LogicVerbose($"AppModel.Board remove {bvm.Id}::{bvm.Name}");
+
+                        prjService.DeleteBoard(bvm.Id);
+                    }));
+
+            ////////////////////
+            // Columns AutoSaver
+            ////////////////////
+            db.Columns
+                .Connect()
+                //.AutoRefresh()
+                .WhenAnyPropertyChanged("Caption", "Order", "Size", "BoardId")
+                .Subscribe(cvm =>
+                {
+                    mon.LogicVerbose($"BoardViewModel.Columns.ItemChanged {cvm.Id}::{cvm.Caption}::{cvm.Order}");
+                    var ci = mapper.Map<ColumnViewModel, ColumnInfo>(cvm);
+                    prjService.CreateOrUpdateColumnAsync(ci);
+                });
+
+            db.Columns
+                .Connect()
+                //.AutoRefresh()
+                .WhereReasonsAre(ListChangeReason.Add)
+                .Subscribe(x => x
+                    .Select(q => q.Item.Current)
+                    .ToList()
+                    .ForEach(cvm =>
+                    {
+                        mon.LogicVerbose($"BoardViewModel.Column add {cvm.Id}::{cvm.Caption}::{cvm.Order}");
+
+                        var ci = mapper.Map<ColumnViewModel, ColumnInfo>(cvm);
+                        prjService.CreateOrUpdateColumnAsync(ci);
+
+                        cvm.Id = ci.Id;
+                        cvm.Determinant = ci.Id;
+                    }));
+
+            db.Columns
+                .Connect()
+                //.AutoRefresh()
+                .WhereReasonsAre(ListChangeReason.Remove)
+                .Subscribe(x => x
+                    .Select(q => q.Item.Current)
+                    .ToList()
+                    .ForEach(cvm => prjService.DeleteColumnAsync(cvm.Id)));
+
+            /////////////////
+            // Rows AutoSaver
+            /////////////////
+            db.Rows
+                .Connect()
+                //.AutoRefresh()
+                .WhenAnyPropertyChanged("Caption", "Order", "Size", "BoardId")
+                .Subscribe(rvm =>
+                {
+                    mon.LogicVerbose($"BoardViewModel.Rows.ItemChanged {rvm.Id}::{rvm.Caption}::{rvm.Order}");
+                    var row = mapper.Map<RowViewModel, RowInfo>(rvm);
+                    prjService.CreateOrUpdateRowAsync(row);
+                });
+
+            db.Rows
+                .Connect()
+                //.AutoRefresh()
+                .WhereReasonsAre(ListChangeReason.Add)
+                .Subscribe(x => x
+                    .Select(q => q.Item.Current)
+                    .ToList()
+                    .ForEach(rvm =>
+                    {
+                        mon.LogicVerbose($"BoardViewModel.Row add {rvm.Id}::{rvm.Caption}::{rvm.Order}");
+
+                        var ri = mapper.Map<RowViewModel, RowInfo>(rvm);
+                        prjService.CreateOrUpdateRowAsync(ri);
+
+                        rvm.Id = ri.Id;
+                        rvm.Determinant = ri.Id;
+                    }));
+
+            db.Rows
+                .Connect()
+                //.AutoRefresh()
+                .WhereReasonsAre(ListChangeReason.Remove)
+                .Subscribe(x => x
+                    .Select(q => q.Item.Current)
+                    .ToList()
+                    .ForEach(rvm => prjService.DeleteRowAsync(rvm.Id)));
         }
     }//end of class
 }

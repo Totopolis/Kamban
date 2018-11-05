@@ -225,7 +225,6 @@ namespace Kamban.ViewModels
                 .ForEach(x => Db.Rows.Remove(x));
 
             // Remove board
-            prjService.DeleteBoard(CurrentBoard.Id);
             Db.Boards.Remove(CurrentBoard);
             CurrentBoard = Db.Boards.Items.First();
         }
