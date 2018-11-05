@@ -219,7 +219,6 @@ namespace Kamban.Model
                         prjService.CreateOrUpdateColumnAsync(ci);
 
                         cvm.Id = ci.Id;
-                        cvm.Determinant = ci.Id;
                     }));
 
             db.Columns
@@ -260,7 +259,6 @@ namespace Kamban.Model
                         prjService.CreateOrUpdateRowAsync(ri);
 
                         rvm.Id = ri.Id;
-                        rvm.Determinant = ri.Id;
                     }));
 
             db.Rows

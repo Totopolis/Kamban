@@ -65,7 +65,6 @@ namespace Kamban.Model
             tmp.Columns.Add(new ColumnViewModel
             {
                 Name = name,
-                Determinant = determ,
                 Order = determ
             });
         }
@@ -75,7 +74,6 @@ namespace Kamban.Model
             tmp.Rows.Add(new RowViewModel
             {
                 Name = name,
-                Determinant = determ,
                 Order = determ
             });
         }

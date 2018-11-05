@@ -113,8 +113,8 @@ namespace Kamban.MatrixControl
             for (int i = 0; i < Columns.Count; i++)
                 for (int j = 0; j < Rows.Count; j++)
                 {
-                    int colDet = columns[i].Determinant;
-                    int rowDet = rows[j].Determinant;
+                    int colDet = columns[i].Id;
+                    int rowDet = rows[j].Id;
 
                     Cards
                         .Connect()
@@ -128,8 +128,8 @@ namespace Kamban.MatrixControl
                     Intersection cell = new Intersection(this)
                     {
                         DataContext = this,
-                        ColumnDeterminant = columns[i].Determinant,
-                        RowDeterminant = rows[j].Determinant,
+                        ColumnDeterminant = colDet,
+                        RowDeterminant = rowDet,
                         SelfCards = intersectionCards
                     };
 

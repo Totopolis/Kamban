@@ -16,7 +16,6 @@ namespace Kamban.Model
         [Reactive] public int Id { get; set; }
         [Reactive] public int BoardId { get; set; }
         [Reactive] public string Name { get; set; }
-        [Reactive] public int Determinant { get; set; } // TODO: avoid from project!!!!
         [Reactive] public int Size { get; set; }
         [Reactive] public int Order { get; set; }
     }
