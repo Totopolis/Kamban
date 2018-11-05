@@ -73,10 +73,10 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> CreateRowCommand { get; set; }
 
         public ReactiveCommand<Unit, Unit> AddBoardCommand { get; set; }
-        public ReactiveCommand<Unit, Unit> PrevBoardCommand { get; set; }
-        public ReactiveCommand<Unit, Unit> NextBoardCommand { get; set; }
+        [Reactive] public ReactiveCommand<Unit, Unit> PrevBoardCommand { get; set; }
+        [Reactive] public ReactiveCommand<Unit, Unit> NextBoardCommand { get; set; }
         public ReactiveCommand<Unit, Unit> RenameBoardCommand { get; set; }
-        public ReactiveCommand<Unit, Unit> DeleteBoardCommand { get; set; }
+        [Reactive] public ReactiveCommand<Unit, Unit> DeleteBoardCommand { get; set; }
         public ReactiveCommand<object, Unit> SelectBoardCommand { get; set; }
 
         public BoardEditViewModel(IShell shell, IDialogCoordinator dc, IMonik m, IMapper mp, IAppModel am)
@@ -140,32 +140,7 @@ namespace Kamban.ViewModels
                 });
             });
 
-            var prevNextCommandEnabled = this
-                .WhenAnyValue(x => x.BoardsInFile)
-                .Where(x => x != null)
-                .Select(x => x.Count > 1);
-
-            PrevBoardCommand = ReactiveCommand.Create(() =>
-            {
-                int indx = BoardsInFile.IndexOf(CurrentBoard);
-
-                CurrentBoard = indx > 0 ?
-                    BoardsInFile[indx - 1] :
-                    BoardsInFile[BoardsInFile.Count - 1];
-            }, prevNextCommandEnabled);
-
-            NextBoardCommand = ReactiveCommand.Create(() =>
-            {
-                int indx = BoardsInFile.IndexOf(CurrentBoard);
-
-                CurrentBoard = indx < BoardsInFile.Count - 1 ?
-                    BoardsInFile[indx + 1] :
-                    BoardsInFile[0];
-            }, prevNextCommandEnabled);
-
             RenameBoardCommand = ReactiveCommand.CreateFromTask(RenameBoardCommandExecute);
-
-            DeleteBoardCommand = ReactiveCommand.CreateFromTask(DeleteBoardCommandExecute, appModel.DbsCountMoreOne);
 
             SelectBoardCommand = ReactiveCommand
                 .Create((object mi) =>
@@ -304,6 +279,27 @@ namespace Kamban.ViewModels
             var request = viewRequest as BoardViewRequest;
 
             Db = request.Db;
+
+            DeleteBoardCommand = ReactiveCommand.CreateFromTask(DeleteBoardCommandExecute, Db.BoardsCountMoreOne);
+
+            PrevBoardCommand = ReactiveCommand.Create(() =>
+            {
+                int indx = BoardsInFile.IndexOf(CurrentBoard);
+
+                CurrentBoard = indx > 0 ?
+                    BoardsInFile[indx - 1] :
+                    BoardsInFile[BoardsInFile.Count - 1];
+            }, Db.BoardsCountMoreOne);
+
+            NextBoardCommand = ReactiveCommand.Create(() =>
+            {
+                int indx = BoardsInFile.IndexOf(CurrentBoard);
+
+                CurrentBoard = indx < BoardsInFile.Count - 1 ?
+                    BoardsInFile[indx + 1] :
+                    BoardsInFile[0];
+            }, Db.BoardsCountMoreOne);
+
             prjService = appModel.GetProjectService(request.Db.Uri);
 
             Db.Boards

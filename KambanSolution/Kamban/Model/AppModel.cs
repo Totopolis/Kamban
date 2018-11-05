@@ -18,7 +18,6 @@ namespace Kamban.Model
     {
         ReadOnlyObservableCollection<DbViewModel> Dbs { get; }
         IObservable<bool> DbsCountMoreZero { get; }
-        IObservable<bool> DbsCountMoreOne { get; }
 
         Task<DbViewModel> CreateDb(string uri);
         Task<DbViewModel> LoadDb(string uri);
@@ -52,17 +51,11 @@ namespace Kamban.Model
             DbsCountMoreZero = dbList
                 .Connect()
                 .AutoRefresh()
-                .Select(x => x.Count > 0);
-
-            DbsCountMoreOne = dbList
-                .Connect()
-                .AutoRefresh()
-                .Select(x => x.Count > 1);
+                .Select(x => dbList.Count > 0);
         }
 
         public ReadOnlyObservableCollection<DbViewModel> Dbs { get; private set; }
         public IObservable<bool> DbsCountMoreZero { get; private set; }
-        public IObservable<bool> DbsCountMoreOne { get; private set; }
 
         public async Task<DbViewModel> CreateDb(string uri)
         {

@@ -4,6 +4,7 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,12 +24,19 @@ namespace Kamban.Model
 
         [Reactive] public SourceList<BoardViewModel> Boards { get; set; }
 
+        public IObservable<bool> BoardsCountMoreOne { get; set; }
+
         public DbViewModel()
         {
             Columns = new SourceList<ColumnViewModel>();
             Rows = new SourceList<RowViewModel>();
 
             Boards = new SourceList<BoardViewModel>();
+
+            BoardsCountMoreOne = Boards
+                .Connect()
+                .AutoRefresh()
+                .Select(x => Boards.Count > 1);
 
             Boards
                 .Connect()
