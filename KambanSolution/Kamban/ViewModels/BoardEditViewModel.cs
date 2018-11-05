@@ -229,8 +229,6 @@ namespace Kamban.ViewModels
             //foreach (var it in toDel)
             //    scope.DeleteIssueAsync(it.Id);
 
-            // TODO: reimplement without EnableMatrix
-
             EnableMatrix = true;
         }
 

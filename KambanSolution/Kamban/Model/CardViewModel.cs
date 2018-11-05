@@ -14,8 +14,6 @@ namespace Kamban.Model
     {
         public CardViewModel()
         {
-            // TODO: whenany => update modified
-
             this.WhenAnyValue(x => x.Body)
                 .Subscribe(x => ShowDescription = !string.IsNullOrEmpty(x));
         }
