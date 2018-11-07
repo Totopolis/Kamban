@@ -239,8 +239,10 @@
     <Compile Include="Views\WizardView.xaml.cs">
       <DependentUpon>WizardView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\WpfResources\ControlElements.cs" />
     <Compile Include="Views\WpfResources\Converters.cs" />
+    <Compile Include="Views\WpfResources\RecentGroup.xaml.cs">
+      <DependentUpon>RecentGroup.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\WpfResources\SelectionBindingTextBox.cs" />
     <Compile Include="Views\WpfResources\Validators.cs" />
   </ItemGroup>
@@ -311,6 +313,10 @@
     <Page Include="Views\WizardView.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="Views\WpfResources\RecentGroup.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\WpfResources\TemplatesDictionary.xaml">
       <Generator>MSBuild:Compile</Generator>

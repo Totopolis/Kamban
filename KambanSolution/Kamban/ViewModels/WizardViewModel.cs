@@ -186,7 +186,7 @@ namespace Kamban.ViewModels
                 if (!db.Loaded)
                     throw new Exception("File not loaded");
 
-                appConfig.AddRecent(uri);
+                appConfig.UpdateRecent(uri, false);
             }
             else
             {

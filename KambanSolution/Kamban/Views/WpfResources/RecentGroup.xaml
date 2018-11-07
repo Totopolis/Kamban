@@ -1,0 +1,93 @@
+﻿<UserControl x:Class="Kamban.Views.WpfResources.RecentGroup"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Kamban.Views.WpfResources"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             Height="0">
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <TextBlock
+                Margin="0,10,0,0"
+                FontWeight="Light"
+                FontSize="16"
+                FontFamily="Segoe UI"
+                Text="{Binding Path=Header, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"/>
+
+            <ItemsControl ItemsSource="{Binding Path=Recent, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button
+                            x:Name="MainButton"
+                            Margin="0,5,0,0"
+                            Command="{Binding Path=OpenRecentCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
+                            CommandParameter="{Binding}"
+                            MouseEnter="Button_MouseEnter"
+                            MouseLeave="Button_MouseLeave">
+
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Cursor" Value="Hand"/>
+                                            <Setter Property="Background" Value="LightYellow"/>
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter Property="Background" Value="LightBlue"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            
+                            <Button.Template>
+                                <ControlTemplate TargetType="{x:Type Button}">
+                                    
+                                    <Grid
+                                        x:Name="ButtonGrid"
+                                        Background="{Binding Background, ElementName=MainButton}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="90*"/>
+                                            <ColumnDefinition Width="10*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Margin="5,5,0,5" Orientation="Vertical" Grid.Column="0" Grid.ColumnSpan="1">
+                                            <TextBlock 
+                                                TextAlignment="Left"
+                                                FontSize="14"
+                                                FontFamily="Segoe UI"
+                                                Text="{Binding FileName}"/>
+
+                                            <TextBlock 
+                                                TextAlignment="Left"
+                                                FontWeight="Light"
+                                                FontSize="12"
+                                                FontFamily="Segoe UI"
+                                                Text="{Binding PathName}"/>
+                                        </StackPanel>
+
+                                        <CheckBox
+                                            x:Name="PinCheck"
+                                            Visibility="Hidden"
+                                            ToolTip="Pin"
+                                            Grid.Column="1" 
+                                            Grid.ColumnSpan="1" 
+                                            IsChecked="{Binding Pinned}"/>
+                                    </Grid>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </Grid>
+</UserControl>

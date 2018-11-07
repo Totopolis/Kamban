@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using DynamicData;
+using Newtonsoft.Json;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,17 +13,35 @@ namespace Kamban.Model
 {
     public interface IAppConfig
     {
-        string[] Recent { get; }
         string Caption { get; set; }
         string ArchiveFolder { get; set; }
 
-        void AddRecent(string uri);
+        void UpdateRecent(string uri, bool pinned);
         void RemoveRecent(string uri);
+
+        IObservable<IChangeSet<RecentViewModel>> RecentObservable { get; }
+    }
+
+    public class RecentJson
+    {
+        public string Uri { get; set; }
+        public DateTime LastAccess { get; set; }
+        public bool Pinned { get; set; }
+    }
+
+    public class RecentViewModel : ReactiveObject
+    {
+        [Reactive] public string Uri { get; set; }
+        [Reactive] public DateTime LastAccess { get; set; }
+        [Reactive] public bool Pinned { get; set; }
+
+        public string FileName => (new FileInfo(Uri)).Name;
+        public string PathName => (new FileInfo(Uri)).DirectoryName;
     }
 
     public class AppConfigJson
     {
-        public List<string> Recent { get; set; } = new List<string>();
+        public List<RecentJson> Feed { get; set; } = new List<RecentJson>();
         public string Caption { get; set; } = "KAMBAN";
         public string ArchiveFolder { get; set; } = null;
     }
@@ -29,6 +50,7 @@ namespace Kamban.Model
     {
         private readonly AppConfigJson appConfig;
         private readonly string path;
+        private readonly SourceList<RecentViewModel> recentList;
 
         public AppConfig()
         {
@@ -42,9 +64,15 @@ namespace Kamban.Model
             }
             else
                 appConfig = new AppConfigJson();
+
+            recentList = new SourceList<RecentViewModel>();
+            recentList.AddRange(appConfig.Feed.Select(x => new RecentViewModel
+                { Uri = x.Uri, LastAccess = x.LastAccess, Pinned = x.Pinned }));
+
+            RecentObservable = recentList.Connect().AutoRefresh();
         }
 
-        public string[] Recent => appConfig.Recent.ToArray();
+        public IObservable<IChangeSet<RecentViewModel>> RecentObservable { get; private set; }
 
         public string Caption
         {
@@ -66,22 +94,53 @@ namespace Kamban.Model
             }
         }
 
-        public void AddRecent(string uri)
+        public void UpdateRecent(string uri, bool pinned)
         {
-            if (!appConfig.Recent.Contains(uri))
+            var recentVM = recentList.Items.Where(x => x.Uri == uri).FirstOrDefault();
+            var recentJson = appConfig.Feed.Where(x => x.Uri == uri).FirstOrDefault();
+
+            if (recentVM == null)
             {
-                appConfig.Recent.Add(uri);
+                recentVM = new RecentViewModel
+                {
+                    Uri = uri,
+                    LastAccess = DateTime.Now
+                };
+
+                recentList.Add(recentVM);
+
+                recentJson = new RecentJson
+                {
+                    Uri = uri,
+                    LastAccess = DateTime.Now
+                };
+
+                appConfig.Feed.Add(recentJson);
+                SaveConfig();
+            }
+            else
+            {
+                recentVM.LastAccess = DateTime.Now;
+                recentJson.LastAccess = recentVM.LastAccess;
+
+                recentVM.Pinned = pinned;
+                recentJson.Pinned = pinned;
+
                 SaveConfig();
             }
         }
 
         public void RemoveRecent(string uri)
         {
-            if (appConfig.Recent.Contains(uri))
-            {
-                appConfig.Recent.Remove(uri);
-                SaveConfig();
-            }
+            var recentVM = recentList.Items.Where(x => x.Uri == uri).FirstOrDefault();
+            var recentJson = appConfig.Feed.Where(x => x.Uri == uri).FirstOrDefault();
+
+            if (recentVM == null)
+                return;
+
+            recentList.Remove(recentVM);
+            appConfig.Feed.Remove(recentJson);
+            SaveConfig();
         }
 
         private void SaveConfig()

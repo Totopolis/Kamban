@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -33,15 +34,18 @@ namespace Kamban.ViewModels
         private readonly IMapper mapper;
         private readonly IAppConfig appConfig;
 
-        public ReadOnlyObservableCollection<DbViewModel> Recents { get; set; }
+        [Reactive] public IObservable<IChangeSet<RecentViewModel>> Pinned { get; private set; }
+        [Reactive] public IObservable<IChangeSet<RecentViewModel>> Today { get; private set; }
+        [Reactive] public IObservable<IChangeSet<RecentViewModel>> ThisMonth { get; private set; }
+        [Reactive] public IObservable<IChangeSet<RecentViewModel>> Older { get; private set; }
+
         public ReactiveCommand NewFileCommand { get; set; }
         public ReactiveCommand OpenFileCommand { get; set; }
-        public ReactiveCommand<string, Unit> OpenRecentDbCommand { get; set; }
+        [Reactive] public ReactiveCommand<RecentViewModel, Unit> OpenRecentDbCommand { get; set; }
         public ReactiveCommand ExportCommand { get; set; }
         public ReactiveCommand ExitCommand { get; set; }
 
-        [Reactive]
-        public bool IsLoading { get; set; }
+        [Reactive] public string Basement { get; set; }
 
         public StartupViewModel(IShell shell, IAppModel appModel, IDialogCoordinator dc,
             IMapper mp, IAppConfig cfg)
@@ -52,13 +56,10 @@ namespace Kamban.ViewModels
             mapper = mp;
             appConfig = cfg;
 
-            Recents = appModel.Dbs;
-
-            OpenRecentDbCommand = ReactiveCommand.Create<string>(async (uri) =>
+            OpenRecentDbCommand = ReactiveCommand.Create<RecentViewModel>(async (rvm) =>
             {
-                IsLoading = true;
-                await OpenBoardView(uri);
-                IsLoading = false;
+                if (await OpenBoardView(rvm.Uri))
+                    appConfig.UpdateRecent(rvm.Uri, rvm.Pinned);
             });
 
             NewFileCommand = ReactiveCommand.Create(() =>
@@ -75,10 +76,10 @@ namespace Kamban.ViewModels
 
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
-                    this.IsLoading = true;
                     var uri = dialog.FileName;
-                    await OpenBoardView(uri);
-                    this.IsLoading = false;
+
+                    if (await OpenBoardView(uri))
+                        appConfig.UpdateRecent(uri, false);
                 }
             });
 
@@ -87,10 +88,32 @@ namespace Kamban.ViewModels
 
             ExitCommand = ReactiveCommand.Create(() => App.Current.Shutdown());
 
-            this.IsLoading = false;
+            Pinned = appConfig.RecentObservable
+                .Filter(x => x.Pinned);
+
+            var notPinned = appConfig.RecentObservable
+                .Filter(x => !x.Pinned);
+
+            Today = notPinned
+                .Filter(x => x.LastAccess.IsToday());
+
+            ThisMonth = notPinned
+                .Filter(x => !x.LastAccess.IsToday() && x.LastAccess.IsThisMonth());
+
+            Older = notPinned
+                .Filter(x => !x.LastAccess.IsToday() && !x.LastAccess.IsThisMonth());
+
+            // TODO: move autosaver to AppConfig
+            
+            appConfig.RecentObservable
+                .WhenAnyPropertyChanged("Pinned")
+                .Subscribe(x => appConfig.UpdateRecent(x.Uri, x.Pinned));
+
+            var ver = Assembly.GetExecutingAssembly().GetName();
+            Basement = $"2018 Kamban v{ver.Version.Major}.{ver.Version.Minor}";
         } //ctor
 
-        private async Task OpenBoardView(string uri)
+        private async Task<bool> OpenBoardView(string uri)
         {
             var file = new FileInfo(uri);
 
@@ -100,7 +123,7 @@ namespace Kamban.ViewModels
                 appModel.RemoveDb(uri);
 
                 await dialCoord.ShowMessageAsync(this, "Error", "File was deleted or moved");
-                return;
+                return false;
             }
 
             var db = await appModel.LoadDb(uri);
@@ -110,7 +133,7 @@ namespace Kamban.ViewModels
                 appModel.RemoveDb(uri);
 
                 await dialCoord.ShowMessageAsync(this, "Error", "File was damaged");
-                return;
+                return false;
             }
 
             var title = file.FullName;
@@ -120,6 +143,8 @@ namespace Kamban.ViewModels
             shell.ShowView<BoardView>(
                 viewRequest: new BoardViewRequest { ViewId = title, Db = db },
                 options: new UiShowOptions { Title = title });
+
+            return true;
         }
 
         public void Initialize(ViewRequest viewRequest)
@@ -134,19 +159,33 @@ namespace Kamban.ViewModels
                 .SetHotKey(ModifierKeys.Control, Key.U);
 
             shell.AddGlobalCommand("File", "Exit", "ExitCommand", this);
-
-            Observable.FromAsync(() => FillRecentsAsync())
-                .ObserveOnDispatcher()
-                .Subscribe();
-        }
-
-        private async Task FillRecentsAsync()
-        {
-            var toFill = appConfig.Recent;
-
-            foreach (var uri in toFill)
-                await appModel.LoadDb(uri);
         }
 
     }//end of classs
+
+    public static class DateTimeExtensionMethods
+    {
+        public static bool IsSameMonth(this DateTime datetime1, DateTime datetime2)
+        {
+            return datetime1.Year == datetime2.Year
+                && datetime1.Month == datetime2.Month;
+        }
+
+        public static bool IsSameDay(this DateTime datetime1, DateTime datetime2)
+        {
+            return datetime1.Year == datetime2.Year
+                && datetime1.Month == datetime2.Month
+                && datetime1.Day == datetime2.Day;
+        }
+
+        public static bool IsToday(this DateTime datetime1)
+        {
+            return IsSameDay(datetime1, DateTime.Now);
+        }
+
+        public static bool IsThisMonth(this DateTime datetime1)
+        {
+            return IsSameMonth(datetime1, DateTime.Now);
+        }
+    }
 }

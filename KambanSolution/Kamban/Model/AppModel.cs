@@ -46,7 +46,7 @@ namespace Kamban.Model
             dbList
                 .Connect()
                 .AutoRefresh()
-                .Sort(SortExpressionComparer<DbViewModel>.Descending(x => x.LastAccess))
+                .Sort(SortExpressionComparer<DbViewModel>.Descending(x => x.LastEdit))
                 .Bind(out ReadOnlyObservableCollection<DbViewModel> temp)
                 .Subscribe();
 
@@ -94,12 +94,17 @@ namespace Kamban.Model
             {
                 db = new DbViewModel { Uri = uri };
 
-                if (!File.Exists(db.Uri))
+                var fi = new FileInfo(uri);
+
+                if (!fi.Exists)
                     return db;
 
                 try
                 {
-                    db.LastAccess = File.GetLastWriteTime(db.Uri);
+                    db.Title = fi.Name;
+                    db.LastEdit = File.GetLastWriteTime(db.Uri);
+                    db.Path = fi.DirectoryName;
+                    db.SizeOf = SizeSuffix(fi.Length);
 
                     var prj = GetProjectService(db.Uri);
 
@@ -111,13 +116,10 @@ namespace Kamban.Model
                     db.Rows.AddRange(rows.Select(x => mapper.Map<RowInfo, RowViewModel>(x)));
                     db.Boards.AddRange(boards.Select(x => mapper.Map<BoardInfo, BoardViewModel>(x)));
 
-                    db.TotalTickets = 0;
                     foreach (var brd in boards)
                     {
                         var issues = await prj.GetIssuesByBoardIdAsync(brd.Id);
-
                         db.Cards.AddRange(issues.Select(x => mapper.Map<Issue, CardViewModel>(x)));
-                        db.TotalTickets += issues.Count();
                     }
 
                     db.Loaded = true;
@@ -315,6 +317,24 @@ namespace Kamban.Model
                         mon.LogicVerbose("AppModel.Cards remove");
                         prj.DeleteIssueAsync(cvm.Id);
                     }));
+        }
+
+        static readonly string[] SizeSuffixes =
+                  { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+
+        static string SizeSuffix(Int64 value)
+        {
+            if (value < 0) { return "-" + SizeSuffix(-value); }
+
+            int i = 0;
+            decimal dValue = (decimal)value;
+            while (Math.Round(dValue / 1024) >= 1)
+            {
+                dValue /= 1024;
+                i++;
+            }
+
+            return string.Format("{0:n1} {1}", dValue, SizeSuffixes[i]);
         }
     }//end of class
 }
