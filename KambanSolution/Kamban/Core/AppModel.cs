@@ -1,19 +1,18 @@
-﻿using Newtonsoft.Json;
+﻿using Autofac;
+using AutoMapper;
+using DynamicData;
+using DynamicData.Binding;
+using Kamban.Model;
+using Monik.Common;
 using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using Ui.Wpf.Common;
-using Autofac;
-using DynamicData;
-using System.Collections.ObjectModel;
-using DynamicData.Binding;
-using System.Threading.Tasks;
-using AutoMapper;
 using System.Reactive.Linq;
-using Monik.Common;
+using System.Threading.Tasks;
+using Ui.Wpf.Common;
 
-namespace Kamban.Model
+namespace Kamban.Core
 {
     public interface IAppModel
     {

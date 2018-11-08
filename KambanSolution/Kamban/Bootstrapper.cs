@@ -1,14 +1,14 @@
 ﻿using Autofac;
+using AutoMapper;
+using Kamban.Core;
 using Kamban.Model;
-using Kamban.Views;
-using Kamban.ViewModels;
-using Ui.Wpf.Common;
-using Ui.Wpf.Common.ViewModels;
 using Kamban.Repository;
+using Kamban.ViewModels;
+using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
 using Monik.Common;
-using AutoMapper;
-using Kamban.MatrixControl;
+using Ui.Wpf.Common;
+using Ui.Wpf.Common.ViewModels;
 
 namespace Kamban
 {

@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using DynamicData;
 using DynamicData.Binding;
+using Kamban.Core;
 using Kamban.Model;
 using Kamban.Views;
 using MahApps.Metro;

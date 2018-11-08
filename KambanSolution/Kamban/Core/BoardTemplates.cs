@@ -1,12 +1,9 @@
-﻿using ReactiveUI;
+﻿using Kamban.Model;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Kamban.Model
+namespace Kamban.Core
 {
     public class BoardTemplate : ReactiveObject
     {

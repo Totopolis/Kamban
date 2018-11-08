@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using System.Windows.Input;
-using AutoMapper;
+﻿using AutoMapper;
 using DynamicData;
 using DynamicData.Binding;
+using Kamban.Core;
 using Kamban.MatrixControl;
 using Kamban.Model;
 using Kamban.Views;
@@ -17,6 +9,13 @@ using MahApps.Metro.Controls.Dialogs;
 using Monik.Common;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Windows.Controls;
+using System.Windows.Input;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
 using CardsObservableType = System.IObservable<DynamicData.IChangeSet<Kamban.MatrixControl.ICard>>;
@@ -249,11 +248,11 @@ namespace Kamban.ViewModels
         {
             mon.LogicVerbose("BoardViewModel.Initialize started");
 
-            shell.AddVMCommand("Edit", "Add tiket", "CreateTiketCommand", this)
+            shell.AddVMCommand("Edit", "Add Tiket", "CreateTiketCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.W);
 
-            shell.AddVMCommand("Edit", "Add column", "CreateColumnCommand", this);
-            shell.AddVMCommand("Edit", "Add row", "CreateRowCommand", this, true);
+            shell.AddVMCommand("Edit", "Add Column", "CreateColumnCommand", this);
+            shell.AddVMCommand("Edit", "Add Row", "CreateRowCommand", this, true);
 
             shell.AddVMCommand("Edit", "Normalize Grid", "NormalizeGridCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.G);

@@ -1,25 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Windows.Input;
-using System.Windows.Threading;
-using AutoMapper;
+﻿using AutoMapper;
 using DynamicData;
 using DynamicData.Binding;
+using Kamban.Core;
 using Kamban.Model;
 using Kamban.Views;
-using MahApps.Metro;
 using MahApps.Metro.Controls.Dialogs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System;
+using System.IO;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Windows.Input;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ShowOptions;
 using Ui.Wpf.Common.ViewModels;
@@ -96,6 +91,8 @@ namespace Kamban.ViewModels
 
             Today = notPinned
                 .Filter(x => x.LastAccess.IsToday());
+
+            // TODO: Yesterday observer
 
             ThisMonth = notPinned
                 .Filter(x => !x.LastAccess.IsToday() && x.LastAccess.IsThisMonth());

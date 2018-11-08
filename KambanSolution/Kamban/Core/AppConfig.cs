@@ -1,4 +1,5 @@
 ﻿using DynamicData;
+using Kamban.Model;
 using Newtonsoft.Json;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -9,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Kamban.Model
+namespace Kamban.Core
 {
     public interface IAppConfig
     {
@@ -27,16 +28,6 @@ namespace Kamban.Model
         public string Uri { get; set; }
         public DateTime LastAccess { get; set; }
         public bool Pinned { get; set; }
-    }
-
-    public class RecentViewModel : ReactiveObject
-    {
-        [Reactive] public string Uri { get; set; }
-        [Reactive] public DateTime LastAccess { get; set; }
-        [Reactive] public bool Pinned { get; set; }
-
-        public string FileName => (new FileInfo(Uri)).Name;
-        public string PathName => (new FileInfo(Uri)).DirectoryName;
     }
 
     public class AppConfigJson

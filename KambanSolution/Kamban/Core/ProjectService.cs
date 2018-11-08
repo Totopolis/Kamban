@@ -1,12 +1,10 @@
-﻿using System;
+﻿using Kamban.Model;
+using Kamban.Repository;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
 using System.Threading.Tasks;
 using Ui.Wpf.Common;
-using Kamban.Repository;
 
-namespace Kamban.Model
+namespace Kamban.Core
 {
     /// LiteDb or Api access to board by url
     public interface IProjectService

@@ -7,7 +7,6 @@
         dialogs:DialogParticipation.Register="{Binding}"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:metro="http://metro.mahapps.com/winfx/xaml/controls"
-        xmlns:loadin="clr-namespace:LoadingIndicators.WPF;assembly=LoadingIndicators.WPF"
               xmlns:wpfresources="clr-namespace:Kamban.Views.WpfResources"
               mc:Ignorable="d">
     <Grid>
@@ -19,8 +18,8 @@
         </Grid.Background>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="75*"/>
-            <ColumnDefinition Width="25*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="0"/>
         </Grid.ColumnDefinitions>
 
         <Grid
@@ -55,13 +54,13 @@
                         FontFamily="Segoe UI">Get Started</TextBlock>
 
                     <TextBlock
-                        Margin="0,0,0,20"
+                        TextWrapping="Wrap"
                         FontWeight="Light"
                         FontSize="14"
-                        FontFamily="Segoe UI">Open url on web and see what you need</TextBlock>
+                        FontFamily="Segoe UI">Open url http://www.rbc.ru on and tra la la - web and see what you need</TextBlock>
 
                     <TextBlock 
-                        
+                        Margin="0,50,0,0"
                         FontWeight="Light"
                         FontSize="30"
                         FontFamily="Segoe UI">Recent</TextBlock>
@@ -120,6 +119,12 @@
                             FontWeight="Light"
                             FontSize="16"
                             FontFamily="Segoe UI">Open Project</Button>
+
+                        <TextBlock 
+                            Margin="0,50,0,0"
+                            FontWeight="Light"
+                            FontSize="30"
+                            FontFamily="Segoe UI">Public Boards</TextBlock>
                     </StackPanel>
 
                     <TextBlock
