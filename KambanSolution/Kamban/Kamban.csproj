@@ -191,6 +191,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="Core\ConfigStructures.cs" />
     <Compile Include="MatrixControl\Intersection.xaml.cs">
       <DependentUpon>Intersection.xaml</DependentUpon>
     </Compile>

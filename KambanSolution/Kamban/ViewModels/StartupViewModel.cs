@@ -5,10 +5,13 @@ using Kamban.Core;
 using Kamban.Model;
 using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
+using Monik.Common;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Net.Http;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reflection;
@@ -28,9 +31,11 @@ namespace Kamban.ViewModels
         private readonly IDialogCoordinator dialCoord;
         private readonly IMapper mapper;
         private readonly IAppConfig appConfig;
+        private readonly IMonik mon;
 
         [Reactive] public IObservable<IChangeSet<RecentViewModel>> Pinned { get; private set; }
         [Reactive] public IObservable<IChangeSet<RecentViewModel>> Today { get; private set; }
+        [Reactive] public IObservable<IChangeSet<RecentViewModel>> Yesterday { get; private set; }
         [Reactive] public IObservable<IChangeSet<RecentViewModel>> ThisMonth { get; private set; }
         [Reactive] public IObservable<IChangeSet<RecentViewModel>> Older { get; private set; }
 
@@ -40,16 +45,21 @@ namespace Kamban.ViewModels
         public ReactiveCommand ExportCommand { get; set; }
         public ReactiveCommand ExitCommand { get; set; }
 
+        [Reactive] public string GetStarted { get; set; }
         [Reactive] public string Basement { get; set; }
+        [Reactive] public ReadOnlyObservableCollection<PublicBoardJson> PublicBoards { get; set; }
+
+        [Reactive] public ReactiveCommand<PublicBoardJson, Unit> OpenPublicBoardCommand { get; set; }
 
         public StartupViewModel(IShell shell, IAppModel appModel, IDialogCoordinator dc,
-            IMapper mp, IAppConfig cfg)
+            IMapper mp, IAppConfig cfg, IMonik m)
         {
             this.shell = shell as IShell;
             this.appModel = appModel;
             dialCoord = dc;
             mapper = mp;
             appConfig = cfg;
+            mon = m;
 
             OpenRecentDbCommand = ReactiveCommand.Create<RecentViewModel>(async (rvm) =>
             {
@@ -78,6 +88,9 @@ namespace Kamban.ViewModels
                 }
             });
 
+            OpenPublicBoardCommand = ReactiveCommand
+                .CreateFromTask<PublicBoardJson>(OpenPublicBoardCommandExecute);
+
             ExportCommand = ReactiveCommand.Create(() => 
                 this.shell.ShowView<ExportView>(), appModel.DbsCountMoreZero);
 
@@ -92,13 +105,14 @@ namespace Kamban.ViewModels
             Today = notPinned
                 .Filter(x => x.LastAccess.IsToday());
 
-            // TODO: Yesterday observer
+            Yesterday = notPinned
+                .Filter(x => x.LastAccess.IsYesterday());
 
             ThisMonth = notPinned
-                .Filter(x => !x.LastAccess.IsToday() && x.LastAccess.IsThisMonth());
+                .Filter(x => !x.LastAccess.IsToday() && !x.LastAccess.IsYesterday() && x.LastAccess.IsThisMonth());
 
             Older = notPinned
-                .Filter(x => !x.LastAccess.IsToday() && !x.LastAccess.IsThisMonth());
+                .Filter(x => !x.LastAccess.IsToday() && !x.LastAccess.IsYesterday() && !x.LastAccess.IsThisMonth());
 
             // TODO: move autosaver to AppConfig
             
@@ -106,9 +120,57 @@ namespace Kamban.ViewModels
                 .WhenAnyPropertyChanged("Pinned")
                 .Subscribe(x => appConfig.UpdateRecent(x.Uri, x.Pinned));
 
+            appConfig.GetStarted.Subscribe(x => GetStarted = x);
+            appConfig.GetStarted.Subscribe(x => Console.WriteLine(x) );
+
             var ver = Assembly.GetExecutingAssembly().GetName();
-            Basement = $"2018 Kamban v{ver.Version.Major}.{ver.Version.Minor}";
+            appConfig.Basement
+                .Subscribe(x => Basement = x + $"v{ver.Version.Major}.{ver.Version.Minor}");
         } //ctor
+
+        public async Task OpenPublicBoardCommandExecute(PublicBoardJson obj)
+        {
+            var selectedPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+            FolderBrowserDialog dialog = new FolderBrowserDialog
+            {
+                Description = "Select folder to save public board",
+                ShowNewFolderButton = true,
+                SelectedPath = selectedPath
+            };
+
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                string fileName = dialog.SelectedPath + "\\" + obj.Name + ".kam";
+                HttpResponseMessage resp;
+
+                HttpClient hc = new HttpClient();
+                try
+                {
+                    resp = await hc.GetAsync(obj.Url);
+                }
+                catch(Exception ex)
+                {
+                    mon.ApplicationError($"StartupViewModel.OpenPublicBoardCommandExecute network error: {ex.Message}");
+                    await dialCoord.ShowMessageAsync(this, "Network Error", "Can not download file");
+                    return;
+                }
+
+                try
+                {
+                    await ReadAsFileAsync(resp.Content, fileName, true);
+                }
+                catch(Exception ex)
+                {
+                    mon.ApplicationError($"StartupViewModel.OpenPublicBoardCommandExecute file save error: {ex.Message}");
+                    await dialCoord.ShowMessageAsync(this, "File save Error", "Can not save file");
+                    return;
+                }
+
+                if (await OpenBoardView(fileName))
+                    appConfig.UpdateRecent(fileName, false);
+            }
+        }
 
         private async Task<bool> OpenBoardView(string uri)
         {
@@ -146,7 +208,7 @@ namespace Kamban.ViewModels
 
         public void Initialize(ViewRequest viewRequest)
         {
-            shell.AddGlobalCommand("File", "New db", "NewFileCommand", this)
+            shell.AddGlobalCommand("File", "Create", "NewFileCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.N);
 
             shell.AddGlobalCommand("File", "Open", "OpenFileCommand", this)
@@ -156,6 +218,37 @@ namespace Kamban.ViewModels
                 .SetHotKey(ModifierKeys.Control, Key.U);
 
             shell.AddGlobalCommand("File", "Exit", "ExitCommand", this);
+
+            Observable.FromAsync(_ => appConfig.LoadOnlineContentAsync())
+                .Subscribe(_ =>
+                {
+                    PublicBoards = appConfig.PublicBoards;
+                });
+        }
+
+        public async Task ReadAsFileAsync(HttpContent content, string filename, bool overwrite)
+        {
+            string pathname = Path.GetFullPath(filename);
+            if (!overwrite && File.Exists(filename))
+                throw new InvalidOperationException(string.Format("File {0} already exists.", pathname));
+
+            FileStream fileStream = null;
+            try
+            {
+                fileStream = new FileStream(pathname, FileMode.Create, FileAccess.Write, FileShare.None);
+                await content.CopyToAsync(fileStream).ContinueWith(
+                    (copyTask) =>
+                    {
+                        fileStream.Close();
+                    });
+            }
+            catch
+            {
+                if (fileStream != null)
+                    fileStream.Close();
+
+                throw;
+            }
         }
 
     }//end of classs
@@ -178,6 +271,15 @@ namespace Kamban.ViewModels
         public static bool IsToday(this DateTime datetime1)
         {
             return IsSameDay(datetime1, DateTime.Now);
+        }
+
+        public static bool IsYesterday(this DateTime dt)
+        {
+            var yesterday = DateTime.Now - TimeSpan.FromDays(1);
+
+            return dt.Year == yesterday.Year
+                && dt.Month == yesterday.Month
+                && dt.Day == yesterday.Day;
         }
 
         public static bool IsThisMonth(this DateTime datetime1)

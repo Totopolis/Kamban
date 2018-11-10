@@ -1,19 +1,21 @@
 ﻿using DynamicData;
 using Kamban.Model;
+using Monik.Common;
 using Newtonsoft.Json;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Kamban.Core
 {
     public interface IAppConfig
     {
+        string ServerName { get; }
         string Caption { get; set; }
         string ArchiveFolder { get; set; }
 
@@ -21,30 +23,30 @@ namespace Kamban.Core
         void RemoveRecent(string uri);
 
         IObservable<IChangeSet<RecentViewModel>> RecentObservable { get; }
+        ReadOnlyObservableCollection<PublicBoardJson> PublicBoards { get; }
+        IObservable<string> GetStarted { get; }
+        IObservable<string> Basement { get; }
+
+        Task LoadOnlineContentAsync();
     }
 
-    public class RecentJson
+    public class AppConfig : ReactiveObject, IAppConfig
     {
-        public string Uri { get; set; }
-        public DateTime LastAccess { get; set; }
-        public bool Pinned { get; set; }
-    }
-
-    public class AppConfigJson
-    {
-        public List<RecentJson> Feed { get; set; } = new List<RecentJson>();
-        public string Caption { get; set; } = "KAMBAN";
-        public string ArchiveFolder { get; set; } = null;
-    }
-
-    public class AppConfig : IAppConfig
-    {
+        private readonly IMonik mon;
         private readonly AppConfigJson appConfig;
         private readonly string path;
         private readonly SourceList<RecentViewModel> recentList;
+        private readonly SourceList<PublicBoardJson> publicBoards;
 
-        public AppConfig()
+        public string ServerName { get; } = "http://topols.io/kamban/";
+
+        [Reactive] private string getStartedValue { get; set; }
+        [Reactive] private string basementValue { get; set; }
+
+        public AppConfig(IMonik m)
         {
+            mon = m;
+
             path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             path += "\\kanban.config";
 
@@ -56,14 +58,34 @@ namespace Kamban.Core
             else
                 appConfig = new AppConfigJson();
 
+            appConfig.StartNumber++;
+            SaveConfig();
+
             recentList = new SourceList<RecentViewModel>();
             recentList.AddRange(appConfig.Feed.Select(x => new RecentViewModel
                 { Uri = x.Uri, LastAccess = x.LastAccess, Pinned = x.Pinned }));
 
             RecentObservable = recentList.Connect().AutoRefresh();
+
+            publicBoards = new SourceList<PublicBoardJson>();
+            publicBoards
+                .Connect()
+                .Bind(out ReadOnlyObservableCollection<PublicBoardJson> temp)
+                .Subscribe();
+
+            PublicBoards = temp;
+
+            GetStarted = this.WhenAnyValue(x => x.getStartedValue);
+            Basement = this.WhenAnyValue(x => x.basementValue);
         }
 
         public IObservable<IChangeSet<RecentViewModel>> RecentObservable { get; private set; }
+
+        public ReadOnlyObservableCollection<PublicBoardJson> PublicBoards { get; private set; }
+
+        public IObservable<string> GetStarted { get; private set; }
+
+        public IObservable<string> Basement { get; private set; }
 
         public string Caption
         {
@@ -138,6 +160,61 @@ namespace Kamban.Core
         {
             string data = JsonConvert.SerializeObject(appConfig);
             File.WriteAllText(path, data);
+        }
+
+        public async Task LoadOnlineContentAsync()
+        {
+            try
+            {
+                var ver = await DownloadAndDeserialize<VersionJson>("ver.json");
+                if (ver.StartUpVersion > appConfig.Version.StartUpVersion)
+                {
+                    var startup = await DownloadAndDeserialize<StartupConfigJson>("startup.json");
+                    appConfig.Startup = startup;
+                    appConfig.Version = ver;
+
+                    SaveConfig();
+                }
+            }
+            catch(Exception ex)
+            {
+                mon.ApplicationError($"AppConfig.LoadOnlineContentAsync download error: {ex.Message}");
+            }
+
+            if (appConfig.Startup != null)
+            {
+                publicBoards.AddRange(appConfig.Startup.PublicBoards);
+
+                basementValue = appConfig.Startup.Basement;
+
+                int tipCount = appConfig.Startup.Tips.Count;
+
+                if (tipCount == 0 || appConfig.StartNumber == 1)
+                {
+                    getStartedValue = appConfig.Startup.FirstStart;
+                    return;
+                }
+
+                // tips rotate
+                int indx = appConfig.StartNumber - 2;
+                getStartedValue = appConfig.Startup.Tips[indx];
+
+                if (indx == appConfig.Startup.Tips.Count - 1)
+                {
+                    appConfig.StartNumber = 1;
+                    SaveConfig();
+                }
+            }
+        }
+
+        private async Task<T> DownloadAndDeserialize<T>(string path)
+            where T: class
+        {
+            HttpClient hc = new HttpClient();
+            var resp = await hc.GetAsync(ServerName + path);
+            var str = await resp.Content.ReadAsStringAsync();
+
+            return JsonConvert.DeserializeObject<T>(str);
         }
 
     }//end of class
