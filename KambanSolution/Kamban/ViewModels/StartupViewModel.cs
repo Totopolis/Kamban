@@ -32,6 +32,9 @@ namespace Kamban.ViewModels
         private readonly IMapper mapper;
         private readonly IAppConfig appConfig;
         private readonly IMonik mon;
+        private bool initialized;
+
+        public const string StartupViewId = "KambanStartupView";
 
         [Reactive] public IObservable<IChangeSet<RecentViewModel>> Pinned { get; private set; }
         [Reactive] public IObservable<IChangeSet<RecentViewModel>> Today { get; private set; }
@@ -39,11 +42,12 @@ namespace Kamban.ViewModels
         [Reactive] public IObservable<IChangeSet<RecentViewModel>> ThisMonth { get; private set; }
         [Reactive] public IObservable<IChangeSet<RecentViewModel>> Older { get; private set; }
 
-        public ReactiveCommand NewFileCommand { get; set; }
-        public ReactiveCommand OpenFileCommand { get; set; }
-        [Reactive] public ReactiveCommand<RecentViewModel, Unit> OpenRecentDbCommand { get; set; }
-        public ReactiveCommand ExportCommand { get; set; }
-        public ReactiveCommand ExitCommand { get; set; }
+        public ReactiveCommand NewFileCommand { get; private set; }
+        public ReactiveCommand OpenFileCommand { get; private set; }
+        [Reactive] public ReactiveCommand<RecentViewModel, Unit> OpenRecentDbCommand { get; private set; }
+        public ReactiveCommand ExportCommand { get; private set; }
+        public ReactiveCommand ShowStartupCommand { get; private set; }
+        public ReactiveCommand ExitCommand { get; private set; }
 
         [Reactive] public string GetStarted { get; set; }
         [Reactive] public string Basement { get; set; }
@@ -60,6 +64,8 @@ namespace Kamban.ViewModels
             mapper = mp;
             appConfig = cfg;
             mon = m;
+
+            initialized = false;
 
             OpenRecentDbCommand = ReactiveCommand.Create<RecentViewModel>(async (rvm) =>
             {
@@ -94,6 +100,13 @@ namespace Kamban.ViewModels
             ExportCommand = ReactiveCommand.Create(() => 
                 this.shell.ShowView<ExportView>(), appModel.DbsCountMoreZero);
 
+            ShowStartupCommand = ReactiveCommand.Create(() =>
+            {
+                shell.ShowView<StartupView>(
+                    viewRequest: new ViewRequest { ViewId = StartupViewModel.StartupViewId },
+                    options: new UiShowOptions { Title = "Start Page", CanClose = false });
+            });
+
             ExitCommand = ReactiveCommand.Create(() => App.Current.Shutdown());
 
             Pinned = appConfig.RecentObservable
@@ -121,7 +134,6 @@ namespace Kamban.ViewModels
                 .Subscribe(x => appConfig.UpdateRecent(x.Uri, x.Pinned));
 
             appConfig.GetStarted.Subscribe(x => GetStarted = x);
-            appConfig.GetStarted.Subscribe(x => Console.WriteLine(x) );
 
             var ver = Assembly.GetExecutingAssembly().GetName();
             appConfig.Basement
@@ -163,7 +175,7 @@ namespace Kamban.ViewModels
                 catch(Exception ex)
                 {
                     mon.ApplicationError($"StartupViewModel.OpenPublicBoardCommandExecute file save error: {ex.Message}");
-                    await dialCoord.ShowMessageAsync(this, "File save Error", "Can not save file");
+                    await dialCoord.ShowMessageAsync(this, "Error", "Can not save file");
                     return;
                 }
 
@@ -208,16 +220,23 @@ namespace Kamban.ViewModels
 
         public void Initialize(ViewRequest viewRequest)
         {
+            if (initialized)
+                return;
+
             shell.AddGlobalCommand("File", "Create", "NewFileCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.N);
 
             shell.AddGlobalCommand("File", "Open", "OpenFileCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.O);
 
-            shell.AddGlobalCommand("File", "Export", "ExportCommand", this, true)
+            shell.AddGlobalCommand("File", "Export", "ExportCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.U);
 
+            shell.AddGlobalCommand("File", "Show Startup", "ShowStartupCommand", this, true);
+
             shell.AddGlobalCommand("File", "Exit", "ExitCommand", this);
+
+            initialized = true;
 
             Observable.FromAsync(_ => appConfig.LoadOnlineContentAsync())
                 .Subscribe(_ =>

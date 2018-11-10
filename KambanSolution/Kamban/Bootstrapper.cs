@@ -68,7 +68,7 @@ namespace Kamban
                 .As<IMapper>()
                 .SingleInstance();
 
-            ConfigureView<StartupViewModel, StartupView>(builder);
+            ConfigureSingleView<StartupViewModel, StartupView>(builder);
             ConfigureView<WizardViewModel, WizardView>(builder);
             ConfigureView<BoardEditViewModel, BoardView>(builder);
             ConfigureView<ExportViewModel, ExportView>(builder);
@@ -116,6 +116,17 @@ namespace Kamban
         {
             builder.RegisterType<TViewModel>();
             builder.RegisterType<TView>();
+        }
+
+        private static void ConfigureSingleView<TViewModel, TView>(ContainerBuilder builder)
+            where TViewModel : IViewModel
+            where TView : IView
+        {
+            builder.RegisterType<TViewModel>()
+                .SingleInstance();
+
+            builder.RegisterType<TView>()
+                .SingleInstance();
         }
     }
 }

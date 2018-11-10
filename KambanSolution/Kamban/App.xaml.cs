@@ -1,4 +1,5 @@
-﻿using Kamban.Views;
+﻿using Kamban.ViewModels;
+using Kamban.Views;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -28,7 +29,9 @@ namespace Kamban
                     ToolPaneWidth = 100
                 });
 
-            shell.ShowView<StartupView>(options: new UiShowOptions() { Title = "Start Page", CanClose = false });
+            shell.ShowView<StartupView>(
+                viewRequest: new ViewRequest { ViewId = StartupViewModel.StartupViewId },
+                options: new UiShowOptions { Title = "Start Page", CanClose = false });
         }
     }
 }
