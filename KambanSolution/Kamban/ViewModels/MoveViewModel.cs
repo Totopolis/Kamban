@@ -8,6 +8,7 @@ using ReactiveUI.Legacy;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,9 +38,9 @@ namespace Kamban.ViewModels
 
         [Reactive] public string CardHeader { get; set; }
 
-        public ReactiveCommand CancelCommand { get; set; }
-        public ReactiveCommand CopyToCommand { get; set; }
-        public ReactiveCommand MoveToCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> CancelCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> CopyToCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> MoveToCommand { get; set; }
 
         public MoveViewModel(IMapper mp)
         {
@@ -49,7 +50,7 @@ namespace Kamban.ViewModels
             AvailableColumns = null;
             AvailableRows = null;
 
-            CancelCommand = ReactiveCommand.Create(() => IsOpened = false);
+            CancelCommand = ReactiveCommand.Create(() => { IsOpened = false; });
 
             var canExecuteCopy = this.WhenAnyValue(
                 x => x.SelectedBoard, x => x.SelectedRow, x => x.SelectedColumn,

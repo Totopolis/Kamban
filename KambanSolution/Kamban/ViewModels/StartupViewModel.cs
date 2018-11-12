@@ -42,12 +42,12 @@ namespace Kamban.ViewModels
         [Reactive] public IObservable<IChangeSet<RecentViewModel>> ThisMonth { get; private set; }
         [Reactive] public IObservable<IChangeSet<RecentViewModel>> Older { get; private set; }
 
-        public ReactiveCommand NewFileCommand { get; private set; }
-        public ReactiveCommand OpenFileCommand { get; private set; }
+        public ReactiveCommand<Unit, Unit> NewFileCommand { get; private set; }
+        public ReactiveCommand<Unit, Unit> OpenFileCommand { get; private set; }
         [Reactive] public ReactiveCommand<RecentViewModel, Unit> OpenRecentDbCommand { get; private set; }
-        public ReactiveCommand ExportCommand { get; private set; }
-        public ReactiveCommand ShowStartupCommand { get; private set; }
-        public ReactiveCommand ExitCommand { get; private set; }
+        public ReactiveCommand<Unit, Unit> ExportCommand { get; private set; }
+        public ReactiveCommand<Unit, Unit> ShowStartupCommand { get; private set; }
+        public ReactiveCommand<Unit, Unit> ExitCommand { get; private set; }
 
         [Reactive] public string GetStarted { get; set; }
         [Reactive] public string Basement { get; set; }
@@ -77,7 +77,7 @@ namespace Kamban.ViewModels
                 this.shell.ShowView<WizardView>(
                     new WizardViewRequest { ViewId = "Creating new file", Uri = null }));
 
-            OpenFileCommand = ReactiveCommand.Create(async () =>
+            OpenFileCommand = ReactiveCommand.CreateFromTask(async _ =>
             {
                 var dialog = new OpenFileDialog
                 {

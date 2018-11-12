@@ -64,9 +64,9 @@ namespace Kamban.ViewModels
         [Reactive] public ColumnViewModel SelectedColumn { get; set; }
         [Reactive] public RowViewModel SelectedRow { get; set; }
 
-        public ReactiveCommand CancelCommand { get; set; }
-        public ReactiveCommand SaveCommand { get; set; }
-        public ReactiveCommand EnterCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> CancelCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> SaveCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> EnterCommand { get; set; }
 
         [Reactive] public bool IsOpened { get; set; }
         [Reactive] public int BodySelectionStart { get; set; }

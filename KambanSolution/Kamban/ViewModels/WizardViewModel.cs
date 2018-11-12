@@ -39,14 +39,14 @@ namespace Kamban.ViewModels
         [Reactive] public ObservableCollection<RowViewModel> Rows { get; set; }
 
         public ReactiveCommand<Unit, Unit> FillFromTemplateCommand { get; set; }
-        public ReactiveCommand AddColumnCommand { get; set; }
-        public ReactiveCommand AddRowCommand { get; set; }
-        public ReactiveCommand ClearAllCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> AddColumnCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> AddRowCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> ClearAllCommand { get; set; }
 
-        public ReactiveCommand CreateCommand { get; set; }
-        public ReactiveCommand CancelCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> CreateCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> CancelCommand { get; set; }
 
-        public ReactiveCommand SelectFolderCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> SelectFolderCommand { get; set; }
 
         private readonly IAppModel appModel;
         private readonly IShell shell;

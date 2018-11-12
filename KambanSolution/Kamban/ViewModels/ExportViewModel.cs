@@ -66,7 +66,7 @@ namespace Kamban.ViewModels
 
         public ReactiveCommand<Unit, Unit> SelectTargetFolderCommand { get; set; }
         public ReactiveCommand<Unit, Unit> ExportCommand { get; set; }
-        public ReactiveCommand CancelCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> CancelCommand { get; set; }
 
         public ExportViewModel(IShell shell, IAppModel am, IDialogCoordinator dc, IAppConfig cfg)
         {
