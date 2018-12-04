@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
@@ -25,16 +26,32 @@ namespace Kamban.ViewModels
         public string Name { get; private set; }
         public string SystemName => Brush.Color.ToString();
 
+        private static readonly Dictionary<string, ColorItem> _colors = new Dictionary<string, ColorItem>();
+
         public static ColorItem I(string colorName)
         {
+            if (_colors.ContainsKey(colorName))
+                return _colors[colorName];
+
             ColorConverter converter = new ColorConverter();
             Color color = (Color)converter.ConvertFromInvariantString(colorName);
 
-            return new ColorItem
+            var item = new ColorItem
             {
                 Brush = new SolidColorBrush(color),
                 Name = colorName
             };
+
+            _colors.Add(colorName, item);
+
+            return item;
+        }
+
+        public static string ToColorName(string systemName)
+        {
+            return _colors.Values
+                .FirstOrDefault(x => x.SystemName == systemName)?
+                .Name;
         }
     }
     

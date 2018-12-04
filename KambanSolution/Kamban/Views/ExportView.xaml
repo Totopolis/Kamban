@@ -33,7 +33,7 @@
                         <CheckBox IsChecked="{Binding ExportJson}" Content="Json"/>
                         <CheckBox IsEnabled="False" IsChecked="{Binding ExportXml}" Content="Xml"/>
                         <CheckBox IsChecked="{Binding ExportKamban}" Content="Kamban"/>
-                        <CheckBox IsEnabled="False" IsChecked="{Binding ExportXls}" Content="Xls"/>
+                        <CheckBox IsChecked="{Binding ExportXlsx}" Content="Xlsx"/>
                         <CheckBox IsEnabled="False" IsChecked="{Binding ExportPdf}" Content="Pdf"/>
                     </StackPanel>
 

@@ -1,27 +1,21 @@
-﻿using System;
+﻿using DynamicData;
+using Kamban.Core;
+using Kamban.Model;
+using MahApps.Metro.Controls.Dialogs;
+using Newtonsoft.Json;
+using OfficeOpenXml;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Input;
-using System.Windows.Threading;
-using DynamicData;
-using DynamicData.Binding;
-using Kamban.Core;
-using Kamban.Model;
-using Kamban.Views;
-using MahApps.Metro;
-using MahApps.Metro.Controls.Dialogs;
-using Newtonsoft.Json;
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
-using Ui.Wpf.Common.ShowOptions;
 using Ui.Wpf.Common.ViewModels;
 
 namespace Kamban.ViewModels
@@ -55,7 +49,7 @@ namespace Kamban.ViewModels
         [Reactive] public bool ExportJson { get; set; }
         [Reactive] public bool ExportXml { get; set; }
         [Reactive] public bool ExportKamban { get; set; }
-        [Reactive] public bool ExportXls { get; set; }
+        [Reactive] public bool ExportXlsx { get; set; }
         [Reactive] public bool ExportPdf { get; set; }
 
         [Reactive] public string TargetFolder { get; set; }
@@ -187,6 +181,12 @@ namespace Kamban.ViewModels
 
             if (ExportKamban)
                 DoExportKamban(db, fileName + ".kam");
+
+            if (ExportXlsx)
+                DoExportXlsx(db, fileName + ".xlsx");
+
+            if (ExportPdf)
+                DoExportPdf(db, fileName + ".pdf");
         }
 
         private void DoExportJson(DatabaseToExport db, string fileName)
@@ -224,6 +224,95 @@ namespace Kamban.ViewModels
                 foreach (var iss in db.IssueList)
                     prj.CreateOrUpdateIssueAsync(iss);
             }
+        }
+
+        private void DoExportXlsx(DatabaseToExport db, string fileName)
+        {
+            if (File.Exists(fileName))
+            {
+                dialCoord.ShowMessageAsync(this, "Error", "Target file already exists");
+                return;
+            }
+
+            using (var package = new ExcelPackage())
+            {
+                var boardsWithIssues =
+                    from b in db.BoardList
+                    join g in
+                        from i in db.IssueList group i by i.BoardId
+                        on b.Id equals g.Key into bg
+                    from g in bg.DefaultIfEmpty()
+                    select new {Info = b, Issues = g?.ToList()};
+
+                foreach (var board in boardsWithIssues)
+                {
+                    var sheet = package.Workbook.Worksheets.Add(board.Info.Name);
+
+                    WriteValuesToSheet(sheet, 1,
+                        new[]
+                        {
+                            "Id",
+                            "Name",
+                            "Row",
+                            "Column",
+                            "Color",
+                            "Description",
+                            "Crated",
+                            "Modified"
+                        });
+
+                    if (board.Issues == null)
+                        continue;
+
+                    var issues =
+                        from i in board.Issues
+                        join r in db.RowList on i.RowId equals r.Id
+                        join c in db.ColumnList on i.ColumnId equals c.Id
+                        orderby c.Id, r.Id, i.Order, i.Id
+                        select new {Info = i, RowInfo = r, ColInfo = c};
+
+                    var row = 2;
+                    foreach (var issue in issues)
+                    {
+                        var values = new object[]
+                        {
+                            issue.Info.Id,
+                            issue.Info.Head,
+                            issue.RowInfo.Name,
+                            issue.ColInfo.Name,
+                            ColorItem.ToColorName(issue.Info.Color),
+                            issue.Info.Body,
+                            issue.Info.Created,
+                            issue.Info.Modified
+                        };
+
+                        WriteValuesToSheet(sheet, row, values);
+                        ++row;
+                    }
+
+                    sheet.Cells.AutoFitColumns();
+                }
+
+                var xlFile = new FileInfo(fileName);
+                package.SaveAs(xlFile);
+            }
+        }
+
+        private static void WriteValuesToSheet(ExcelWorksheet sheet, int row, IEnumerable<object> values)
+        {
+            var col = 1;
+            foreach (var val in values)
+            {
+                sheet.Cells[row, col].Value = val;
+                if (val is DateTime)
+                    sheet.Cells[row, col].Style.Numberformat.Format = "hh:mm:ss dd.mm.yyyy";
+                ++col;
+            }
+        }
+
+        private void DoExportPdf(DatabaseToExport db, string fileName)
+        {
+
         }
 
         private void SelectTargetFolderCommandExecute()
