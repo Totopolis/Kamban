@@ -48,10 +48,14 @@ namespace Kamban.Core
         {
             mon = m;
 
+            // C:\Users\myuser\AppData\Roaming (travel with user profile)
             path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            path += "\\kanban.config";
+            path += @"\Kamban\kamban.config";
 
-            if (File.Exists(path))
+            FileInfo file = new FileInfo(path);
+            file.Directory.Create();
+
+            if (file.Exists)
             {
                 string data = File.ReadAllText(path);
                 appConfig = JsonConvert.DeserializeObject<AppConfigJson>(data);

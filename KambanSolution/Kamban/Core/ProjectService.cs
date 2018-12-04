@@ -37,9 +37,6 @@ namespace Kamban.Core
     {
         private readonly IRepository repo;
 
-        private List<RowInfo> rows = new List<RowInfo>();
-        private List<ColumnInfo> columns = new List<ColumnInfo>();
-
         public ProjectService(IShell shell, IRepository repository, string uri)
         {
             Uri = uri;

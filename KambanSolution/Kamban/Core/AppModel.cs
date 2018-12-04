@@ -141,6 +141,8 @@ namespace Kamban.Core
                 dbList.Remove(db);
         }
 
+        // TODO: remove ProjectService, use Repository directly
+
         public IProjectService GetProjectService(string uri)
         {
             var scope = shell
