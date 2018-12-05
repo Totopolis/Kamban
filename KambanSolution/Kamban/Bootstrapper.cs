@@ -30,7 +30,7 @@ namespace Kamban
         {
             var builder = new ContainerBuilder();
 
-            builder.RegisterType<Shell>()
+            builder.RegisterType<ShellEx>()
                 .As<IShell>()
                 .SingleInstance();
 

@@ -34,7 +34,7 @@
                         <CheckBox IsEnabled="False" IsChecked="{Binding ExportXml}" Content="Xml"/>
                         <CheckBox IsChecked="{Binding ExportKamban}" Content="Kamban"/>
                         <CheckBox IsChecked="{Binding ExportXlsx}" Content="Xlsx"/>
-                        <CheckBox IsEnabled="False" IsChecked="{Binding ExportPdf}" Content="Pdf"/>
+                        <CheckBox IsChecked="{Binding ExportPdf}" Content="Pdf"/>
                     </StackPanel>
 
                     <StackPanel Orientation="Vertical" Margin="20, 0, 0, 0">

@@ -1,9 +1,13 @@
 ﻿using DynamicData;
 using Kamban.Core;
 using Kamban.Model;
+using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
 using Newtonsoft.Json;
 using OfficeOpenXml;
+using PdfSharp;
+using PdfSharp.Drawing;
+using PdfSharp.Pdf;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -15,6 +19,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Media.Imaging;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
 
@@ -312,7 +317,40 @@ namespace Kamban.ViewModels
 
         private void DoExportPdf(DatabaseToExport db, string fileName)
         {
+            if (File.Exists(fileName))
+            {
+                dialCoord.ShowMessageAsync(this, "Error", "Target file already exists");
+                return;
+            }
 
+            var pdf = new PdfDocument();
+
+            foreach (var board in SelectedDb.Boards.Items)
+            {
+                var pdfPage = pdf.AddPage();
+                pdfPage.Size = PageSize.A4;
+                pdfPage.Orientation = PageOrientation.Landscape;
+
+                var bmpSource = ((ShellEx) shell).RenderView<BoardView>(
+                    new BoardViewRequest
+                    {
+                        ViewId = SelectedDb.Uri,
+                        Db = SelectedDb,
+                        Board = board
+                    },
+                    72, pdfPage.Width.Inch, pdfPage.Height.Inch);
+
+                var png = new PngBitmapEncoder { Frames = { BitmapFrame.Create(bmpSource) } };
+                using (var stream = new MemoryStream())
+                {
+                    png.Save(stream);
+                    var xImage = XImage.FromStream(stream);
+                    var gfx = XGraphics.FromPdfPage(pdfPage);
+                    gfx.DrawImage(xImage, 0, 0, xImage.PixelWidth, xImage.PixelHeight);
+                }
+            }
+
+            pdf.Save(fileName);
         }
 
         private void SelectTargetFolderCommandExecute()
