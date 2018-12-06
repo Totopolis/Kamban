@@ -11,6 +11,7 @@ using ReactiveUI.Fody.Helpers;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -46,6 +47,7 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> OpenFileCommand { get; private set; }
         [Reactive] public ReactiveCommand<RecentViewModel, Unit> OpenRecentDbCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> ExportCommand { get; private set; }
+        public ReactiveCommand<Unit, Unit> PrintCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> ShowStartupCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> ExitCommand { get; private set; }
 
@@ -99,6 +101,9 @@ namespace Kamban.ViewModels
 
             ExportCommand = ReactiveCommand.Create(() => 
                 this.shell.ShowView<ExportView>(), appModel.DbsCountMoreZero);
+
+            PrintCommand = ReactiveCommand.Create(PrintCommandExecute,
+                shell.WhenAny(x => x.SelectedView, x => x.Value?.ViewModel is BoardEditViewModel));
 
             ShowStartupCommand = ReactiveCommand.Create(() =>
             {
@@ -232,6 +237,9 @@ namespace Kamban.ViewModels
             shell.AddGlobalCommand("File", "Export", "ExportCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.U);
 
+            shell.AddGlobalCommand("File", "Print", "PrintCommand", this)
+                .SetHotKey(ModifierKeys.Control, Key.P);
+
             shell.AddGlobalCommand("File", "Show Startup", "ShowStartupCommand", this, true);
 
             shell.AddGlobalCommand("File", "Exit", "ExitCommand", this);
@@ -267,6 +275,24 @@ namespace Kamban.ViewModels
                     fileStream.Close();
 
                 throw;
+            }
+        }
+
+        private void PrintCommandExecute()
+        {
+            if (shell.SelectedView.ViewModel is BoardEditViewModel bvm)
+            {
+                (shell as ShellEx).PrintView<BoardView>(
+                    bvm.Db.Boards.Items.Select(x =>
+                            new BoardViewRequest
+                            {
+                                ViewId = bvm.Db.Uri,
+                                Db = bvm.Db,
+                                Board = x
+                            })
+                        .Cast<ViewRequest>()
+                        .ToArray()
+                );
             }
         }
 

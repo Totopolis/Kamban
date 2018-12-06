@@ -33,7 +33,7 @@ namespace Kamban.ViewModels
 
         private ReadOnlyObservableCollection<CardViewModel> cardList;
 
-        private DbViewModel Db { get; set; }
+        public DbViewModel Db { get; set; }
 
         [Reactive] public bool EnableMatrix { get; set; }
         [Reactive] public IMonik Monik { get; set; }
