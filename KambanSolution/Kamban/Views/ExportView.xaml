@@ -8,6 +8,9 @@
              mah:DialogParticipation.Register="{Binding}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolCvt" />
+    </UserControl.Resources>
     <Grid>
         <ScrollViewer>
             <StackPanel Orientation="Vertical" Margin="20" MaxWidth="600">
@@ -34,7 +37,22 @@
                         <CheckBox IsEnabled="False" IsChecked="{Binding ExportXml}" Content="Xml"/>
                         <CheckBox IsChecked="{Binding ExportKamban}" Content="Kamban"/>
                         <CheckBox IsChecked="{Binding ExportXlsx}" Content="Xlsx"/>
-                        <CheckBox IsChecked="{Binding ExportPdf}" Content="Pdf"/>
+                        <CheckBox x:Name="CbExportPdf" IsChecked="{Binding ExportPdf}" Content="Pdf"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Vertical"
+                                Margin="20, 0, 0, 0"
+                                Visibility="{Binding Path=IsChecked, ElementName=CbExportPdf, Converter={StaticResource BoolCvt}}">
+                        <TextBlock FontWeight="DemiBold" Margin="0,0,0,5">Pdf options</TextBlock>
+                        <ComboBox Margin="0,0,0,5"
+                                  mah:TextBoxHelper.Watermark="Page Size"
+                                  mah:TextBoxHelper.UseFloatingWatermark="True"
+                                  ItemsSource="{Binding PdfPageSizes}"
+                                  SelectedItem="{Binding PdfSelectedPageSize}"/>
+                        <ComboBox mah:TextBoxHelper.Watermark="Page Orientation"
+                                  mah:TextBoxHelper.UseFloatingWatermark="True"
+                                  ItemsSource="{Binding PdfPageOrientations}"
+                                  SelectedItem="{Binding PdfSelectedPageOrientation}"/>
                     </StackPanel>
 
                     <StackPanel Orientation="Vertical" Margin="20, 0, 0, 0">

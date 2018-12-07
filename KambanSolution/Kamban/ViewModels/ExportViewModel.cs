@@ -57,6 +57,12 @@ namespace Kamban.ViewModels
         [Reactive] public bool ExportXlsx { get; set; }
         [Reactive] public bool ExportPdf { get; set; }
 
+        // Pdf settings
+        public PageSize PdfSelectedPageSize { get; set; }
+        public PageSize[] PdfPageSizes { get; set; }
+        public PageOrientation PdfSelectedPageOrientation { get; set; }
+        public PageOrientation[] PdfPageOrientations { get; set; }
+
         [Reactive] public string TargetFolder { get; set; }
         [Reactive] public string TargetFile { get; set; }
 
@@ -111,6 +117,11 @@ namespace Kamban.ViewModels
 
             var fi = new FileInfo(SelectedDb.Uri);
             TargetFolder = cfg.ArchiveFolder ?? fi.DirectoryName;
+
+            PdfPageSizes = Enum.GetValues(typeof(PageSize)).Cast<PageSize>().ToArray();
+            PdfSelectedPageSize = PageSize.A4;
+            PdfPageOrientations = Enum.GetValues(typeof(PageOrientation)).Cast<PageOrientation>().ToArray();
+            PdfSelectedPageOrientation = PageOrientation.Portrait;
         }
 
         private async Task ExportCommandExecute()
@@ -325,8 +336,8 @@ namespace Kamban.ViewModels
 
             var pdfPage = new PdfPage
             {
-                Size = PageSize.A4,
-                Orientation = PageOrientation.Landscape
+                Size = PdfSelectedPageSize,
+                Orientation = PdfSelectedPageOrientation
             };
 
             var width = pdfPage.Width.Inch * 96;
