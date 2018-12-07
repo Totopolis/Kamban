@@ -6,7 +6,6 @@ using MahApps.Metro.Controls.Dialogs;
 using Newtonsoft.Json;
 using OfficeOpenXml;
 using PdfSharp;
-using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -18,8 +17,9 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Forms;
-using System.Windows.Media.Imaging;
+using System.Windows.Xps.Packaging;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
 
@@ -323,34 +323,36 @@ namespace Kamban.ViewModels
                 return;
             }
 
-            var pdf = new PdfDocument();
-
-            foreach (var board in SelectedDb.Boards.Items)
+            var pdfPage = new PdfPage
             {
-                var pdfPage = pdf.AddPage();
-                pdfPage.Size = PageSize.A4;
-                pdfPage.Orientation = PageOrientation.Landscape;
+                Size = PageSize.A4,
+                Orientation = PageOrientation.Landscape
+            };
 
-                var bmpSource = ((ShellEx) shell).RenderView<BoardView>(
-                    new BoardViewRequest
-                    {
-                        ViewId = SelectedDb.Uri,
-                        Db = SelectedDb,
-                        Board = board
-                    },
-                    72, pdfPage.Width.Inch, pdfPage.Height.Inch);
+            var width = pdfPage.Width.Inch * 96;
+            var height = pdfPage.Height.Inch * 96;
 
-                var png = new PngBitmapEncoder { Frames = { BitmapFrame.Create(bmpSource) } };
-                using (var stream = new MemoryStream())
-                {
-                    png.Save(stream);
-                    var xImage = XImage.FromStream(stream);
-                    var gfx = XGraphics.FromPdfPage(pdfPage);
-                    gfx.DrawImage(xImage, 0, 0, xImage.PixelWidth, xImage.PixelHeight);
-                }
-            }
+            var document = (shell as ShellEx).ViewsToDocument<BoardView>(
+                SelectedDb.Boards.Items.Select(x =>
+                        new BoardViewRequest
+                        {
+                            ViewId = SelectedDb.Uri,
+                            Db = SelectedDb,
+                            Board = x
+                        })
+                    .Cast<ViewRequest>()
+                    .ToArray(),
+                new Size(width, height));
 
-            pdf.Save(fileName);
+            var xpsFileName = fileName.Substring(0, fileName.LastIndexOf('.')) + ".xps";
+
+            XpsDocument xpsd = new XpsDocument(xpsFileName, FileAccess.ReadWrite);
+            System.Windows.Xps.XpsDocumentWriter xw = XpsDocument.CreateXpsDocumentWriter(xpsd);
+            xw.Write(document);
+            xpsd.Close();
+
+            PdfSharp.Xps.XpsConverter.Convert(xpsFileName);
+            File.Delete(xpsFileName);
         }
 
         private void SelectTargetFolderCommandExecute()
