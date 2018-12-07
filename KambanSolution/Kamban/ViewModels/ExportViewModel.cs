@@ -148,9 +148,11 @@ namespace Kamban.ViewModels
 
         private async Task DoExportWhole(string fileName)
         {
+            var boardsSelected = await GetBoardsSelectedToExport();
+
             // 1. prepare database
             var jb = new DatabaseToExport();
-            jb.BoardList.AddRange(await prjService.GetAllBoardsInFileAsync());
+            jb.BoardList.AddRange(boardsSelected);
 
             foreach (var brd in jb.BoardList)
             {
@@ -170,9 +172,9 @@ namespace Kamban.ViewModels
 
         private async Task DoExportSplit(string fileName)
         {
-            var boards = await prjService.GetAllBoardsInFileAsync();
+            var boardsSelected = await GetBoardsSelectedToExport();
 
-            foreach (var brd in boards)
+            foreach (var brd in boardsSelected)
             {
                 // 1. prepare database
                 var jb = new DatabaseToExport();
@@ -188,6 +190,18 @@ namespace Kamban.ViewModels
                 // 2. export
                 DoExportForNeededFormats(jb, fileName + "_" + brd.Name);
             }
+        }
+
+        private async Task<IEnumerable<BoardInfo>> GetBoardsSelectedToExport()
+        {
+            var selectedBoardIds = new HashSet<int>(
+                AvailableBoards
+                    .Where(x => x.IsChecked)
+                    .Select(x => x.Board.Id)
+            );
+
+            var boardsAll = await prjService.GetAllBoardsInFileAsync();
+            return boardsAll.Where(x => selectedBoardIds.Contains(x.Id));
         }
 
         private void DoExportForNeededFormats(DatabaseToExport db, string fileName)
@@ -343,8 +357,11 @@ namespace Kamban.ViewModels
             var width = pdfPage.Width.Inch * 96;
             var height = pdfPage.Height.Inch * 96;
 
+            var selectedBoardIds = new HashSet<int>(db.BoardList.Select(x => x.Id));
             var document = (shell as ShellEx).ViewsToDocument<BoardView>(
-                SelectedDb.Boards.Items.Select(x =>
+                SelectedDb.Boards.Items
+                    .Where(x => selectedBoardIds.Contains(x.Id))
+                    .Select(x =>
                         new BoardViewRequest
                         {
                             ViewId = SelectedDb.Uri,

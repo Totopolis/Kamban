@@ -43,8 +43,6 @@ namespace Kamban.Core
                 );
 
                 view.LayoutTransform = new ScaleTransform(scale, scale);
-                //view.Width = view.DesiredSize.Width;
-                //view.Height = pageSize.Height / scale;
 
                 var page = new FixedPage();
                 page.Children.Add(view);
