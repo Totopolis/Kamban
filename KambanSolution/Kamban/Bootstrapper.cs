@@ -47,6 +47,10 @@ namespace Kamban
                 .As<IProjectService>();
 
             builder
+                .RegisterType<ExportService>()
+                .As<IExportService>();
+
+            builder
                 .RegisterType<AppConfig>()
                 .As<IAppConfig>()
                 .SingleInstance();

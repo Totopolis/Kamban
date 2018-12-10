@@ -1,12 +1,8 @@
 ﻿using DynamicData;
 using Kamban.Core;
 using Kamban.Model;
-using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
-using Newtonsoft.Json;
-using OfficeOpenXml;
 using PdfSharp;
-using PdfSharp.Pdf;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System;
@@ -17,9 +13,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Forms;
-using System.Windows.Xps.Packaging;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
 
@@ -41,9 +35,9 @@ namespace Kamban.ViewModels
 
     public class ExportViewModel : ViewModelBase, IInitializableViewModel
     {
-        private readonly IShell shell;
         private readonly IAppModel appModel;
         private readonly IDialogCoordinator dialCoord;
+        private readonly IExportService export;
         private IProjectService prjService;
         private SourceList<BoardToExport> boards;
 
@@ -73,11 +67,11 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> ExportCommand { get; set; }
         public ReactiveCommand<Unit, Unit> CancelCommand { get; set; }
 
-        public ExportViewModel(IShell shell, IAppModel am, IDialogCoordinator dc, IAppConfig cfg)
+        public ExportViewModel(IAppModel am, IDialogCoordinator dc, IAppConfig cfg, IExportService ex)
         {
-            this.shell = shell as IShell;
-            this.appModel = am;
+            appModel = am;
             dialCoord = dc;
+            export = ex;
 
             AvailableDbs = appModel.Dbs;
 
@@ -207,180 +201,16 @@ namespace Kamban.ViewModels
         private void DoExportForNeededFormats(DatabaseToExport db, string fileName)
         {
             if (ExportJson)
-                DoExportJson(db, fileName + ".json");
+                export.ToJson(db, fileName);
 
             if (ExportKamban)
-                DoExportKamban(db, fileName + ".kam");
+                export.ToKamban(db, fileName);
 
             if (ExportXlsx)
-                DoExportXlsx(db, fileName + ".xlsx");
+                export.ToXlsx(db, fileName);
 
             if (ExportPdf)
-                DoExportPdf(db, fileName + ".pdf");
-        }
-
-        private void DoExportJson(DatabaseToExport db, string fileName)
-        {
-            if (File.Exists(fileName))
-            {
-                dialCoord.ShowMessageAsync(this, "Error", "Target file already exists");
-                return;
-            }
-
-            string output = JsonConvert.SerializeObject(db, Formatting.Indented);
-            File.WriteAllText(fileName, output);
-        }
-
-        private void DoExportKamban(DatabaseToExport db, string fileName)
-        {
-            if (File.Exists(fileName))
-            {
-                dialCoord.ShowMessageAsync(this, "Error", "Target file already exists");
-                return;
-            }
-
-            var prj = appModel.GetProjectService(fileName);
-
-            foreach (var brd in db.BoardList)
-            {
-                prj.CreateOrUpdateBoardAsync(brd);
-
-                foreach (var col in db.ColumnList)
-                    prj.CreateOrUpdateColumnAsync(col);
-
-                foreach (var row in db.RowList)
-                    prj.CreateOrUpdateRowAsync(row);
-
-                foreach (var iss in db.IssueList)
-                    prj.CreateOrUpdateIssueAsync(iss);
-            }
-        }
-
-        private void DoExportXlsx(DatabaseToExport db, string fileName)
-        {
-            if (File.Exists(fileName))
-            {
-                dialCoord.ShowMessageAsync(this, "Error", "Target file already exists");
-                return;
-            }
-
-            using (var package = new ExcelPackage())
-            {
-                var boardsWithIssues =
-                    from b in db.BoardList
-                    join g in
-                        from i in db.IssueList group i by i.BoardId
-                        on b.Id equals g.Key into bg
-                    from g in bg.DefaultIfEmpty()
-                    select new {Info = b, Issues = g?.ToList()};
-
-                foreach (var board in boardsWithIssues)
-                {
-                    var sheet = package.Workbook.Worksheets.Add(board.Info.Name);
-
-                    WriteValuesToSheet(sheet, 1,
-                        new[]
-                        {
-                            "Id",
-                            "Name",
-                            "Row",
-                            "Column",
-                            "Color",
-                            "Description",
-                            "Crated",
-                            "Modified"
-                        });
-
-                    if (board.Issues == null)
-                        continue;
-
-                    var issues =
-                        from i in board.Issues
-                        join r in db.RowList on i.RowId equals r.Id
-                        join c in db.ColumnList on i.ColumnId equals c.Id
-                        orderby c.Id, r.Id, i.Order, i.Id
-                        select new {Info = i, RowInfo = r, ColInfo = c};
-
-                    var row = 2;
-                    foreach (var issue in issues)
-                    {
-                        var values = new object[]
-                        {
-                            issue.Info.Id,
-                            issue.Info.Head,
-                            issue.RowInfo.Name,
-                            issue.ColInfo.Name,
-                            ColorItem.ToColorName(issue.Info.Color),
-                            issue.Info.Body,
-                            issue.Info.Created,
-                            issue.Info.Modified
-                        };
-
-                        WriteValuesToSheet(sheet, row, values);
-                        ++row;
-                    }
-
-                    sheet.Cells.AutoFitColumns();
-                }
-
-                var xlFile = new FileInfo(fileName);
-                package.SaveAs(xlFile);
-            }
-        }
-
-        private static void WriteValuesToSheet(ExcelWorksheet sheet, int row, IEnumerable<object> values)
-        {
-            var col = 1;
-            foreach (var val in values)
-            {
-                sheet.Cells[row, col].Value = val;
-                if (val is DateTime)
-                    sheet.Cells[row, col].Style.Numberformat.Format = "hh:mm:ss dd.mm.yyyy";
-                ++col;
-            }
-        }
-
-        private void DoExportPdf(DatabaseToExport db, string fileName)
-        {
-            if (File.Exists(fileName))
-            {
-                dialCoord.ShowMessageAsync(this, "Error", "Target file already exists");
-                return;
-            }
-
-            var pdfPage = new PdfPage
-            {
-                Size = PdfSelectedPageSize,
-                Orientation = PdfSelectedPageOrientation
-            };
-
-            var width = pdfPage.Width.Inch * 96;
-            var height = pdfPage.Height.Inch * 96;
-
-            var selectedBoardIds = new HashSet<int>(db.BoardList.Select(x => x.Id));
-            var document = (shell as ShellEx).ViewsToDocument<BoardView>(
-                SelectedDb.Boards.Items
-                    .Where(x => selectedBoardIds.Contains(x.Id))
-                    .Select(x =>
-                        new BoardViewRequest
-                        {
-                            ViewId = SelectedDb.Uri,
-                            Db = SelectedDb,
-                            Board = x
-                        })
-                    .Cast<ViewRequest>()
-                    .ToArray(),
-                new Size(width, height));
-
-            var xpsFileName = fileName.Substring(0, fileName.LastIndexOf('.')) + ".xps";
-
-            XpsDocument xpsd = new XpsDocument(xpsFileName, FileAccess.ReadWrite);
-            System.Windows.Xps.XpsDocumentWriter xw = XpsDocument.CreateXpsDocumentWriter(xpsd);
-            xw.Write(document);
-            xpsd.Close();
-
-            PdfSharp.Xps.XpsConverter.Convert(xpsFileName);
-            File.Delete(xpsFileName);
+                export.ToPdf(db, SelectedDb, fileName, PdfSelectedPageSize, PdfSelectedPageOrientation);
         }
 
         private void SelectTargetFolderCommandExecute()

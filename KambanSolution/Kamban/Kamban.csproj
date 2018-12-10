@@ -236,6 +236,7 @@
     </Compile>
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Core\ConfigStructures.cs" />
+    <Compile Include="Core\ExportService.cs" />
     <Compile Include="Core\ShellEx.cs" />
     <Compile Include="MatrixControl\Intersection.xaml.cs">
       <DependentUpon>Intersection.xaml</DependentUpon>
