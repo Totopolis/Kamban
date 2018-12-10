@@ -196,7 +196,7 @@ namespace Kamban.Core
             var height = pdfPage.Height.Inch * WPF_DPI;
 
             var selectedBoardIds = new HashSet<int>(db.BoardList.Select(x => x.Id));
-            var document = ((ShellEx)_shell).ViewsToDocument<BoardView>(
+            var document = ((ShellEx)_shell).ViewsToDocument<BoardForExportView>(
                 dbViewModel.Boards.Items
                     .Where(x => selectedBoardIds.Contains(x.Id))
                     .Select(x =>

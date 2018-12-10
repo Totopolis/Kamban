@@ -282,7 +282,7 @@ namespace Kamban.ViewModels
         {
             if (shell.SelectedView.ViewModel is BoardEditViewModel bvm)
             {
-                (shell as ShellEx).PrintView<BoardView>(
+                ((ShellEx)shell).PrintView<BoardForExportView>(
                     bvm.Db.Boards.Items.Select(x =>
                             new BoardViewRequest
                             {

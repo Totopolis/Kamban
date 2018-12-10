@@ -238,10 +238,17 @@
     <Compile Include="Core\ConfigStructures.cs" />
     <Compile Include="Core\ExportService.cs" />
     <Compile Include="Core\ShellEx.cs" />
+    <Compile Include="MatrixControl\IntersectionForExport.xaml.cs">
+      <DependentUpon>IntersectionForExport.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MatrixControl\Intersection.xaml.cs">
       <DependentUpon>Intersection.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MatrixControl\MatrixForExport.Build.cs" />
     <Compile Include="MatrixControl\Matrix.Build.cs" />
+    <Compile Include="MatrixControl\MatrixForExport.xaml.cs">
+      <DependentUpon>MatrixForExport.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MatrixControl\Matrix.cs" />
     <Compile Include="MatrixControl\Matrix.xaml.cs">
       <DependentUpon>Matrix.xaml</DependentUpon>
@@ -261,6 +268,7 @@
     <Compile Include="Repository\ColumnInfo.cs" />
     <Compile Include="Repository\Issue.cs" />
     <Compile Include="Repository\RowInfo.cs" />
+    <Compile Include="ViewModels\BoardEditViewForExportModel.cs" />
     <Compile Include="ViewModels\BoardEditViewModel.Commands.cs" />
     <Compile Include="ViewModels\BoardEditViewModel.cs" />
     <Compile Include="ViewModels\ExportViewModel.cs" />
@@ -269,6 +277,9 @@
     <Compile Include="ViewModels\MoveViewModel.cs" />
     <Compile Include="ViewModels\StartupViewModel.cs" />
     <Compile Include="ViewModels\WizardViewModel.cs" />
+    <Compile Include="Views\BoardEditForExportView.xaml.cs">
+      <DependentUpon>BoardEditForExportView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\BoardEditView.xaml.cs">
       <DependentUpon>BoardEditView.xaml</DependentUpon>
     </Compile>
@@ -331,13 +342,25 @@
     <Resource Include="Tree-256.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="MatrixControl\IntersectionForExport.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MatrixControl\Intersection.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="MatrixControl\MatrixForExport.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MatrixControl\Matrix.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\BoardEditForExportView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\BoardEditView.xaml">
       <SubType>Designer</SubType>

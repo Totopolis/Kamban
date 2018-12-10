@@ -75,6 +75,7 @@ namespace Kamban
             ConfigureSingleView<StartupViewModel, StartupView>(builder);
             ConfigureView<WizardViewModel, WizardView>(builder);
             ConfigureView<BoardEditViewModel, BoardView>(builder);
+            ConfigureView<BoardEditForExportViewModel, BoardForExportView>(builder);
             ConfigureView<ExportViewModel, ExportView>(builder);
 
             return builder.Build();
