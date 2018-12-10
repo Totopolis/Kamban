@@ -22,7 +22,7 @@
             <ColumnDefinition Width="30*"/>
         </Grid.ColumnDefinitions>
 
-        <mykanban:Matrix
+        <mykanban:Matrix x:Name="Matrix"
             Monik="{Binding Monik}"
             Columns="{Binding Columns}"
             Rows="{Binding Rows}"

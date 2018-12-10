@@ -21,7 +21,8 @@ namespace Kamban.Core
         void ToJson(DatabaseToExport db, string fileName);
         void ToKamban(DatabaseToExport db, string fileName);
         void ToXlsx(DatabaseToExport db, string fileName);
-        void ToPdf(DatabaseToExport db, DbViewModel dbViewModel, string fileName, PageSize pageSize, PageOrientation pageOrientation);
+        void ToPdf(DatabaseToExport db, DbViewModel dbViewModel, string fileName,
+            PageSize pageSize, PageOrientation pageOrientation, bool stretch);
     }
 
     public class ExportService : IExportService
@@ -174,7 +175,8 @@ namespace Kamban.Core
             }
         }
 
-        public void ToPdf(DatabaseToExport db, DbViewModel dbViewModel, string fileName, PageSize pageSize, PageOrientation pageOrientation)
+        public void ToPdf(DatabaseToExport db, DbViewModel dbViewModel, string fileName,
+            PageSize pageSize, PageOrientation pageOrientation, bool stretch)
         {
             var pdfFileName = fileName + EXT_PDF;
 
@@ -206,7 +208,8 @@ namespace Kamban.Core
                         })
                     .Cast<ViewRequest>()
                     .ToArray(),
-                new Size(width, height));
+                new Size(width, height),
+                stretch);
 
             var xpsFileName = fileName + EXT_XPS;
 

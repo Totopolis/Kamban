@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Kamban.Views;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -15,7 +16,7 @@ namespace Kamban.Core
     {
         private static readonly Action EmptyDelegate = delegate { };
 
-        public FixedDocument ViewsToDocument<TView>(IEnumerable<ViewRequest> viewRequests, Size pageSize)
+        public FixedDocument ViewsToDocument<TView>(IEnumerable<ViewRequest> viewRequests, Size pageSize, bool stretch = true)
             where TView : FrameworkElement, IView
         {
             var document = new FixedDocument();
@@ -36,13 +37,25 @@ namespace Kamban.Core
 
                 view.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
                 view.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                view.Arrange(new Rect(0, 0, view.DesiredSize.Width, view.DesiredSize.Height));
 
-                var scale = Math.Min(
-                    pageSize.Width / view.DesiredSize.Width,
-                    pageSize.Height / view.DesiredSize.Height
-                );
+                var scale =
+                    stretch && view is IStretchedSize viewStretched
+                        ? Math.Min(
+                            pageSize.Width / viewStretched.StretchedWidth,
+                            pageSize.Height / viewStretched.StretchedHeight
+                        )
+                        : Math.Min(
+                            pageSize.Width / view.ActualWidth,
+                            pageSize.Height / view.ActualHeight
+                        );
 
                 view.LayoutTransform = new ScaleTransform(scale, scale);
+                if (stretch)
+                {
+                    view.Width = Math.Ceiling(pageSize.Width / scale);
+                    view.Height = Math.Ceiling(pageSize.Height / scale);
+                }
 
                 var page = new FixedPage();
                 page.Children.Add(view);

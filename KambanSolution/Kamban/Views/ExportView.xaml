@@ -33,32 +33,34 @@
                 <StackPanel Orientation="Horizontal">
                     <StackPanel Orientation="Vertical">
                         <TextBlock FontWeight="DemiBold" Margin="0,0,0,5">Formats to export</TextBlock>
-                        <CheckBox IsChecked="{Binding ExportJson}" Content="Json"/>
-                        <CheckBox IsEnabled="False" IsChecked="{Binding ExportXml}" Content="Xml"/>
-                        <CheckBox IsChecked="{Binding ExportKamban}" Content="Kamban"/>
-                        <CheckBox IsChecked="{Binding ExportXlsx}" Content="Xlsx"/>
-                        <CheckBox x:Name="CbExportPdf" IsChecked="{Binding ExportPdf}" Content="Pdf"/>
+                        <CheckBox Margin="0,0,0,3" IsChecked="{Binding ExportJson}" Content="Json"/>
+                        <CheckBox Margin="0,0,0,3" IsEnabled="False" IsChecked="{Binding ExportXml}" Content="Xml"/>
+                        <CheckBox Margin="0,0,0,3" IsChecked="{Binding ExportKamban}" Content="Kamban"/>
+                        <CheckBox Margin="0,0,0,3" IsChecked="{Binding ExportXlsx}" Content="Xlsx"/>
+                        <CheckBox Margin="0,0,0,3" x:Name="CbExportPdf" IsChecked="{Binding ExportPdf}" Content="Pdf"/>
                     </StackPanel>
 
                     <StackPanel Orientation="Vertical"
                                 Margin="20, 0, 0, 0"
                                 Visibility="{Binding Path=IsChecked, ElementName=CbExportPdf, Converter={StaticResource BoolCvt}}">
                         <TextBlock FontWeight="DemiBold" Margin="0,0,0,5">Pdf options</TextBlock>
-                        <ComboBox Margin="0,0,0,5"
+                        <ComboBox Margin="0,0,0,3"
                                   mah:TextBoxHelper.Watermark="Page Size"
                                   mah:TextBoxHelper.UseFloatingWatermark="True"
                                   ItemsSource="{Binding PdfPageSizes}"
                                   SelectedItem="{Binding PdfSelectedPageSize}"/>
-                        <ComboBox mah:TextBoxHelper.Watermark="Page Orientation"
+                        <ComboBox Margin="0,0,0,3"
+                                  mah:TextBoxHelper.Watermark="Page Orientation"
                                   mah:TextBoxHelper.UseFloatingWatermark="True"
                                   ItemsSource="{Binding PdfPageOrientations}"
                                   SelectedItem="{Binding PdfSelectedPageOrientation}"/>
+                        <CheckBox IsChecked="{Binding PdfStretch}" Content="Stretch"/>
                     </StackPanel>
 
                     <StackPanel Orientation="Vertical" Margin="20, 0, 0, 0">
                         <TextBlock FontWeight="DemiBold" Margin="0,0,0,5">Additional options</TextBlock>
-                        <CheckBox IsChecked="{Binding DatePostfix}" Content="DatePostfix"/>
-                        <CheckBox IsChecked="{Binding SplitBoardsToFiles}" Content="SplitBoardsToFiles"/>
+                        <CheckBox Margin="0,0,0,3" IsChecked="{Binding DatePostfix}" Content="DatePostfix"/>
+                        <CheckBox Margin="0,0,0,3" IsChecked="{Binding SplitBoardsToFiles}" Content="SplitBoardsToFiles"/>
                     </StackPanel>
                 </StackPanel>
 

@@ -56,6 +56,7 @@ namespace Kamban.ViewModels
         public PageSize[] PdfPageSizes { get; set; }
         public PageOrientation PdfSelectedPageOrientation { get; set; }
         public PageOrientation[] PdfPageOrientations { get; set; }
+        public bool PdfStretch { get; set; }
 
         [Reactive] public string TargetFolder { get; set; }
         [Reactive] public string TargetFile { get; set; }
@@ -81,6 +82,12 @@ namespace Kamban.ViewModels
             ExportJson = true;
             DatePostfix = true;
             SplitBoardsToFiles = false;
+
+            PdfPageSizes = Enum.GetValues(typeof(PageSize)).Cast<PageSize>().ToArray();
+            PdfSelectedPageSize = PageSize.A4;
+            PdfPageOrientations = Enum.GetValues(typeof(PageOrientation)).Cast<PageOrientation>().ToArray();
+            PdfSelectedPageOrientation = PageOrientation.Portrait;
+            PdfStretch = true;
 
             var canExport = boards
                 .Connect()
@@ -111,11 +118,6 @@ namespace Kamban.ViewModels
 
             var fi = new FileInfo(SelectedDb.Uri);
             TargetFolder = cfg.ArchiveFolder ?? fi.DirectoryName;
-
-            PdfPageSizes = Enum.GetValues(typeof(PageSize)).Cast<PageSize>().ToArray();
-            PdfSelectedPageSize = PageSize.A4;
-            PdfPageOrientations = Enum.GetValues(typeof(PageOrientation)).Cast<PageOrientation>().ToArray();
-            PdfSelectedPageOrientation = PageOrientation.Portrait;
         }
 
         private async Task ExportCommandExecute()
@@ -210,7 +212,8 @@ namespace Kamban.ViewModels
                 export.ToXlsx(db, fileName);
 
             if (ExportPdf)
-                export.ToPdf(db, SelectedDb, fileName, PdfSelectedPageSize, PdfSelectedPageOrientation);
+                export.ToPdf(db, SelectedDb, fileName, 
+                    PdfSelectedPageSize, PdfSelectedPageOrientation, PdfStretch);
         }
 
         private void SelectTargetFolderCommandExecute()
