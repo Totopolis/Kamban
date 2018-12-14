@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Forms;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
@@ -52,11 +53,8 @@ namespace Kamban.ViewModels
         [Reactive] public bool ExportPdf { get; set; }
 
         // Pdf settings
-        public PageSize PdfSelectedPageSize { get; set; }
-        public PageSize[] PdfPageSizes { get; set; }
-        public PageOrientation PdfSelectedPageOrientation { get; set; }
-        public PageOrientation[] PdfPageOrientations { get; set; }
-        public bool PdfStretch { get; set; }
+        public PdfOptions PdfOptions { get; set; }
+        public PdfOptionsAvailable PdfOptionsAvailable { get; set; }
 
         [Reactive] public string TargetFolder { get; set; }
         [Reactive] public string TargetFile { get; set; }
@@ -83,11 +81,25 @@ namespace Kamban.ViewModels
             DatePostfix = true;
             SplitBoardsToFiles = false;
 
-            PdfPageSizes = Enum.GetValues(typeof(PageSize)).Cast<PageSize>().ToArray();
-            PdfSelectedPageSize = PageSize.A4;
-            PdfPageOrientations = Enum.GetValues(typeof(PageOrientation)).Cast<PageOrientation>().ToArray();
-            PdfSelectedPageOrientation = PageOrientation.Portrait;
-            PdfStretch = true;
+            PdfOptionsAvailable = new PdfOptionsAvailable
+            {
+                PageSizes = Enum.GetValues(typeof(PageSize)).Cast<PageSize>().ToArray(),
+                PageOrientations = Enum.GetValues(typeof(PageOrientation)).Cast<PageOrientation>().ToArray(),
+                ScaleFittings = Enum.GetValues(typeof(ScaleFitting)).Cast<ScaleFitting>().ToArray()
+            };
+            PdfOptions = new PdfOptions
+            {                
+                PageSize = PageSize.A4,   
+                PageOrientation = PageOrientation.Portrait,
+                ScaleOptions = new ScaleOptions
+                {
+                    Padding = new Thickness(),
+                    ScaleToFit = true,
+                    ScaleFitting = ScaleFitting.BothDirections,
+                    MaxScale = 1.0,
+                    MinScale = 0.0
+                }
+            };
 
             var canExport = boards
                 .Connect()
@@ -212,8 +224,7 @@ namespace Kamban.ViewModels
                 export.ToXlsx(db, fileName);
 
             if (ExportPdf)
-                export.ToPdf(db, SelectedDb, fileName, 
-                    PdfSelectedPageSize, PdfSelectedPageOrientation, PdfStretch);
+                export.ToPdf(db, SelectedDb, fileName, PdfOptions);
         }
 
         private void SelectTargetFolderCommandExecute()

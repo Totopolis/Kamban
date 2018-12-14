@@ -5,11 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Kamban.Views"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:wpfResources="clr-namespace:Kamban.Views.WpfResources"
              mah:DialogParticipation.Register="{Binding}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolCvt" />
+        <wpfResources:ThicknessToStringConverter x:Key="ThicknessCvt" />
     </UserControl.Resources>
     <Grid>
         <ScrollViewer>
@@ -42,19 +44,55 @@
 
                     <StackPanel Orientation="Vertical"
                                 Margin="20, 0, 0, 0"
+                                Width="150" 
                                 Visibility="{Binding Path=IsChecked, ElementName=CbExportPdf, Converter={StaticResource BoolCvt}}">
                         <TextBlock FontWeight="DemiBold" Margin="0,0,0,5">Pdf options</TextBlock>
-                        <ComboBox Margin="0,0,0,3"
+                        <Expander Header="Page">
+                            <StackPanel Orientation="Vertical">
+                                <ComboBox Margin="0,0,0,3"
                                   mah:TextBoxHelper.Watermark="Page Size"
                                   mah:TextBoxHelper.UseFloatingWatermark="True"
-                                  ItemsSource="{Binding PdfPageSizes}"
-                                  SelectedItem="{Binding PdfSelectedPageSize}"/>
-                        <ComboBox Margin="0,0,0,3"
+                                  ItemsSource="{Binding PdfOptionsAvailable.PageSizes}"
+                                  SelectedItem="{Binding PdfOptions.PageSize}"/>
+                                <ComboBox Margin="0,0,0,3"
                                   mah:TextBoxHelper.Watermark="Page Orientation"
                                   mah:TextBoxHelper.UseFloatingWatermark="True"
-                                  ItemsSource="{Binding PdfPageOrientations}"
-                                  SelectedItem="{Binding PdfSelectedPageOrientation}"/>
-                        <CheckBox IsChecked="{Binding PdfStretch}" Content="Stretch"/>
+                                  ItemsSource="{Binding PdfOptionsAvailable.PageOrientations}"
+                                  SelectedItem="{Binding PdfOptions.PageOrientation}"/>
+                            </StackPanel>
+                        </Expander>
+                        <Expander Header="Transform">
+                            <StackPanel Orientation="Vertical">
+                                <TextBox Margin="0,0,0,3"
+                                         mah:TextBoxHelper.Watermark="Padding"
+                                         mah:TextBoxHelper.UseFloatingWatermark="True"
+                                         Text="{Binding Path=PdfOptions.ScaleOptions.Padding, Converter={StaticResource ThicknessCvt}}"/>
+                                <CheckBox x:Name="CbScaleToFit" Margin="0,0,0,3" IsChecked="{Binding PdfOptions.ScaleOptions.ScaleToFit}" Content="ScaleToFit"/>
+                                <StackPanel Orientation="Vertical"
+                                            Visibility="{Binding Path=IsChecked, ElementName=CbScaleToFit, Converter={StaticResource BoolCvt}}">
+                                    <ComboBox Margin="0,0,0,3"
+                                              mah:TextBoxHelper.Watermark="Stretching"
+                                              mah:TextBoxHelper.UseFloatingWatermark="True"
+                                              ItemsSource="{Binding PdfOptionsAvailable.ScaleFittings}"
+                                              SelectedItem="{Binding PdfOptions.ScaleOptions.ScaleFitting}"/>
+                                    <mah:MetroHeader Header="Scale range">
+                                        <mah:RangeSlider 
+                                            mah:SliderHelper.EnableMouseWheel="MouseHover"
+                                            Minimum="0"
+                                            Maximum="3"
+                                            SmallChange="0.01"
+                                            LargeChange="0.1"
+                                            LowerValue="{Binding PdfOptions.ScaleOptions.MinScale}"
+                                            UpperValue="{Binding PdfOptions.ScaleOptions.MaxScale}"
+                                            AutoToolTipPlacement="TopLeft"
+                                            AutoToolTipPrecision="2"
+                                            MinRangeWidth="0"
+                                        />
+                                    </mah:MetroHeader>
+                                    
+                                </StackPanel>
+                            </StackPanel>
+                        </Expander>
                     </StackPanel>
 
                     <StackPanel Orientation="Vertical" Margin="20, 0, 0, 0">

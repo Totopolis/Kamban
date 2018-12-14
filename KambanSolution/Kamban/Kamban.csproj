@@ -237,6 +237,7 @@
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Core\ConfigStructures.cs" />
     <Compile Include="Core\ExportService.cs" />
+    <Compile Include="Core\ExportOptions.cs" />
     <Compile Include="Core\ShellEx.cs" />
     <Compile Include="MatrixControl\IntersectionForExport.xaml.cs">
       <DependentUpon>IntersectionForExport.xaml</DependentUpon>
@@ -268,6 +269,7 @@
     <Compile Include="Repository\ColumnInfo.cs" />
     <Compile Include="Repository\Issue.cs" />
     <Compile Include="Repository\RowInfo.cs" />
+    <Compile Include="SampleData\CardsSample.cs" />
     <Compile Include="ViewModels\BoardEditViewForExportModel.cs" />
     <Compile Include="ViewModels\BoardEditViewModel.Commands.cs" />
     <Compile Include="ViewModels\BoardEditViewModel.cs" />
@@ -355,6 +357,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="MatrixControl\Matrix.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SampleData\CardsSampleData.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -5,7 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:conv="clr-namespace:Kamban.Views.WpfResources"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="300">
 
     <UserControl.Resources>
         <conv:ColorNameToSolidColorBrushValueConverter x:Key="ColorCvt"/>
@@ -20,6 +20,12 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <CollectionViewSource x:Key="CardsCollection"
+                              Source="{Binding Path=SelfCards, 
+                                RelativeSource={RelativeSource Mode=FindAncestor,
+                                AncestorType={x:Type UserControl}}}"
+                              d:Source="{d:DesignData /SampleData/CardsSampleData.xaml}"/>
     </UserControl.Resources>
 
     <Grid>
@@ -27,10 +33,9 @@
         <ListView
             Margin="0"
             BorderThickness="0"
-            ItemsSource="{Binding Path=SelfCards, 
-                                RelativeSource={RelativeSource Mode=FindAncestor,
-                                AncestorType={x:Type UserControl}}}">
-
+            ScrollViewer.VerticalScrollBarVisibility="Disabled"
+            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+            ItemsSource="{Binding Source={StaticResource CardsCollection}}">
             <ListView.ItemTemplate>
                 <DataTemplate>
 
@@ -46,7 +51,7 @@
                                     FontSize="14"
                                     Margin="3, 0, 3, 0"
                                     Text="{Binding Path=Header}"
-                                    HorizontalAlignment="Left"
+                                    TextTrimming="CharacterEllipsis"
                                 />
                         </StackPanel>
                     </Border>
@@ -57,3 +62,4 @@
 
     </Grid>
 </UserControl>
+
