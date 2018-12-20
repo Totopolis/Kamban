@@ -194,6 +194,8 @@ namespace Kamban.Core
 
                 int tipCount = appConfig.Startup.Tips.Count;
 
+                // TODO: fix rotator
+
                 if (tipCount == 0 || appConfig.StartNumber == 1)
                 {
                     getStartedValue = appConfig.Startup.FirstStart;
