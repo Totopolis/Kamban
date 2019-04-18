@@ -3,6 +3,7 @@ using AutoMapper;
 using DynamicData;
 using DynamicData.Binding;
 using Kamban.Model;
+using Kamban.Repository;
 using Monik.Common;
 using System;
 using System.Collections.ObjectModel;

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Kamban.Model
+namespace Kamban.Repository
 {
     public class BoardInfo
     {

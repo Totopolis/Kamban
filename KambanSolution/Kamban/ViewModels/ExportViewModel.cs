@@ -1,6 +1,7 @@
 ﻿using DynamicData;
 using Kamban.Core;
 using Kamban.Model;
+using Kamban.Repository;
 using MahApps.Metro.Controls.Dialogs;
 using PdfSharp;
 using ReactiveUI;
@@ -144,7 +145,7 @@ namespace Kamban.ViewModels
 
             string fileName = TargetFolder + "\\" + TargetFile;
             if (DatePostfix)
-                fileName += "_" + DateTime.Now.ToString("yyyyMMdd");
+                fileName += "_" + DateTime.Now.ToString("yyyyMMdd-hhmmss");
 
             if (!SplitBoardsToFiles)
                 await DoExportWhole(fileName);

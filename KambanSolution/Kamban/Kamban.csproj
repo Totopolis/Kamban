@@ -73,9 +73,6 @@
     <Reference Include="Google.Protobuf, Version=3.6.1.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Protobuf.3.6.1\lib\net45\Google.Protobuf.dll</HintPath>
     </Reference>
-    <Reference Include="LiteDB, Version=4.1.4.0, Culture=neutral, PublicKeyToken=4ee40123013c9f27, processorArchitecture=MSIL">
-      <HintPath>..\packages\LiteDB.4.1.4\lib\net40\LiteDB.dll</HintPath>
-    </Reference>
     <Reference Include="MahApps.Metro, Version=1.6.5.1, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.1.6.5\lib\net46\MahApps.Metro.dll</HintPath>
     </Reference>
@@ -263,12 +260,6 @@
     <Compile Include="Model\DbViewModel.cs" />
     <Compile Include="Model\RecentViewModel.cs" />
     <Compile Include="Model\RowViewModel.cs" />
-    <Compile Include="Repository\IRepository.cs" />
-    <Compile Include="Repository\LiteDbRepository.cs" />
-    <Compile Include="Repository\BoardInfo.cs" />
-    <Compile Include="Repository\ColumnInfo.cs" />
-    <Compile Include="Repository\Issue.cs" />
-    <Compile Include="Repository\RowInfo.cs" />
     <Compile Include="SampleData\CardsSample.cs" />
     <Compile Include="ViewModels\BoardEditViewForExportModel.cs" />
     <Compile Include="ViewModels\BoardEditViewModel.Commands.cs" />
@@ -400,6 +391,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Kamban.Repository\Kamban.Repository.csproj">
+      <Project>{35e0996b-9597-470d-a963-2d9d58a7e08c}</Project>
+      <Name>Kamban.Repository</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.3.2.17\build\Fody.targets" Condition="Exists('..\packages\Fody.3.2.17\build\Fody.targets')" />
