@@ -25,8 +25,7 @@ namespace Kamban
                 new Bootstrapper(),
                 new UiShowStartWindowOptions
                 {
-                    Title = "Kamban",
-                    ToolPaneWidth = 100
+                    Title = "Kamban"
                 });
 
             shell.ShowView<StartupView>(
