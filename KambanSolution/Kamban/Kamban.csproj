@@ -1,268 +1,64 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{674D4998-BE6E-46DC-AA12-30373D83CB2B}</ProjectGuid>
+    <LanguageTargets>$(MSBuildExtensionsPath)\$(VisualStudioVersion)\Bin\Microsoft.CSharp.targets</LanguageTargets>
+    <TargetFramework>net462</TargetFramework>
     <OutputType>WinExe</OutputType>
     <RootNamespace>Kamban</RootNamespace>
     <AssemblyName>Kamban</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <WarningLevel>4</WarningLevel>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
+    <AssemblyTitle>Kamban</AssemblyTitle>
+    <AssemblyProduct>Kamban</AssemblyProduct>
+    <AssemblyCopyright>Copyright © 2018</AssemblyCopyright>
+    <Version>0.6</Version>
+    <StartupObject />
     <ApplicationIcon>Tree-256.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Reference Include="ReachFramework" />
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Numerics" />
     <Reference Include="System.Printing" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Windows" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xaml">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
+
   <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
+    <Compile Update="Properties\Resources.Designer.cs" DesignTime="True" AutoGen="True" DependentUpon="Resources.resx" />
+
+    <None Update="Properties\Settings.settings" Generator="SettingsSingleFileGenerator" LastGenOutput="Settings.Designer.cs" />
+    <Compile Update="Properties\Settings.Designer.cs" DesignTime="True" AutoGen="True" DependentUpon="Settings.settings" />
+
+
     <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Bootstrapper.cs" />
-    <Compile Include="Core\ConfigStructures.cs" />
-    <Compile Include="Core\ExportService.cs" />
-    <Compile Include="Core\ExportOptions.cs" />
-    <Compile Include="Core\ShellEx.cs" />
-    <Compile Include="MatrixControl\IntersectionForExport.xaml.cs">
-      <DependentUpon>IntersectionForExport.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MatrixControl\Intersection.xaml.cs">
-      <DependentUpon>Intersection.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MatrixControl\MatrixForExport.Build.cs" />
-    <Compile Include="MatrixControl\Matrix.Build.cs" />
-    <Compile Include="MatrixControl\MatrixForExport.xaml.cs">
-      <DependentUpon>MatrixForExport.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MatrixControl\Matrix.cs" />
-    <Compile Include="MatrixControl\Matrix.xaml.cs">
-      <DependentUpon>Matrix.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MatrixControl\Common.cs" />
-    <Compile Include="Core\AppConfig.cs" />
-    <Compile Include="Core\BoardTemplates.cs" />
-    <Compile Include="Model\BoardViewModel.cs" />
-    <Compile Include="Model\CardViewModel.cs" />
-    <Compile Include="Model\ColumnViewModel.cs" />
-    <Compile Include="Model\DbViewModel.cs" />
-    <Compile Include="Model\RecentViewModel.cs" />
-    <Compile Include="Model\RowViewModel.cs" />
-    <Compile Include="SampleData\CardsSample.cs" />
-    <Compile Include="ViewModels\BoardEditViewForExportModel.cs" />
-    <Compile Include="ViewModels\BoardEditViewModel.Commands.cs" />
-    <Compile Include="ViewModels\BoardEditViewModel.cs" />
-    <Compile Include="ViewModels\ExportViewModel.cs" />
-    <Compile Include="ViewModels\IssueViewModel.cs" />
-    <Compile Include="ViewModels\IssueViewRequest.cs" />
-    <Compile Include="ViewModels\MoveViewModel.cs" />
-    <Compile Include="ViewModels\StartupViewModel.cs" />
-    <Compile Include="ViewModels\WizardViewModel.cs" />
-    <Compile Include="Views\BoardEditForExportView.xaml.cs">
-      <DependentUpon>BoardEditForExportView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\BoardEditView.xaml.cs">
-      <DependentUpon>BoardEditView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\ExportView.xaml.cs">
-      <DependentUpon>ExportView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\IStretchedSize.cs" />
-    <Compile Include="Views\IssueView.xaml.cs">
-      <DependentUpon>IssueView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\MoveView.xaml.cs">
-      <DependentUpon>MoveView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\StartupView.xaml.cs">
-      <DependentUpon>StartupView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\WizardView.xaml.cs">
-      <DependentUpon>WizardView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\WpfResources\Converters.cs" />
-    <Compile Include="Views\WpfResources\RecentGroup.xaml.cs">
-      <DependentUpon>RecentGroup.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\WpfResources\SelectionBindingTextBox.cs" />
-    <Compile Include="Views\WpfResources\Validators.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Core\AppModel.cs" />
-    <Compile Include="Core\ProjectService.cs" />
-    <Compile Include="Model\ViewRequests.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
+    <Page Include="**\*.xaml" SubType="Designer" Generator="MSBuild:UpdateDesignTimeXaml" Exclude="App.xaml" />
+    <Compile Update="**\*.xaml.cs" SubType="Code" DependentUpon="%(Filename)" />
+
     <Content Include="FodyWeavers.xml" />
     <Resource Include="Images\letter.jpg" />
     <Resource Include="Tree-256.ico" />
   </ItemGroup>
+
   <ItemGroup>
-    <Page Include="MatrixControl\IntersectionForExport.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="MatrixControl\Intersection.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MatrixControl\MatrixForExport.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="MatrixControl\Matrix.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="SampleData\CardsSampleData.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\BoardEditForExportView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\BoardEditView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>XamlIntelliSenseFileGenerator</Generator>
-    </Page>
-    <Page Include="Views\ExportView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\IssueView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>XamlIntelliSenseFileGenerator</Generator>
-    </Page>
-    <Page Include="Views\MoveView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\StartupView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>XamlIntelliSenseFileGenerator</Generator>
-    </Page>
-    <Page Include="Views\WizardView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>XamlIntelliSenseFileGenerator</Generator>
-    </Page>
-    <Page Include="Views\WpfResources\RecentGroup.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\WpfResources\TemplatesDictionary.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="AutoMapper">
-      <Version>8.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="EPPlus">
-      <Version>4.5.3.1</Version>
-    </PackageReference>
-    <PackageReference Include="gong-wpf-dragdrop">
-      <Version>2.0.1</Version>
-    </PackageReference>
-    <PackageReference Include="kenjiuno.PdfSharp.Xps">
-      <Version>1.1.1</Version>
-    </PackageReference>
-    <PackageReference Include="MahApps.Metro.IconPacks">
-      <Version>2.3.0</Version>
-    </PackageReference>
-    <PackageReference Include="Monik.Common">
-      <Version>1.0.4</Version>
-    </PackageReference>
-    <PackageReference Include="Newtonsoft.Json">
-      <Version>12.0.1</Version>
-    </PackageReference>
-    <PackageReference Include="SharpCompress">
-      <Version>0.23.0</Version>
-    </PackageReference>
-    <PackageReference Include="squirrel.windows">
-      <Version>1.9.1</Version>
-    </PackageReference>
-    <PackageReference Include="Ui.Wpf.Common">
-      <Version>1.0.34</Version>
-    </PackageReference>
+    <PackageReference Include="AutoMapper" Version="8.0.0" />
+    <PackageReference Include="EPPlus" Version="4.5.3.1" />
+    <PackageReference Include="gong-wpf-dragdrop" Version="2.0.1" />
+    <PackageReference Include="kenjiuno.PdfSharp.Xps" Version="1.1.1" />
+    <PackageReference Include="MahApps.Metro.IconPacks" Version="2.3.0" />
+    <PackageReference Include="Monik.Common" Version="1.0.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="squirrel.windows" Version="1.9.1" />
+    <PackageReference Include="Ui.Wpf.Common" Version="1.0.34" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Kamban.Repository\Kamban.Repository.csproj">
@@ -270,5 +66,4 @@
       <Name>Kamban.Repository</Name>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
