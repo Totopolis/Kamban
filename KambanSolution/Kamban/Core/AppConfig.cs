@@ -41,8 +41,8 @@ namespace Kamban.Core
 
         public string ServerName { get; } = "http://topols.io/kamban/";
 
-        [Reactive] private string getStartedValue { get; set; }
-        [Reactive] private string basementValue { get; set; }
+        [Reactive] private string GetStartedValue { get; set; }
+        [Reactive] private string BasementValue { get; set; }
 
         public AppConfig(IMonik m)
         {
@@ -80,8 +80,8 @@ namespace Kamban.Core
 
             PublicBoards = temp;
 
-            GetStarted = this.WhenAnyValue(x => x.getStartedValue);
-            Basement = this.WhenAnyValue(x => x.basementValue);
+            GetStarted = this.WhenAnyValue(x => x.GetStartedValue);
+            Basement = this.WhenAnyValue(x => x.BasementValue);
         }
 
         public IObservable<IChangeSet<RecentViewModel>> RecentObservable { get; private set; }
@@ -190,7 +190,7 @@ namespace Kamban.Core
             {
                 publicBoards.AddRange(appConfig.Startup.PublicBoards);
 
-                basementValue = appConfig.Startup.Basement;
+                BasementValue = appConfig.Startup.Basement;
 
                 int tipCount = appConfig.Startup.Tips.Count;
 
@@ -198,13 +198,13 @@ namespace Kamban.Core
 
                 if (tipCount == 0 || appConfig.StartNumber == 1)
                 {
-                    getStartedValue = appConfig.Startup.FirstStart;
+                    GetStartedValue = appConfig.Startup.FirstStart;
                     return;
                 }
 
                 // tips rotate
                 int indx = appConfig.StartNumber - 2;
-                getStartedValue = appConfig.Startup.Tips[indx];
+                GetStartedValue = appConfig.Startup.Tips[indx];
 
                 if (indx == appConfig.Startup.Tips.Count - 1)
                 {

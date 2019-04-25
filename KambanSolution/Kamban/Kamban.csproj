@@ -56,7 +56,7 @@
     <PackageReference Include="kenjiuno.PdfSharp.Xps" Version="1.1.1" />
     <PackageReference Include="MahApps.Metro.IconPacks" Version="2.3.0" />
     <PackageReference Include="Monik.Common" Version="1.0.4" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="squirrel.windows" Version="1.9.1" />
     <PackageReference Include="Ui.Wpf.Common" Version="1.0.34" />
   </ItemGroup>
