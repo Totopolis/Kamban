@@ -1,28 +1,29 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Kamban.Repository
 {
     public interface IRepository
     {
-        void Initialize(string uri);
+        Task<Issue> CreateOrUpdateIssue(Issue issue);
+        Task<RowInfo> CreateOrUpdateRow(RowInfo row);
+        Task<ColumnInfo> CreateOrUpdateColumn(ColumnInfo column);        
+        Task<BoardInfo> CreateOrUpdateBoardInfo(BoardInfo info);
 
-        RowInfo CreateOrUpdateRow(RowInfo row);
-        ColumnInfo CreateOrUpdateColumn(ColumnInfo column);
-        Issue CreateOrUpdateIssue(Issue issue);
-        BoardInfo CreateOrUpdateBoardInfo(BoardInfo info);
+        Task<List<Issue>> GetAllIssues();
+        Task<List<RowInfo>> GetAllRows();
+        Task<List<ColumnInfo>> GetAllColumns();
+        Task<List<BoardInfo>> GetAllBoards();
 
-        List<ColumnInfo> GetAllColumns();
-        List<RowInfo> GetAllRows();
+        Task<List<Issue>> GetIssues(int boardId);
+        Task<List<RowInfo>> GetRows(int boardId);
+        Task<List<ColumnInfo>> GetColumns(int boardId);
 
-        List<Issue> GetIssuesByBoardId(int boardId);
-        List<RowInfo> GetRows(int boardId);
-        List<ColumnInfo> GetColumns(int boardId);
-        Issue GetIssue(int issueId);
-        List<BoardInfo> GetAllBoardsInFile();
+        Task<Issue> GetIssue(int issueId);
 
-        void DeleteRow(int rowId);
-        void DeleteColumn(int columnId);
-        void DeleteIssue(int issueId);
-        void DeleteBoard(int boardId);
+        Task DeleteRow(int rowId);
+        Task DeleteColumn(int columnId);
+        Task DeleteIssue(int issueId);
+        Task DeleteBoard(int boardId);
     }
 }

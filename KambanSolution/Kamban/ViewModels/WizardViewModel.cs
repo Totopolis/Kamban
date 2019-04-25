@@ -198,7 +198,7 @@ namespace Kamban.ViewModels
                     return;
                 }
 
-                if (db.Boards.Items.Where(x => x.Name == BoardName).Count() > 0)
+                if (db.Boards.Items.Any(x => x.Name == BoardName))
                 {
                     await dialCoord.ShowMessageAsync(this, "Error", "Board name already used");
                     return;

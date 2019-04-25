@@ -35,7 +35,7 @@ namespace Kamban.Core
     {
         private readonly IMonik mon;
         private readonly AppConfigJson appConfig;
-        private readonly string path;
+        private readonly string appConfigPath;
         private readonly SourceList<RecentViewModel> recentList;
         private readonly SourceList<PublicBoardJson> publicBoards;
 
@@ -49,15 +49,15 @@ namespace Kamban.Core
             mon = m;
 
             // C:\Users\myuser\AppData\Roaming (travel with user profile)
-            path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            path += @"\Kamban\kamban.config";
+            appConfigPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            appConfigPath += @"\Kamban\kamban.config";
 
-            FileInfo file = new FileInfo(path);
+            FileInfo file = new FileInfo(appConfigPath);
             file.Directory.Create();
 
             if (file.Exists)
             {
-                string data = File.ReadAllText(path);
+                string data = File.ReadAllText(appConfigPath);
                 appConfig = JsonConvert.DeserializeObject<AppConfigJson>(data);
             }
             else
@@ -68,7 +68,7 @@ namespace Kamban.Core
 
             recentList = new SourceList<RecentViewModel>();
             recentList.AddRange(appConfig.Feed.Select(x => new RecentViewModel
-                { Uri = x.Uri, LastAccess = x.LastAccess, Pinned = x.Pinned }));
+                {Uri = x.Uri, LastAccess = x.LastAccess, Pinned = x.Pinned}));
 
             RecentObservable = recentList.Connect().AutoRefresh();
 
@@ -94,7 +94,7 @@ namespace Kamban.Core
 
         public string Caption
         {
-            get { return appConfig.Caption; }
+            get => appConfig.Caption;
             set
             {
                 appConfig.Caption = value;
@@ -104,7 +104,7 @@ namespace Kamban.Core
 
         public string ArchiveFolder
         {
-            get { return appConfig.ArchiveFolder; }
+            get => appConfig.ArchiveFolder;
             set
             {
                 appConfig.ArchiveFolder = value;
@@ -114,49 +114,54 @@ namespace Kamban.Core
 
         public void UpdateRecent(string uri, bool pinned)
         {
-            var recentVM = recentList.Items.Where(x => x.Uri == uri).FirstOrDefault();
-            var recentJson = appConfig.Feed.Where(x => x.Uri == uri).FirstOrDefault();
+            var now = DateTime.Now;
 
-            if (recentVM == null)
+            var recentVm = recentList.Items.FirstOrDefault(x => x.Uri == uri);
+            if (recentVm == null)
             {
-                recentVM = new RecentViewModel
+                recentVm = new RecentViewModel
                 {
                     Uri = uri,
-                    LastAccess = DateTime.Now
+                    LastAccess = now
                 };
 
-                recentList.Add(recentVM);
-
-                recentJson = new RecentJson
-                {
-                    Uri = uri,
-                    LastAccess = DateTime.Now
-                };
-
-                appConfig.Feed.Add(recentJson);
-                SaveConfig();
+                recentList.Add(recentVm);
             }
             else
             {
-                recentVM.LastAccess = DateTime.Now;
-                recentJson.LastAccess = recentVM.LastAccess;
-
-                recentVM.Pinned = pinned;
-                recentJson.Pinned = pinned;
-
-                SaveConfig();
+                recentVm.LastAccess = now;
+                recentVm.Pinned = pinned;
             }
+
+            var recentJson = appConfig.Feed.FirstOrDefault(x => x.Uri == uri);
+            if (recentJson == null)
+            {
+                recentJson = new RecentJson
+                {
+                    Uri = uri,
+                    LastAccess = now
+                };
+
+                appConfig.Feed.Add(recentJson);
+            }
+            else
+            {
+                recentJson.LastAccess = now;
+                recentJson.Pinned = pinned;
+            }
+
+            SaveConfig();
         }
 
         public void RemoveRecent(string uri)
         {
-            var recentVM = recentList.Items.Where(x => x.Uri == uri).FirstOrDefault();
-            var recentJson = appConfig.Feed.Where(x => x.Uri == uri).FirstOrDefault();
+            var recentVm = recentList.Items.FirstOrDefault(x => x.Uri == uri);
+            var recentJson = appConfig.Feed.FirstOrDefault(x => x.Uri == uri);
 
-            if (recentVM == null)
+            if (recentVm == null || recentJson == null)
                 return;
 
-            recentList.Remove(recentVM);
+            recentList.Remove(recentVm);
             appConfig.Feed.Remove(recentJson);
             SaveConfig();
         }
@@ -164,7 +169,7 @@ namespace Kamban.Core
         private void SaveConfig()
         {
             string data = JsonConvert.SerializeObject(appConfig);
-            File.WriteAllText(path, data);
+            File.WriteAllText(appConfigPath, data);
         }
 
         public async Task LoadOnlineContentAsync()
@@ -181,7 +186,7 @@ namespace Kamban.Core
                     SaveConfig();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 mon.ApplicationError($"AppConfig.LoadOnlineContentAsync download error: {ex.Message}");
             }
@@ -225,17 +230,16 @@ namespace Kamban.Core
             {
                 mon.ApplicationError($"AppConfig.LoadOnlineContentAsync UpdateManager: {ex.Message}");
             }
-        }//LoadOnlineContentAsync
+        } //LoadOnlineContentAsync
 
         private async Task<T> DownloadAndDeserialize<T>(string path)
-            where T: class
+            where T : class
         {
-            HttpClient hc = new HttpClient();
+            var hc = new HttpClient();
             var resp = await hc.GetAsync(ServerName + path);
             var str = await resp.Content.ReadAsStringAsync();
 
             return JsonConvert.DeserializeObject<T>(str);
         }
-
-    }//end of class
+    } //end of class
 }

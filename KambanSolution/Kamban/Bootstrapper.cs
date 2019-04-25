@@ -39,10 +39,6 @@ namespace Kamban
                 .As<IDockWindow>();
 
             builder
-                .RegisterType<LiteDbRepository>()
-                .As<IRepository>();
-
-            builder
                 .RegisterType<ProjectService>()
                 .As<IProjectService>();
 

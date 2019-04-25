@@ -165,13 +165,13 @@ namespace Kamban.ViewModels
 
             foreach (var brd in jb.BoardList)
             {
-                var columns = await prjService.GetColumnsByBoardIdAsync(brd.Id);
+                var columns = await prjService.Repository.GetColumns(brd.Id);
                 jb.ColumnList.AddRange(columns);
 
-                var rows = await prjService.GetRowsByBoardIdAsync(brd.Id);
+                var rows = await prjService.Repository.GetRows(brd.Id);
                 jb.RowList.AddRange(rows);
 
-                var issues = await prjService.GetIssuesByBoardIdAsync(brd.Id);
+                var issues = await prjService.Repository.GetIssues(brd.Id);
                 jb.IssueList.AddRange(issues);
             }
 
@@ -189,11 +189,11 @@ namespace Kamban.ViewModels
                 var jb = new DatabaseToExport();
                 jb.BoardList.Add(brd);
 
-                var columns = await prjService.GetColumnsByBoardIdAsync(brd.Id);
+                var columns = await prjService.Repository.GetColumns(brd.Id);
                 jb.ColumnList.AddRange(columns);
-                var rows = await prjService.GetRowsByBoardIdAsync(brd.Id);
+                var rows = await prjService.Repository.GetRows(brd.Id);
                 jb.RowList.AddRange(rows);
-                var issues = await prjService.GetIssuesByBoardIdAsync(brd.Id);
+                var issues = await prjService.Repository.GetIssues(brd.Id);
                 jb.IssueList.AddRange(issues);
 
                 // 2. export
@@ -209,7 +209,7 @@ namespace Kamban.ViewModels
                     .Select(x => x.Board.Id)
             );
 
-            var boardsAll = await prjService.GetAllBoardsInFileAsync();
+            var boardsAll = await prjService.Repository.GetAllBoards();
             return boardsAll.Where(x => selectedBoardIds.Contains(x.Id));
         }
 

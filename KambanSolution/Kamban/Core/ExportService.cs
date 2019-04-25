@@ -4,7 +4,6 @@ using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
 using Newtonsoft.Json;
 using OfficeOpenXml;
-using PdfSharp;
 using PdfSharp.Pdf;
 using System;
 using System.Collections.Generic;
@@ -75,16 +74,16 @@ namespace Kamban.Core
 
             foreach (var brd in db.BoardList)
             {
-                prj.CreateOrUpdateBoardAsync(brd);
+                prj.Repository.CreateOrUpdateBoardInfo(brd);
 
                 foreach (var col in db.ColumnList)
-                    prj.CreateOrUpdateColumnAsync(col);
+                    prj.Repository.CreateOrUpdateColumn(col);
 
                 foreach (var row in db.RowList)
-                    prj.CreateOrUpdateRowAsync(row);
+                    prj.Repository.CreateOrUpdateRow(row);
 
                 foreach (var iss in db.IssueList)
-                    prj.CreateOrUpdateIssueAsync(iss);
+                    prj.Repository.CreateOrUpdateIssue(iss);
             }
         }
 
