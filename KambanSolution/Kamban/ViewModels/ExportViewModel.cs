@@ -1,7 +1,10 @@
 ﻿using DynamicData;
 using Kamban.Core;
+using Kamban.Export;
+using Kamban.Export.Options;
 using Kamban.Model;
 using Kamban.Repository;
+using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
 using PdfSharp;
 using ReactiveUI;
@@ -15,6 +18,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Forms;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
@@ -27,16 +31,9 @@ namespace Kamban.ViewModels
         [Reactive] public bool IsChecked { get; set; }
     }
 
-    public class DatabaseToExport
-    {
-        public List<BoardInfo> BoardList { get; set; } = new List<BoardInfo>();
-        public List<ColumnInfo> ColumnList { get; set; } = new List<ColumnInfo>();
-        public List<RowInfo> RowList { get; set; } = new List<RowInfo>();
-        public List<Issue> IssueList { get; set; } = new List<Issue>();
-    }
-
     public class ExportViewModel : ViewModelBase, IInitializableViewModel
     {
+        private readonly IShell shell;
         private readonly IAppModel appModel;
         private readonly IDialogCoordinator dialCoord;
         private readonly IExportService export;
@@ -67,8 +64,9 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> ExportCommand { get; set; }
         public ReactiveCommand<Unit, Unit> CancelCommand { get; set; }
 
-        public ExportViewModel(IAppModel am, IDialogCoordinator dc, IAppConfig cfg, IExportService ex)
+        public ExportViewModel(IShell sh, IAppModel am, IDialogCoordinator dc, IAppConfig cfg, IExportService ex)
         {
+            shell = sh;
             appModel = am;
             dialCoord = dc;
             export = ex;
@@ -89,8 +87,8 @@ namespace Kamban.ViewModels
                 ScaleFittings = Enum.GetValues(typeof(ScaleFitting)).Cast<ScaleFitting>().ToArray()
             };
             PdfOptions = new PdfOptions
-            {                
-                PageSize = PageSize.A4,   
+            {
+                PageSize = PageSize.A4,
                 PageOrientation = PageOrientation.Portrait,
                 ScaleOptions = new ScaleOptions
                 {
@@ -105,9 +103,9 @@ namespace Kamban.ViewModels
             var canExport = boards
                 .Connect()
                 .AutoRefresh()
-                .Filter(x=>x.IsChecked)
+                .Filter(x => x.IsChecked)
                 .Select(x => AvailableBoards.Count(y => y.IsChecked) > 0
-                    && !string.IsNullOrEmpty(SelectedDb.Uri) && File.Exists(SelectedDb.Uri));
+                             && !string.IsNullOrEmpty(SelectedDb.Uri) && File.Exists(SelectedDb.Uri));
 
             ExportCommand = ReactiveCommand.CreateFromTask(ExportCommandExecute, canExport);
             SelectTargetFolderCommand = ReactiveCommand.Create(SelectTargetFolderCommandExecute);
@@ -119,8 +117,8 @@ namespace Kamban.ViewModels
                 .Subscribe(db =>
                 {
                     boards.ClearAndAddRange(db.Boards.Items
-                        .Select(x => new BoardToExport { Board = x, IsChecked = true }));
-                    
+                        .Select(x => new BoardToExport {Board = x, IsChecked = true}));
+
                     TargetFile = Path.GetFileNameWithoutExtension(db.Uri) + "_export";
                 });
 
@@ -160,7 +158,7 @@ namespace Kamban.ViewModels
             var boardsSelected = await GetBoardsSelectedToExport();
 
             // 1. prepare database
-            var jb = new DatabaseToExport();
+            var jb = new BoxToExport();
             jb.BoardList.AddRange(boardsSelected);
 
             foreach (var brd in jb.BoardList)
@@ -186,7 +184,7 @@ namespace Kamban.ViewModels
             foreach (var brd in boardsSelected)
             {
                 // 1. prepare database
-                var jb = new DatabaseToExport();
+                var jb = new BoxToExport();
                 jb.BoardList.Add(brd);
 
                 var columns = await prjService.Repository.GetColumns(brd.Id);
@@ -213,7 +211,7 @@ namespace Kamban.ViewModels
             return boardsAll.Where(x => selectedBoardIds.Contains(x.Id));
         }
 
-        private void DoExportForNeededFormats(DatabaseToExport db, string fileName)
+        private void DoExportForNeededFormats(BoxToExport db, string fileName)
         {
             if (ExportJson)
                 export.ToJson(db, fileName);
@@ -225,7 +223,21 @@ namespace Kamban.ViewModels
                 export.ToXlsx(db, fileName);
 
             if (ExportPdf)
-                export.ToPdf(db, SelectedDb, fileName, PdfOptions);
+            {
+                FixedDocument RenderToXps(Size size)
+                {
+                    var selectedBoardIds = new HashSet<int>(db.BoardList.Select(x => x.Id));
+                    return ((ShellEx) shell).ViewsToDocument<BoardForExportView>(
+                        SelectedDb.Boards.Items
+                            .Where(x => selectedBoardIds.Contains(x.Id))
+                            .Select(x => new BoardViewRequest {ViewId = SelectedDb.Uri, Db = SelectedDb, Board = x})
+                            .Cast<ViewRequest>()
+                            .ToArray(),
+                        size, PdfOptions.ScaleOptions);
+                }
+
+                export.ToPdf(db, RenderToXps, fileName, PdfOptions);
+            }
         }
 
         private void SelectTargetFolderCommandExecute()

@@ -1,7 +1,7 @@
-﻿using Kamban.Model;
-using Kamban.ViewModels;
-using Kamban.Views;
-using MahApps.Metro.Controls.Dialogs;
+﻿using Kamban.Common;
+using Kamban.Export;
+using Kamban.Export.Options;
+using Kamban.Repository.LiteDb;
 using Newtonsoft.Json;
 using OfficeOpenXml;
 using PdfSharp.Pdf;
@@ -10,17 +10,20 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Xps.Packaging;
-using Ui.Wpf.Common;
 
 namespace Kamban.Core
 {
     public interface IExportService
     {
-        void ToJson(DatabaseToExport db, string fileName);
-        void ToKamban(DatabaseToExport db, string fileName);
-        void ToXlsx(DatabaseToExport db, string fileName);
-        void ToPdf(DatabaseToExport db, DbViewModel dbViewModel, string fileName, PdfOptions options);
+        void ToJson(BoxToExport db, string fileName);
+        void ToKamban(BoxToExport db, string fileName);
+        void ToXlsx(BoxToExport db, string fileName);
+
+        void ToPdf(BoxToExport db,
+            Func<Size, FixedDocument> renderToXps,
+            string fileName, PdfOptions options);
     }
 
     public class ExportService : IExportService
@@ -33,69 +36,39 @@ namespace Kamban.Core
 
         private const int WPF_DPI = 96; // default dpi
 
-        private readonly IShell _shell;
-        private readonly IDialogCoordinator _dialCoord;
-        private readonly IAppModel _appModel;
 
-
-        public ExportService(IShell shell, IDialogCoordinator dialCoord, IAppModel appModel)
-        {
-            _shell = shell;
-            _dialCoord = dialCoord;
-            _appModel = appModel;
-        }
-
-
-        public void ToJson(DatabaseToExport db, string fileName)
+        public void ToJson(BoxToExport db, string fileName)
         {
             var jsonFileName = fileName + EXT_JSON;
-
-            if (File.Exists(jsonFileName))
-            {
-                _dialCoord.ShowMessageAsync(this, "Error", "Target file already exists");
-                return;
-            }
 
             var output = JsonConvert.SerializeObject(db, Formatting.Indented);
             File.WriteAllText(jsonFileName, output);
         }
 
-        public void ToKamban(DatabaseToExport db, string fileName)
+        public void ToKamban(BoxToExport db, string fileName)
         {
             var kamFileName = fileName + EXT_KAM;
 
-            if (File.Exists(kamFileName))
-            {
-                _dialCoord.ShowMessageAsync(this, "Error", "Target file already exists");
-                return;
-            }
-
-            var prj = _appModel.GetProjectService(kamFileName);
+            var repo = new LiteDbRepository(kamFileName);
 
             foreach (var brd in db.BoardList)
             {
-                prj.Repository.CreateOrUpdateBoardInfo(brd);
+                repo.CreateOrUpdateBoardInfo(brd);
 
                 foreach (var col in db.ColumnList)
-                    prj.Repository.CreateOrUpdateColumn(col);
+                    repo.CreateOrUpdateColumn(col);
 
                 foreach (var row in db.RowList)
-                    prj.Repository.CreateOrUpdateRow(row);
+                    repo.CreateOrUpdateRow(row);
 
                 foreach (var iss in db.IssueList)
-                    prj.Repository.CreateOrUpdateIssue(iss);
+                    repo.CreateOrUpdateIssue(iss);
             }
         }
 
-        public void ToXlsx(DatabaseToExport db, string fileName)
+        public void ToXlsx(BoxToExport db, string fileName)
         {
             var xlsxFileName = fileName + EXT_XLSX;
-
-            if (File.Exists(xlsxFileName))
-            {
-                _dialCoord.ShowMessageAsync(this, "Error", "Target file already exists");
-                return;
-            }
 
             using (var package = new ExcelPackage())
             {
@@ -105,7 +78,7 @@ namespace Kamban.Core
                         from i in db.IssueList group i by i.BoardId
                         on b.Id equals g.Key into bg
                     from g in bg.DefaultIfEmpty()
-                    select new { Info = b, Issues = g?.ToList() };
+                    select new {Info = b, Issues = g?.ToList()};
 
                 foreach (var board in boardsWithIssues)
                 {
@@ -132,7 +105,7 @@ namespace Kamban.Core
                         join r in db.RowList on i.RowId equals r.Id
                         join c in db.ColumnList on i.ColumnId equals c.Id
                         orderby c.Id, r.Id, i.Order, i.Id
-                        select new { Info = i, RowInfo = r, ColInfo = c };
+                        select new {Info = i, RowInfo = r, ColInfo = c};
 
                     var row = 2;
                     foreach (var issue in issues)
@@ -173,16 +146,10 @@ namespace Kamban.Core
             }
         }
 
-        public void ToPdf(DatabaseToExport db, DbViewModel dbViewModel, string fileName, PdfOptions options)
+        public void ToPdf(BoxToExport db,
+            Func<Size, FixedDocument> renderToXps,
+            string fileName, PdfOptions options)
         {
-            var pdfFileName = fileName + EXT_PDF;
-
-            if (File.Exists(pdfFileName))
-            {
-                _dialCoord.ShowMessageAsync(this, "Error", "Target file already exists");
-                return;
-            }
-
             var pdfPage = new PdfPage
             {
                 Size = options.PageSize,
@@ -192,21 +159,7 @@ namespace Kamban.Core
             var width = pdfPage.Width.Inch * WPF_DPI;
             var height = pdfPage.Height.Inch * WPF_DPI;
 
-            var selectedBoardIds = new HashSet<int>(db.BoardList.Select(x => x.Id));
-            var document = ((ShellEx)_shell).ViewsToDocument<BoardForExportView>(
-                dbViewModel.Boards.Items
-                    .Where(x => selectedBoardIds.Contains(x.Id))
-                    .Select(x =>
-                        new BoardViewRequest
-                        {
-                            ViewId = dbViewModel.Uri,
-                            Db = dbViewModel,
-                            Board = x
-                        })
-                    .Cast<ViewRequest>()
-                    .ToArray(),
-                new Size(width, height),
-                options.ScaleOptions);
+            var document = renderToXps(new Size(width, height));
 
             var xpsFileName = fileName + EXT_XPS;
 
@@ -218,7 +171,5 @@ namespace Kamban.Core
             PdfSharp.Xps.XpsConverter.Convert(xpsFileName);
             File.Delete(xpsFileName);
         }
-
-
     }
 }

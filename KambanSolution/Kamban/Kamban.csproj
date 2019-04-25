@@ -51,10 +51,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="8.0.0" />
-    <PackageReference Include="EPPlus" Version="4.5.3.1" />
     <PackageReference Include="gong-wpf-dragdrop" Version="2.0.1" />
-    <PackageReference Include="kenjiuno.PdfSharp-WPF" Version="1.31.5198" />
-    <PackageReference Include="kenjiuno.PdfSharp.Xps" Version="1.1.1" />
     <PackageReference Include="MahApps.Metro.IconPacks" Version="2.3.0" />
     <PackageReference Include="Monik.Common" Version="1.0.4" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
@@ -62,6 +59,8 @@
     <PackageReference Include="Ui.Wpf.Common" Version="1.0.34" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Kamban.Common\Kamban.Common.csproj" />
+    <ProjectReference Include="..\Kamban.Export\Kamban.Export.csproj" />
     <ProjectReference Include="..\Kamban.Repository.LiteDb\Kamban.Repository.LiteDb.csproj" />
   </ItemGroup>
 </Project>

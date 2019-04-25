@@ -1,60 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DynamicData;
+using Kamban.Common;
+using Kamban.Model;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
-using System.Windows.Media;
-using AutoMapper;
-using DynamicData;
-using Kamban.MatrixControl;
-using Kamban.Model;
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
 using Brush = System.Windows.Media.Brush;
-using ColorConverter = System.Windows.Media.ColorConverter;
-using WpfColor = System.Windows.Media.Color;
 
 namespace Kamban.ViewModels
 {
-    public class ColorItem
-    {
-        public SolidColorBrush Brush { get; private set; }
-        public string Name { get; private set; }
-        public string SystemName => Brush.Color.ToString();
 
-        private static readonly Dictionary<string, ColorItem> _colors = new Dictionary<string, ColorItem>();
-
-        public static ColorItem I(string colorName)
-        {
-            if (_colors.ContainsKey(colorName))
-                return _colors[colorName];
-
-            ColorConverter converter = new ColorConverter();
-            Color color = (Color)converter.ConvertFromInvariantString(colorName);
-
-            var item = new ColorItem
-            {
-                Brush = new SolidColorBrush(color),
-                Name = colorName
-            };
-
-            _colors.Add(colorName, item);
-
-            return item;
-        }
-
-        public static string ToColorName(string systemName)
-        {
-            return _colors.Values
-                .FirstOrDefault(x => x.SystemName == systemName)?
-                .Name;
-        }
-    }
-    
     public enum IssueEditResult
     {
         None,
@@ -90,14 +50,8 @@ namespace Kamban.ViewModels
 
         [Reactive] public Brush Background { get; set; }
 
-        [Reactive] public ColorItem[] ColorItems { get; set; } =
-        {
-            ColorItem.I("LemonChiffon"),
-            ColorItem.I("WhiteSmoke"),
-            ColorItem.I("NavajoWhite"),
-            ColorItem.I("HoneyDew")
-        };
-
+        [Reactive] public ColorItem[] ColorItems { get; set; } = DefaultColorItems.Colors;
+        
         [Reactive] public ColorItem SelectedColor { get; set; }
 
         public IssueViewModel()

@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Kamban.Export.Options;
 using Kamban.Views;
 using System;
 using System.Collections.Generic;
