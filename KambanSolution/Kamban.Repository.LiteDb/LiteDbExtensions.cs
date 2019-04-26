@@ -11,10 +11,10 @@ namespace Kamban.Repository.LiteDb
         private static readonly Dictionary<Type, string> CollectionNameByType =
             new Dictionary<Type, string>
             {
-                {typeof(RowInfo), "rows"},
-                {typeof(ColumnInfo), "columns"},
-                {typeof(BoardInfo), "boards"},
-                {typeof(Issue), "issues"}
+                {typeof(Row), "rows"},
+                {typeof(Column), "columns"},
+                {typeof(Board), "boards"},
+                {typeof(Card), "issues"}
             };
 
         public static LiteCollection<T> GetCollectionByType<T>(this LiteDatabase db)

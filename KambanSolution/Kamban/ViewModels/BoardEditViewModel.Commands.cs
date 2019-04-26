@@ -65,19 +65,19 @@ namespace Kamban.ViewModels
             {
                 // Shift cards
                 var firstColumn = Columns.OrderBy(x => x.Order).First();
-                foreach (CardViewModel it in cardList.Where(x => (int)x.ColumnDeterminant == column.Id).ToList())
+                foreach (var it in cardList.Where(x => (int)x.ColumnDeterminant == column.Id).ToList())
                     it.ColumnDeterminant = firstColumn.Id;
 
-                Db.Columns.Remove(column);
+                Box.Columns.Remove(column);
             }
             else
             {
                 // Shift cards
                 var firstRow = Rows.OrderBy(x => x.Order).First();
-                foreach (CardViewModel it in cardList.Where(x => (int)x.RowDeterminant == row.Id).ToList())
+                foreach (var it in cardList.Where(x => (int)x.RowDeterminant == row.Id).ToList())
                     it.RowDeterminant = firstRow.Id;
 
-                Db.Rows.Remove(row);
+                Box.Rows.Remove(row);
             }
 
             // Rebuild Matrix
@@ -129,7 +129,7 @@ namespace Kamban.ViewModels
                 };
 
                 tempColumns.Insert(indx, cvm);
-                Db.Columns.Add(cvm);
+                Box.Columns.Add(cvm);
 
                 int i = 0;
                 foreach (var it in tempColumns)
@@ -150,7 +150,7 @@ namespace Kamban.ViewModels
                 };
 
                 tempRows.Insert(indx, rvm);
-                Db.Rows.Add(rvm);
+                Box.Rows.Add(rvm);
 
                 int i = 0;
                 foreach (var it in tempRows)
@@ -198,39 +198,39 @@ namespace Kamban.ViewModels
                 return;
 
             // protect
-            if (Db.Boards.Count <= 1)
+            if (Box.Boards.Count <= 1)
                 return;
 
             // Remove cards
             foreach (var card in cardList.ToList())
-                Db.Cards.Remove(card);
+                Box.Cards.Remove(card);
 
             // Remove headers
-            Db.Columns.Items
+            Box.Columns.Items
                 .Where(x => x.BoardId == CurrentBoard.Id)
                 .ToList()
-                .ForEach(x => Db.Columns.Remove(x));
+                .ForEach(x => Box.Columns.Remove(x));
 
-            Db.Rows.Items
+            Box.Rows.Items
                 .Where(x => x.BoardId == CurrentBoard.Id)
                 .ToList()
-                .ForEach(x => Db.Rows.Remove(x));
+                .ForEach(x => Box.Rows.Remove(x));
 
             // Remove board
-            Db.Boards.Remove(CurrentBoard);
-            CurrentBoard = Db.Boards.Items.First();
+            Box.Boards.Remove(CurrentBoard);
+            CurrentBoard = Box.Boards.Items.First();
         }
 
         private async Task DeleteCardCommandExecuteAsync(ICard cvm)
         {
             var ts = await dialCoord.ShowMessageAsync(this, "Warning",
-                $"Are you shure to delete issue '{cvm.Header}'?"
+                $"Are you sure you want to delete the card '{cvm.Header}'?"
                 , MessageDialogStyle.AffirmativeAndNegative);
 
             if (ts == MessageDialogResult.Negative)
                 return;
 
-            Db.Cards.Remove(cvm as CardViewModel);
+            Box.Cards.Remove(cvm as CardViewModel);
         }
 
     }//end of class

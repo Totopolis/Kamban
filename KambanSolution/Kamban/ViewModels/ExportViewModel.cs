@@ -40,8 +40,8 @@ namespace Kamban.ViewModels
         private IProjectService prjService;
         private SourceList<BoardToExport> boards;
 
-        [Reactive] public ReadOnlyObservableCollection<DbViewModel> AvailableDbs { get; set; }
-        [Reactive] public DbViewModel SelectedDb { get; set; }
+        [Reactive] public ReadOnlyObservableCollection<BoxViewModel> AvailableBoxes { get; set; }
+        [Reactive] public BoxViewModel SelectedBox { get; set; }
         [Reactive] public ReadOnlyObservableCollection<BoardToExport> AvailableBoards { get; set; }
 
         [Reactive] public bool ExportJson { get; set; }
@@ -71,7 +71,7 @@ namespace Kamban.ViewModels
             dialCoord = dc;
             export = ex;
 
-            AvailableDbs = appModel.Dbs;
+            AvailableBoxes = appModel.Boxes;
 
             boards = new SourceList<BoardToExport>();
             AvailableBoards = boards.SpawnCollection();
@@ -105,29 +105,29 @@ namespace Kamban.ViewModels
                 .AutoRefresh()
                 .Filter(x => x.IsChecked)
                 .Select(x => AvailableBoards.Count(y => y.IsChecked) > 0
-                             && !string.IsNullOrEmpty(SelectedDb.Uri) && File.Exists(SelectedDb.Uri));
+                             && !string.IsNullOrEmpty(SelectedBox.Uri) && File.Exists(SelectedBox.Uri));
 
             ExportCommand = ReactiveCommand.CreateFromTask(ExportCommandExecute, canExport);
             SelectTargetFolderCommand = ReactiveCommand.Create(SelectTargetFolderCommandExecute);
-            CancelCommand = ReactiveCommand.Create(() => this.Close());
+            CancelCommand = ReactiveCommand.Create(Close);
 
-            this.ObservableForProperty(x => x.SelectedDb)
+            this.ObservableForProperty(x => x.SelectedBox)
                 .Where(x => x.Value != null)
                 .Select(x => x.Value)
-                .Subscribe(db =>
+                .Subscribe(box =>
                 {
-                    boards.ClearAndAddRange(db.Boards.Items
+                    boards.ClearAndAddRange(box.Boards.Items
                         .Select(x => new BoardToExport {Board = x, IsChecked = true}));
 
-                    TargetFile = Path.GetFileNameWithoutExtension(db.Uri) + "_export";
+                    TargetFile = Path.GetFileNameWithoutExtension(box.Uri) + "_export";
                 });
 
             this.ObservableForProperty(x => x.TargetFolder)
                 .Subscribe(x => cfg.ArchiveFolder = x.Value);
 
-            SelectedDb = AvailableDbs.FirstOrDefault();
+            SelectedBox = AvailableBoxes.First();
 
-            var fi = new FileInfo(SelectedDb.Uri);
+            var fi = new FileInfo(SelectedBox.Uri);
             TargetFolder = cfg.ArchiveFolder ?? fi.DirectoryName;
         }
 
@@ -139,7 +139,7 @@ namespace Kamban.ViewModels
                 return;
             }
 
-            prjService = appModel.GetProjectService(SelectedDb.Uri);
+            prjService = appModel.GetProjectService(SelectedBox.Uri);
 
             string fileName = TargetFolder + "\\" + TargetFile;
             if (DatePostfix)
@@ -169,8 +169,8 @@ namespace Kamban.ViewModels
                 var rows = await prjService.Repository.GetRows(brd.Id);
                 jb.RowList.AddRange(rows);
 
-                var issues = await prjService.Repository.GetIssues(brd.Id);
-                jb.IssueList.AddRange(issues);
+                var cards = await prjService.Repository.GetCards(brd.Id);
+                jb.CardList.AddRange(cards);
             }
 
             // 2. export
@@ -191,15 +191,15 @@ namespace Kamban.ViewModels
                 jb.ColumnList.AddRange(columns);
                 var rows = await prjService.Repository.GetRows(brd.Id);
                 jb.RowList.AddRange(rows);
-                var issues = await prjService.Repository.GetIssues(brd.Id);
-                jb.IssueList.AddRange(issues);
+                var cards = await prjService.Repository.GetCards(brd.Id);
+                jb.CardList.AddRange(cards);
 
                 // 2. export
                 DoExportForNeededFormats(jb, fileName + "_" + brd.Name);
             }
         }
 
-        private async Task<IEnumerable<BoardInfo>> GetBoardsSelectedToExport()
+        private async Task<IEnumerable<Board>> GetBoardsSelectedToExport()
         {
             var selectedBoardIds = new HashSet<int>(
                 AvailableBoards
@@ -211,32 +211,32 @@ namespace Kamban.ViewModels
             return boardsAll.Where(x => selectedBoardIds.Contains(x.Id));
         }
 
-        private void DoExportForNeededFormats(BoxToExport db, string fileName)
+        private void DoExportForNeededFormats(BoxToExport box, string fileName)
         {
             if (ExportJson)
-                export.ToJson(db, fileName);
+                export.ToJson(box, fileName);
 
             if (ExportKamban)
-                export.ToKamban(db, fileName);
+                export.ToKamban(box, fileName);
 
             if (ExportXlsx)
-                export.ToXlsx(db, fileName);
+                export.ToXlsx(box, fileName);
 
             if (ExportPdf)
             {
                 FixedDocument RenderToXps(Size size)
                 {
-                    var selectedBoardIds = new HashSet<int>(db.BoardList.Select(x => x.Id));
+                    var selectedBoardIds = new HashSet<int>(box.BoardList.Select(x => x.Id));
                     return ((ShellEx) shell).ViewsToDocument<BoardForExportView>(
-                        SelectedDb.Boards.Items
+                        SelectedBox.Boards.Items
                             .Where(x => selectedBoardIds.Contains(x.Id))
-                            .Select(x => new BoardViewRequest {ViewId = SelectedDb.Uri, Db = SelectedDb, Board = x})
+                            .Select(x => new BoardViewRequest {ViewId = SelectedBox.Uri, Box = SelectedBox, Board = x})
                             .Cast<ViewRequest>()
                             .ToArray(),
                         size, PdfOptions.ScaleOptions);
                 }
 
-                export.ToPdf(db, RenderToXps, fileName, PdfOptions);
+                export.ToPdf(box, RenderToXps, fileName, PdfOptions);
             }
         }
 

@@ -1,5 +1,4 @@
 ﻿using Kamban.Common;
-using Kamban.Export;
 using Kamban.Export.Options;
 using Kamban.Repository.LiteDb;
 using Newtonsoft.Json;
@@ -13,19 +12,8 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Xps.Packaging;
 
-namespace Kamban.Core
+namespace Kamban.Export
 {
-    public interface IExportService
-    {
-        void ToJson(BoxToExport db, string fileName);
-        void ToKamban(BoxToExport db, string fileName);
-        void ToXlsx(BoxToExport db, string fileName);
-
-        void ToPdf(BoxToExport db,
-            Func<Size, FixedDocument> renderToXps,
-            string fileName, PdfOptions options);
-    }
-
     public class ExportService : IExportService
     {
         public const string EXT_XPS = ".xps";
@@ -37,50 +25,50 @@ namespace Kamban.Core
         private const int WPF_DPI = 96; // default dpi
 
 
-        public void ToJson(BoxToExport db, string fileName)
+        public void ToJson(BoxToExport box, string fileName)
         {
             var jsonFileName = fileName + EXT_JSON;
 
-            var output = JsonConvert.SerializeObject(db, Formatting.Indented);
+            var output = JsonConvert.SerializeObject(box, Formatting.Indented);
             File.WriteAllText(jsonFileName, output);
         }
 
-        public void ToKamban(BoxToExport db, string fileName)
+        public void ToKamban(BoxToExport box, string fileName)
         {
             var kamFileName = fileName + EXT_KAM;
 
             var repo = new LiteDbRepository(kamFileName);
 
-            foreach (var brd in db.BoardList)
+            foreach (var brd in box.BoardList)
             {
-                repo.CreateOrUpdateBoardInfo(brd);
+                repo.CreateOrUpdateBoard(brd);
 
-                foreach (var col in db.ColumnList)
+                foreach (var col in box.ColumnList)
                     repo.CreateOrUpdateColumn(col);
 
-                foreach (var row in db.RowList)
+                foreach (var row in box.RowList)
                     repo.CreateOrUpdateRow(row);
 
-                foreach (var iss in db.IssueList)
-                    repo.CreateOrUpdateIssue(iss);
+                foreach (var iss in box.CardList)
+                    repo.CreateOrUpdateCard(iss);
             }
         }
 
-        public void ToXlsx(BoxToExport db, string fileName)
+        public void ToXlsx(BoxToExport box, string fileName)
         {
             var xlsxFileName = fileName + EXT_XLSX;
 
             using (var package = new ExcelPackage())
             {
-                var boardsWithIssues =
-                    from b in db.BoardList
+                var boardsWithCards =
+                    from b in box.BoardList
                     join g in
-                        from i in db.IssueList group i by i.BoardId
+                        from i in box.CardList group i by i.BoardId
                         on b.Id equals g.Key into bg
                     from g in bg.DefaultIfEmpty()
-                    select new {Info = b, Issues = g?.ToList()};
+                    select new {Info = b, Cards = g?.ToList()};
 
-                foreach (var board in boardsWithIssues)
+                foreach (var board in boardsWithCards)
                 {
                     var sheet = package.Workbook.Worksheets.Add(board.Info.Name);
 
@@ -97,29 +85,29 @@ namespace Kamban.Core
                             "Modified"
                         });
 
-                    if (board.Issues == null)
+                    if (board.Cards == null)
                         continue;
 
-                    var issues =
-                        from i in board.Issues
-                        join r in db.RowList on i.RowId equals r.Id
-                        join c in db.ColumnList on i.ColumnId equals c.Id
+                    var cards =
+                        from i in board.Cards
+                        join r in box.RowList on i.RowId equals r.Id
+                        join c in box.ColumnList on i.ColumnId equals c.Id
                         orderby c.Id, r.Id, i.Order, i.Id
                         select new {Info = i, RowInfo = r, ColInfo = c};
 
                     var row = 2;
-                    foreach (var issue in issues)
+                    foreach (var card in cards)
                     {
                         var values = new object[]
                         {
-                            issue.Info.Id,
-                            issue.Info.Head,
-                            issue.RowInfo.Name,
-                            issue.ColInfo.Name,
-                            ColorItem.ToColorName(issue.Info.Color),
-                            issue.Info.Body,
-                            issue.Info.Created,
-                            issue.Info.Modified
+                            card.Info.Id,
+                            card.Info.Head,
+                            card.RowInfo.Name,
+                            card.ColInfo.Name,
+                            ColorItem.ToColorName(card.Info.Color),
+                            card.Info.Body,
+                            card.Info.Created,
+                            card.Info.Modified
                         };
 
                         WriteValuesToSheet(sheet, row, values);
@@ -146,7 +134,7 @@ namespace Kamban.Core
             }
         }
 
-        public void ToPdf(BoxToExport db,
+        public void ToPdf(BoxToExport box,
             Func<Size, FixedDocument> renderToXps,
             string fileName, PdfOptions options)
         {

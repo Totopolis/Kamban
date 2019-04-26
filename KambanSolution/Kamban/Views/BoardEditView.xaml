@@ -33,7 +33,7 @@
             IsTabStop="False"
             NormalizeGridCommand="{Binding NormalizeGridCommand}"
             CardClickCommand="{Binding CardClickCommand}"
-            CardOfContextMenu="{Binding IssueOfContextMenu, Mode=TwoWay}"
+            CardOfContextMenu="{Binding CardOfContextMenu, Mode=TwoWay}"
             HeadOfContextMenu="{Binding HeadOfContextMenu, Mode=TwoWay}"
             CellDoubleClickCommand="{Binding CellDoubleClickCommand}"
             mykanban:ContextMenuServiceExtensions.DataContext="{Binding}">
@@ -42,12 +42,12 @@
                 <ContextMenu>
                     <MenuItem 
                         Header="Move"
-                        CommandParameter="{Binding IssueOfContextMenu}"
-                        Command="{Binding MoveIssueCommand}"/>
+                        CommandParameter="{Binding CardOfContextMenu}"
+                        Command="{Binding MoveCardCommand}"/>
                     <MenuItem
                         Header="Delete"
-                        CommandParameter="{Binding IssueOfContextMenu}"
-                        Command="{Binding DeleteIssueCommand}"/>
+                        CommandParameter="{Binding CardOfContextMenu}"
+                        Command="{Binding DeleteCardCommand}"/>
                 </ContextMenu>
             </mykanban:Matrix.CardContextMenu>
 
@@ -82,10 +82,10 @@
                     Grid.ColumnSpan="4"
                     CloseButtonVisibility="Hidden"
                     TitleVisibility="Hidden"
-                    IsOpen="{Binding IssueFlyout.IsOpened}"
+                    IsOpen="{Binding CardEditFlyout.IsOpened}"
                     Theme="Adapt"
                     IsModal="True"
-                    Content="{Binding IssueFlyout}"
+                    Content="{Binding CardEditFlyout}"
                     AnimateOpacity="True"
                     Width="600"
                     />
@@ -98,10 +98,10 @@
                     Grid.ColumnSpan="4"
                     CloseButtonVisibility="Hidden"
                     TitleVisibility="Hidden"
-                    IsOpen="{Binding MoveFlyout.IsOpened}"
+                    IsOpen="{Binding CardMoveFlyout.IsOpened}"
                     Theme="Adapt"
                     IsModal="True"
-                    Content="{Binding MoveFlyout}"
+                    Content="{Binding CardMoveFlyout}"
                     AnimateOpacity="True"
                     Width="600"
                     />

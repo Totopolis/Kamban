@@ -1,9 +1,9 @@
 ﻿
 namespace Kamban.Views
 {
-    public partial class IssueView
+    public partial class CardEditView
     {
-        public IssueView()
+        public CardEditView()
         {
             InitializeComponent();
         }

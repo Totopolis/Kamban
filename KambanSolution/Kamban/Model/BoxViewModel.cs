@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Kamban.Model
 {
-    public class DbViewModel : ReactiveObject
+    public class BoxViewModel : ReactiveObject
     {
         [Reactive] public string Uri { get; set; }
         [Reactive] public bool Loaded { get; set; }
@@ -36,7 +36,7 @@ namespace Kamban.Model
 
         [Reactive] public SourceList<CardViewModel> Cards { get; set; }
 
-        public DbViewModel()
+        public BoxViewModel()
         {
             Columns = new SourceList<ColumnViewModel>();
             Rows = new SourceList<RowViewModel>();

@@ -177,28 +177,28 @@ namespace Kamban.ViewModels
             }
 
             // 2. Create board (or get from preloaded)
-            DbViewModel db;
+            BoxViewModel box;
 
             if (IsNewFile)
             {
-                db = await appModel.CreateDb(uri);
-                if (!db.Loaded)
+                box = await appModel.Create(uri);
+                if (!box.Loaded)
                     throw new Exception("File not loaded");
 
                 appConfig.UpdateRecent(uri, false);
             }
             else
             {
-                db = await appModel.LoadDb(uri);
-                if (!db.Loaded)
+                box = await appModel.Load(uri);
+                if (!box.Loaded)
                 {
                     appConfig.RemoveRecent(uri);
-                    appModel.RemoveDb(uri);
+                    appModel.Remove(uri);
                     await dialCoord.ShowMessageAsync(this, "Error", "File was damaged");
                     return;
                 }
 
-                if (db.Boards.Items.Any(x => x.Name == BoardName))
+                if (box.Boards.Items.Any(x => x.Name == BoardName))
                 {
                     await dialCoord.ShowMessageAsync(this, "Error", "Board name already used");
                     return;
@@ -212,7 +212,7 @@ namespace Kamban.ViewModels
                 Modified = DateTime.Now
             };
 
-            db.Boards.Add(bvm);
+            box.Boards.Add(bvm);
 
             // 3. Normalize grid
             double colSize = Columns.Count == 1 ? 100 : 100 / (Columns.Count - 1);
@@ -240,7 +240,7 @@ namespace Kamban.ViewModels
                     Name = cvm.Name
                 };
 
-                db.Columns.Add(colToAdd);
+                box.Columns.Add(colToAdd);
             }
 
             // 5. Create rows
@@ -254,11 +254,11 @@ namespace Kamban.ViewModels
                     Name = rvm.Name
                 };
 
-                db.Rows.Add(rowToAdd);
+                box.Rows.Add(rowToAdd);
             }
 
             shell.ShowView<BoardView>(
-                viewRequest: new BoardViewRequest { ViewId = uri, Db = db, Board = bvm },
+                viewRequest: new BoardViewRequest { ViewId = uri, Box = box, Board = bvm },
                 options: new UiShowOptions { Title = BoardName });
 
             this.Close();

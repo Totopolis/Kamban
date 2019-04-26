@@ -15,22 +15,22 @@ using Brush = System.Windows.Media.Brush;
 namespace Kamban.ViewModels
 {
 
-    public enum IssueEditResult
+    public enum CardEditResult
     {
         None,
         Created,
         Modified
     }
 
-    public class IssueViewModel : ViewModelBase, IInitializableViewModel
+    public class CardEditViewModel : ViewModelBase, IInitializableViewModel
     {
-        private DbViewModel db;
+        private BoxViewModel box;
         private BoardViewModel board;
         private int requestedColumnId;
         private int requestedRowId;
 
         [Reactive] public CardViewModel Card { get; set; }
-        [Reactive] public IssueEditResult Result { get; set; }
+        [Reactive] public CardEditResult Result { get; set; }
 
         [Reactive] public ReadOnlyObservableCollection<ColumnViewModel> AvailableColumns { get; set; }
         [Reactive] public ReadOnlyObservableCollection<RowViewModel> AvailableRows { get; set; }
@@ -54,20 +54,20 @@ namespace Kamban.ViewModels
         
         [Reactive] public ColorItem SelectedColor { get; set; }
 
-        public IssueViewModel()
+        public CardEditViewModel()
         {
             Card = null;
 
-            var issueFilled = this.WhenAnyValue(
+            var cardFilled = this.WhenAnyValue(
                 t => t.Head, t => t.SelectedRow, t => t.SelectedColumn, t => t.SelectedColor,
                 (sh, sr, sc, cc) =>
                 sr != null && sc != null && !string.IsNullOrEmpty(sh) && cc != null);
 
-            SaveCommand = ReactiveCommand.Create(SaveCommandExecute, issueFilled);
+            SaveCommand = ReactiveCommand.Create(SaveCommandExecute, cardFilled);
 
             CancelCommand = ReactiveCommand.Create(() =>
             {
-                Result = IssueEditResult.None;
+                Result = CardEditResult.None;
                 IsOpened = false;
             });
 
@@ -127,7 +127,7 @@ namespace Kamban.ViewModels
 
         public void UpdateViewModel()
         {
-            db.Columns
+            box.Columns
                 .Connect()
                 .AutoRefresh()
                 .Filter(x => x.BoardId == board.Id)
@@ -136,7 +136,7 @@ namespace Kamban.ViewModels
 
             AvailableColumns = temp;
 
-            db.Rows
+            box.Rows
                 .Connect()
                 .AutoRefresh()
                 .Filter(x => x.BoardId == board.Id)
@@ -160,7 +160,7 @@ namespace Kamban.ViewModels
                 if (requestedRowId != 0)
                     SelectedRow = AvailableRows.First(c => c.Id == requestedRowId);
 
-                Result = IssueEditResult.Created;
+                Result = CardEditResult.Created;
             }
             else
             {
@@ -174,17 +174,17 @@ namespace Kamban.ViewModels
                     FirstOrDefault(c => c.SystemName == Card.Color)
                     ?? ColorItems.First();
 
-                Result = IssueEditResult.Modified;
+                Result = CardEditResult.Modified;
             }
         }
 
         public void Initialize(ViewRequest viewRequest)
         {
-            var request = viewRequest as IssueViewRequest;
+            var request = viewRequest as CardViewRequest;
             if (request == null)
                 return;
 
-            db = request.Db;
+            box = request.Box;
             board = request.Board;
             Card = request.Card;
 
@@ -193,7 +193,7 @@ namespace Kamban.ViewModels
 
             UpdateViewModel();
 
-            Title = $"Issue edit {Head}";
+            Title = $"Edit {Head}";
             IsOpened = true;
         }
     }//end of class

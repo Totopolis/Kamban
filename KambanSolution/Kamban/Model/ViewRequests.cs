@@ -9,7 +9,7 @@ namespace Kamban.Model
 
     public class BoardViewRequest : ViewRequest
     {
-        public DbViewModel Db { get; set; }
+        public BoxViewModel Box { get; set; }
         public BoardViewModel Board { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using AutoMapper;
 using Kamban.Core;
+using Kamban.Export;
 using Kamban.Model;
 using Kamban.Repository;
 using Kamban.ViewModels;
@@ -82,31 +83,31 @@ namespace Kamban
             return new MapperConfiguration(cfg =>
             {
                 //cfg.AddProfile<AppProfile>();
-                cfg.CreateMap<BoardViewModel, BoardInfo>();
-                cfg.CreateMap<BoardInfo, BoardViewModel>();
+                cfg.CreateMap<BoardViewModel, Board>();
+                cfg.CreateMap<Board, BoardViewModel>();
 
-                cfg.CreateMap<CardViewModel, Issue>()
+                cfg.CreateMap<CardViewModel, Card>()
                     .ForMember(dst => dst.Head, opt => opt.MapFrom(src => src.Header))
                     .ForMember(dst => dst.ColumnId, opt => opt.MapFrom(src => src.ColumnDeterminant))
                     .ForMember(dst => dst.RowId, opt => opt.MapFrom(src => src.RowDeterminant));
 
-                cfg.CreateMap<Issue, CardViewModel>()
+                cfg.CreateMap<Card, CardViewModel>()
                     .ForMember(dst => dst.Header, opt => opt.MapFrom(src => src.Head))
                     .ForMember(dst => dst.ColumnDeterminant, opt => opt.MapFrom(src => src.ColumnId))
                     .ForMember(dst => dst.RowDeterminant, opt => opt.MapFrom(src => src.RowId));
 
-                cfg.CreateMap<ColumnViewModel, ColumnInfo>()
+                cfg.CreateMap<ColumnViewModel, Column>()
                     // incorrect .ForMember(dst => dst.Id, opt => opt.MapFrom(src => src.Determinant))
                     .ForMember(dst => dst.Width, opt => opt.MapFrom(src => src.Size));
 
-                cfg.CreateMap<ColumnInfo, ColumnViewModel>()
+                cfg.CreateMap<Column, ColumnViewModel>()
                     .ForMember(dst => dst.Size, opt => opt.MapFrom(src => src.Width));
 
-                cfg.CreateMap<RowViewModel, RowInfo>()
+                cfg.CreateMap<RowViewModel, Row>()
                     // incorrect: .ForMember(dst => dst.Id, opt => opt.MapFrom(src => src.Determinant))
                     .ForMember(dst => dst.Height, opt => opt.MapFrom(src => src.Size));
 
-                cfg.CreateMap<RowInfo, RowViewModel>()
+                cfg.CreateMap<Row, RowViewModel>()
                     .ForMember(dst => dst.Size, opt => opt.MapFrom(src => src.Height));
             });
         }

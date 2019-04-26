@@ -2,7 +2,7 @@
 
 namespace Kamban.Repository
 {
-    public class Issue
+    public class Card
     {
         public int Id { get; set; }
         public string Head { get; set; }

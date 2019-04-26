@@ -2,9 +2,9 @@
 
 namespace Kamban.Views
 {
-    public partial class MoveView : UserControl
+    public partial class CardMoveView
     {
-        public MoveView()
+        public CardMoveView()
         {
             InitializeComponent();
         }

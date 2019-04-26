@@ -9,7 +9,7 @@ namespace Kamban.ViewModels
 {
     public class BoardEditForExportViewModel : ViewModelBase, IInitializableViewModel
     {
-        public DbViewModel Db { get; set; }
+        public BoxViewModel Box { get; set; }
 
         [Reactive] public bool EnableMatrix { get; set; }
 
@@ -21,19 +21,19 @@ namespace Kamban.ViewModels
         public void Initialize(ViewRequest viewRequest)
         {
             var request = viewRequest as BoardViewRequest;
-            Db = request.Db;
+            Box = request.Box;
 
-            Columns = Db.Columns.Items
+            Columns = Box.Columns.Items
                 .Where(x => x.BoardId == request.Board.Id)
                 .OrderBy(x => x.Order)
                 .ToArray();
 
-            Rows = Db.Rows.Items
+            Rows = Box.Rows.Items
                 .Where(x => x.BoardId == request.Board.Id)
                 .OrderBy(x => x.Order)
                 .ToArray();
 
-            Cards = Db.Cards.Items
+            Cards = Box.Cards.Items
                 .Where(x => x.BoardId == request.Board.Id)
                 .OfType<ICard>()
                 .ToArray();

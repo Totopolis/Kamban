@@ -71,27 +71,27 @@
                         <wpfresources:RecentGroup
                             Header="Pinned"
                             RecentObservable="{Binding Pinned}"
-                            OpenRecentCommand="{Binding OpenRecentDbCommand}"/>
+                            OpenRecentCommand="{Binding OpenRecentBoxCommand}"/>
 
                         <wpfresources:RecentGroup
                             Header="Today"
                             RecentObservable="{Binding Today}"
-                            OpenRecentCommand="{Binding OpenRecentDbCommand}"/>
+                            OpenRecentCommand="{Binding OpenRecentBoxCommand}"/>
 
                         <wpfresources:RecentGroup
                             Header="Yesterday"
                             RecentObservable="{Binding Yesterday}"
-                            OpenRecentCommand="{Binding OpenRecentDbCommand}"/>
+                            OpenRecentCommand="{Binding OpenRecentBoxCommand}"/>
 
                         <wpfresources:RecentGroup
                             Header="This month"
                             RecentObservable="{Binding ThisMonth}"
-                            OpenRecentCommand="{Binding OpenRecentDbCommand}"/>
+                            OpenRecentCommand="{Binding OpenRecentBoxCommand}"/>
 
                         <wpfresources:RecentGroup
                             Header="Older"
                             RecentObservable="{Binding Older}"
-                            OpenRecentCommand="{Binding OpenRecentDbCommand}"/>
+                            OpenRecentCommand="{Binding OpenRecentBoxCommand}"/>
 
                     </StackPanel>
 

@@ -14,85 +14,85 @@ namespace Kamban.Repository.LiteDb
             db = new LiteDatabase(uri);
         }
 
-        public Task<RowInfo> CreateOrUpdateRow(RowInfo row)
+        public Task<Row> CreateOrUpdateRow(Row row)
         {
             return db.UpsertAsync(row);
         }
 
-        public Task<ColumnInfo> CreateOrUpdateColumn(ColumnInfo column)
+        public Task<Column> CreateOrUpdateColumn(Column column)
         {
             return db.UpsertAsync(column);
         }
 
-        public Task<Issue> CreateOrUpdateIssue(Issue issue)
+        public Task<Card> CreateOrUpdateCard(Card card)
         {
-            return db.UpsertAsync(issue);
+            return db.UpsertAsync(card);
         }
 
-        public Task<BoardInfo> CreateOrUpdateBoardInfo(BoardInfo info)
+        public Task<Board> CreateOrUpdateBoard(Board board)
         {
-            return db.UpsertAsync(info);
+            return db.UpsertAsync(board);
         }
 
-        public Task<List<Issue>> GetAllIssues()
+        public Task<List<Card>> GetAllCards()
         {
-            return db.GetAllAsync<Issue>();
+            return db.GetAllAsync<Card>();
         }
 
-        public Task<List<RowInfo>> GetAllRows()
+        public Task<List<Row>> GetAllRows()
         {
-            return db.GetAllAsync<RowInfo>();
+            return db.GetAllAsync<Row>();
         }
 
-        public Task<List<ColumnInfo>> GetAllColumns()
+        public Task<List<Column>> GetAllColumns()
         {
-            return db.GetAllAsync<ColumnInfo>();
+            return db.GetAllAsync<Column>();
         }
 
-        public Task<List<BoardInfo>> GetAllBoards()
+        public Task<List<Board>> GetAllBoards()
         {
-            return db.GetAllAsync<BoardInfo>();
+            return db.GetAllAsync<Board>();
         }
 
-        public Task<List<Issue>> GetIssues(int boardId)
+        public Task<List<Card>> GetCards(int boardId)
         {
             return Task.Run(() =>
             {
-                var issues = db.GetCollectionByType<Issue>();
-                var results = issues.Find(x => x.BoardId == boardId);
+                var cards = db.GetCollectionByType<Card>();
+                var results = cards.Find(x => x.BoardId == boardId);
 
                 return results.ToList();
             });
         }
 
-        public Task<List<RowInfo>> GetRows(int boardId)
+        public Task<List<Row>> GetRows(int boardId)
         {
             return Task.Run(() =>
             {
-                var rows = db.GetCollectionByType<RowInfo>();
+                var rows = db.GetCollectionByType<Row>();
                 var result = rows.Find(x => x.BoardId == boardId);
 
                 return result.ToList();
             });
         }
 
-        public Task<List<ColumnInfo>> GetColumns(int boardId)
+        public Task<List<Column>> GetColumns(int boardId)
         {
             return Task.Run(() =>
             {
-                var columns = db.GetCollectionByType<ColumnInfo>();
+                var columns = db.GetCollectionByType<Column>();
                 var result = columns.Find(x => x.BoardId == boardId);
 
                 return result.ToList();
             });
         }
 
-        public Task<Issue> GetIssue(int issueId)
+        public Task<Card> GetCard(int cardId)
         {
             return Task.Run(() =>
             {
-                var issues = db.GetCollectionByType<Issue>();
-                var result = issues.Find(x => x.Id == issueId);
+                var cards = db.GetCollectionByType<Card>();
+                var result = cards.Find(x => x.Id == cardId);
 
                 return result.First();
             });
@@ -102,7 +102,7 @@ namespace Kamban.Repository.LiteDb
         {
             return Task.Run(() =>
             {
-                var rows = db.GetCollectionByType<RowInfo>();
+                var rows = db.GetCollectionByType<Row>();
                 rows.Delete(x => x.Id == rowId);
             });
         }
@@ -111,17 +111,17 @@ namespace Kamban.Repository.LiteDb
         {
             return Task.Run(() =>
             {
-                var columns = db.GetCollectionByType<ColumnInfo>();
+                var columns = db.GetCollectionByType<Column>();
                 columns.Delete(x => x.Id == columnId);
             });
         }
 
-        public Task DeleteIssue(int issueId)
+        public Task DeleteCard(int cardId)
         {
             return Task.Run(() =>
             {
-                var issues = db.GetCollectionByType<Issue>();
-                issues.Delete(x => x.Id == issueId);
+                var cards = db.GetCollectionByType<Card>();
+                cards.Delete(x => x.Id == cardId);
             });
         }
 
@@ -129,7 +129,7 @@ namespace Kamban.Repository.LiteDb
         {
             return Task.Run(() =>
             {
-                var boards = db.GetCollectionByType<BoardInfo>();
+                var boards = db.GetCollectionByType<Board>();
                 boards.Delete(x => x.Id == boardId);
             });
         }

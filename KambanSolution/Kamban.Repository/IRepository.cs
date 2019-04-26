@@ -5,25 +5,25 @@ namespace Kamban.Repository
 {
     public interface IRepository
     {
-        Task<Issue> CreateOrUpdateIssue(Issue issue);
-        Task<RowInfo> CreateOrUpdateRow(RowInfo row);
-        Task<ColumnInfo> CreateOrUpdateColumn(ColumnInfo column);        
-        Task<BoardInfo> CreateOrUpdateBoardInfo(BoardInfo info);
+        Task<Card> CreateOrUpdateCard(Card card);
+        Task<Row> CreateOrUpdateRow(Row row);
+        Task<Column> CreateOrUpdateColumn(Column column);        
+        Task<Board> CreateOrUpdateBoard(Board board);
 
-        Task<List<Issue>> GetAllIssues();
-        Task<List<RowInfo>> GetAllRows();
-        Task<List<ColumnInfo>> GetAllColumns();
-        Task<List<BoardInfo>> GetAllBoards();
+        Task<List<Card>> GetAllCards();
+        Task<List<Row>> GetAllRows();
+        Task<List<Column>> GetAllColumns();
+        Task<List<Board>> GetAllBoards();
 
-        Task<List<Issue>> GetIssues(int boardId);
-        Task<List<RowInfo>> GetRows(int boardId);
-        Task<List<ColumnInfo>> GetColumns(int boardId);
+        Task<List<Card>> GetCards(int boardId);
+        Task<List<Row>> GetRows(int boardId);
+        Task<List<Column>> GetColumns(int boardId);
 
-        Task<Issue> GetIssue(int issueId);
+        Task<Card> GetCard(int cardId);
 
         Task DeleteRow(int rowId);
         Task DeleteColumn(int columnId);
-        Task DeleteIssue(int issueId);
+        Task DeleteCard(int cardId);
         Task DeleteBoard(int boardId);
     }
 }

@@ -45,7 +45,7 @@ namespace Kamban.ViewModels
 
         public ReactiveCommand<Unit, Unit> NewFileCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> OpenFileCommand { get; private set; }
-        [Reactive] public ReactiveCommand<RecentViewModel, Unit> OpenRecentDbCommand { get; private set; }
+        [Reactive] public ReactiveCommand<RecentViewModel, Unit> OpenRecentBoxCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> ExportCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> PrintCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> ShowStartupCommand { get; private set; }
@@ -69,7 +69,7 @@ namespace Kamban.ViewModels
 
             initialized = false;
 
-            OpenRecentDbCommand = ReactiveCommand.Create<RecentViewModel>(async (rvm) =>
+            OpenRecentBoxCommand = ReactiveCommand.Create<RecentViewModel>(async (rvm) =>
             {
                 if (await OpenBoardView(rvm.Uri))
                     appConfig.UpdateRecent(rvm.Uri, rvm.Pinned);
@@ -100,7 +100,7 @@ namespace Kamban.ViewModels
                 .CreateFromTask<PublicBoardJson>(OpenPublicBoardCommandExecute);
 
             ExportCommand = ReactiveCommand.Create(() => 
-                this.shell.ShowView<ExportView>(), appModel.DbsCountMoreZero);
+                this.shell.ShowView<ExportView>(), appModel.Exist);
 
             PrintCommand = ReactiveCommand.Create(PrintCommandExecute,
                 shell.WhenAny(x => x.SelectedView, x => x.Value?.ViewModel is BoardEditViewModel));
@@ -196,17 +196,17 @@ namespace Kamban.ViewModels
             if (!file.Exists)
             {
                 appConfig.RemoveRecent(uri);
-                appModel.RemoveDb(uri);
+                appModel.Remove(uri);
 
                 await dialCoord.ShowMessageAsync(this, "Error", "File was deleted or moved");
                 return false;
             }
 
-            var db = await appModel.LoadDb(uri);
-            if (!db.Loaded)
+            var box = await appModel.Load(uri);
+            if (!box.Loaded)
             {
                 appConfig.RemoveRecent(uri);
-                appModel.RemoveDb(uri);
+                appModel.Remove(uri);
 
                 await dialCoord.ShowMessageAsync(this, "Error", "File was damaged");
                 return false;
@@ -217,7 +217,7 @@ namespace Kamban.ViewModels
             await Task.Delay(200);
 
             shell.ShowView<BoardView>(
-                viewRequest: new BoardViewRequest { ViewId = title, Db = db },
+                viewRequest: new BoardViewRequest { ViewId = title, Box = box },
                 options: new UiShowOptions { Title = title });
 
             return true;
@@ -283,11 +283,11 @@ namespace Kamban.ViewModels
             if (shell.SelectedView.ViewModel is BoardEditViewModel bvm)
             {
                 ((ShellEx)shell).PrintView<BoardForExportView>(
-                    bvm.Db.Boards.Items.Select(x =>
+                    bvm.Box.Boards.Items.Select(x =>
                             new BoardViewRequest
                             {
-                                ViewId = bvm.Db.Uri,
-                                Db = bvm.Db,
+                                ViewId = bvm.Box.Uri,
+                                Box = bvm.Box,
                                 Board = x
                             })
                         .Cast<ViewRequest>()

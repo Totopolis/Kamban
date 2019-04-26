@@ -17,12 +17,12 @@ namespace Kamban.Core
 {
     public interface IAppModel
     {
-        ReadOnlyObservableCollection<DbViewModel> Dbs { get; }
-        IObservable<bool> DbsCountMoreZero { get; }
+        ReadOnlyObservableCollection<BoxViewModel> Boxes { get; }
+        IObservable<bool> Exist { get; }
 
-        Task<DbViewModel> CreateDb(string uri);
-        Task<DbViewModel> LoadDb(string uri);
-        void RemoveDb(string uri);
+        Task<BoxViewModel> Create(string uri);
+        Task<BoxViewModel> Load(string uri);
+        void Remove(string uri);
 
         IProjectService GetProjectService(string uri);
     }
@@ -33,7 +33,7 @@ namespace Kamban.Core
         private readonly IMapper mapper;
         private readonly IMonik mon;
 
-        private readonly SourceList<DbViewModel> dbList;
+        private readonly SourceList<BoxViewModel> boxesList;
 
         public AppModel(IShell shell, IMapper mp, IMonik m)
         {
@@ -41,100 +41,100 @@ namespace Kamban.Core
             mapper = mp;
             mon = m;
 
-            dbList = new SourceList<DbViewModel>();
+            boxesList = new SourceList<BoxViewModel>();
 
-            dbList
+            boxesList
                 .Connect()
                 .AutoRefresh()
-                .Sort(SortExpressionComparer<DbViewModel>.Descending(x => x.LastEdit))
-                .Bind(out ReadOnlyObservableCollection<DbViewModel> temp)
+                .Sort(SortExpressionComparer<BoxViewModel>.Descending(x => x.LastEdit))
+                .Bind(out ReadOnlyObservableCollection<BoxViewModel> temp)
                 .Subscribe();
 
-            Dbs = temp;
+            Boxes = temp;
 
-            DbsCountMoreZero = dbList
+            Exist = boxesList
                 .Connect()
                 .AutoRefresh()
-                .Select(x => dbList.Count > 0);
+                .Select(x => boxesList.Count > 0);
 
             m.LogicVerbose("AppModel.ctor");
         }
 
-        public ReadOnlyObservableCollection<DbViewModel> Dbs { get; private set; }
-        public IObservable<bool> DbsCountMoreZero { get; private set; }
+        public ReadOnlyObservableCollection<BoxViewModel> Boxes { get; private set; }
+        public IObservable<bool> Exist { get; private set; }
 
-        public Task<DbViewModel> CreateDb(string uri)
+        public Task<BoxViewModel> Create(string uri)
         {
-            var db = dbList.Items.FirstOrDefault(x => x.Uri == uri);
-            if (db != null)
-                throw new Exception("Db already exists");
+            var box = boxesList.Items.FirstOrDefault(x => x.Uri == uri);
+            if (box != null)
+                throw new Exception("Already created");
 
             if (File.Exists(uri))
                 throw new Exception("File already exists");
 
-            db = new DbViewModel {Uri = uri, Loaded = true};
-            dbList.Add(db);
-            EnableAutoSaver(db);
+            box = new BoxViewModel {Uri = uri, Loaded = true};
+            boxesList.Add(box);
+            EnableAutoSaver(box);
 
-            return Task.FromResult(db);
+            return Task.FromResult(box);
         }
 
-        public async Task<DbViewModel> LoadDb(string uri)
+        public async Task<BoxViewModel> Load(string uri)
         {
-            var db = dbList.Items.FirstOrDefault(x => x.Uri == uri);
-            if (db == null)
+            var box = boxesList.Items.FirstOrDefault(x => x.Uri == uri);
+            if (box == null)
             {
-                db = new DbViewModel {Uri = uri};
+                box = new BoxViewModel {Uri = uri};
 
                 var fi = new FileInfo(uri);
 
                 if (!fi.Exists)
-                    return db;
+                    return box;
 
                 try
                 {
-                    db.Title = fi.Name;
-                    db.LastEdit = File.GetLastWriteTime(db.Uri);
-                    db.Path = fi.DirectoryName;
-                    db.SizeOf = SizeSuffix(fi.Length);
+                    box.Title = fi.Name;
+                    box.LastEdit = File.GetLastWriteTime(box.Uri);
+                    box.Path = fi.DirectoryName;
+                    box.SizeOf = SizeSuffix(fi.Length);
 
-                    var prj = GetProjectService(db.Uri);
+                    var prj = GetProjectService(box.Uri);
 
-                    var issuesTask = prj.Repository.GetAllIssues();
+                    var cardsTask = prj.Repository.GetAllCards();
                     var rowsTask = prj.Repository.GetAllRows();
                     var columnsTask = prj.Repository.GetAllColumns();
                     var boardsTask = prj.Repository.GetAllBoards();
 
-                    var issues = await issuesTask;
+                    var cards = await cardsTask;
                     var columns = await columnsTask;
                     var rows = await rowsTask;
                     var boards = await boardsTask;
 
-                    db.Cards.AddRange(issues.Select(x => mapper.Map<Issue, CardViewModel>(x)));
-                    db.Columns.AddRange(columns.Select(x => mapper.Map<ColumnInfo, ColumnViewModel>(x)));
-                    db.Rows.AddRange(rows.Select(x => mapper.Map<RowInfo, RowViewModel>(x)));
-                    db.Boards.AddRange(boards.Select(x => mapper.Map<BoardInfo, BoardViewModel>(x)));
+                    box.Cards.AddRange(cards.Select(x => mapper.Map<Card, CardViewModel>(x)));
+                    box.Columns.AddRange(columns.Select(x => mapper.Map<Column, ColumnViewModel>(x)));
+                    box.Rows.AddRange(rows.Select(x => mapper.Map<Row, RowViewModel>(x)));
+                    box.Boards.AddRange(boards.Select(x => mapper.Map<Board, BoardViewModel>(x)));
 
-                    db.Loaded = true;
+                    box.Loaded = true;
                 }
                 // Skip broken file
                 catch
                 {
                 }
 
-                dbList.Add(db);
-                EnableAutoSaver(db);
+                boxesList.Add(box);
+                EnableAutoSaver(box);
             }
 
-            return db;
+            return box;
         }
 
-        public void RemoveDb(string uri)
+        public void Remove(string uri)
         {
-            var db = dbList.Items.FirstOrDefault(x => x.Uri == uri);
+            var box = boxesList.Items.FirstOrDefault(x => x.Uri == uri);
 
-            if (db != null)
-                dbList.Remove(db);
+            if (box != null)
+                boxesList.Remove(box);
         }
 
         // TODO: remove ProjectService, use Repository directly
@@ -148,24 +148,24 @@ namespace Kamban.Core
             return scope;
         }
 
-        private void EnableAutoSaver(DbViewModel db)
+        private void EnableAutoSaver(BoxViewModel box)
         {
-            var prj = GetProjectService(db.Uri);
+            var prj = GetProjectService(box.Uri);
 
             ///////////////////
             // Boards AutoSaver
             ///////////////////
-            db.Boards
+            box.Boards
                 .Connect()
                 .WhenAnyPropertyChanged("Name", "Modified")
                 .Subscribe(async bvm =>
                 {
                     mon.LogicVerbose($"AppModel.Boards.ItemChanged {bvm.Id}::{bvm.Name}::{bvm.Modified}");
-                    var bi = mapper.Map<BoardViewModel, BoardInfo>(bvm);
-                    await prj.Repository.CreateOrUpdateBoardInfo(bi);
+                    var bi = mapper.Map<BoardViewModel, Board>(bvm);
+                    await prj.Repository.CreateOrUpdateBoard(bi);
                 });
 
-            db.Boards
+            box.Boards
                 .Connect()
                 .WhereReasonsAre(ListChangeReason.Add)
                 .Subscribe(x => x
@@ -175,13 +175,13 @@ namespace Kamban.Core
                     {
                         mon.LogicVerbose($"AppModel.Board add {bvm.Id}::{bvm.Name}");
 
-                        var bi = mapper.Map<BoardViewModel, BoardInfo>(bvm);
-                        await prj.Repository.CreateOrUpdateBoardInfo(bi);
+                        var bi = mapper.Map<BoardViewModel, Board>(bvm);
+                        await prj.Repository.CreateOrUpdateBoard(bi);
 
                         bvm.Id = bi.Id;
                     }));
 
-            db.Boards
+            box.Boards
                 .Connect()
                 .WhereReasonsAre(ListChangeReason.Remove)
                 .Subscribe(x => x
@@ -197,18 +197,18 @@ namespace Kamban.Core
             ////////////////////
             // Columns AutoSaver
             ////////////////////
-            db.Columns
+            box.Columns
                 .Connect()
                 //.AutoRefresh()
                 .WhenAnyPropertyChanged("Name", "Order", "Size", "BoardId")
                 .Subscribe(async cvm =>
                 {
                     mon.LogicVerbose($"AppModel.Columns.ItemChanged {cvm.Id}::{cvm.Name}::{cvm.Order}");
-                    var ci = mapper.Map<ColumnViewModel, ColumnInfo>(cvm);
+                    var ci = mapper.Map<ColumnViewModel, Column>(cvm);
                     await prj.Repository.CreateOrUpdateColumn(ci);
                 });
 
-            db.Columns
+            box.Columns
                 .Connect()
                 //.AutoRefresh()
                 .WhereReasonsAre(ListChangeReason.Add)
@@ -219,13 +219,13 @@ namespace Kamban.Core
                     {
                         mon.LogicVerbose($"AppModel.Column add {cvm.Id}::{cvm.Name}::{cvm.Order}");
 
-                        var ci = mapper.Map<ColumnViewModel, ColumnInfo>(cvm);
+                        var ci = mapper.Map<ColumnViewModel, Column>(cvm);
                         await prj.Repository.CreateOrUpdateColumn(ci);
 
                         cvm.Id = ci.Id;
                     }));
 
-            db.Columns
+            box.Columns
                 .Connect()
                 //.AutoRefresh()
                 .WhereReasonsAre(ListChangeReason.Remove)
@@ -237,18 +237,18 @@ namespace Kamban.Core
             /////////////////
             // Rows AutoSaver
             /////////////////
-            db.Rows
+            box.Rows
                 .Connect()
                 //.AutoRefresh()
                 .WhenAnyPropertyChanged("Name", "Order", "Size", "BoardId")
                 .Subscribe(async rvm =>
                 {
                     mon.LogicVerbose($"AppModel.Rows.ItemChanged {rvm.Id}::{rvm.Name}::{rvm.Order}");
-                    var row = mapper.Map<RowViewModel, RowInfo>(rvm);
+                    var row = mapper.Map<RowViewModel, Row>(rvm);
                     await prj.Repository.CreateOrUpdateRow(row);
                 });
 
-            db.Rows
+            box.Rows
                 .Connect()
                 //.AutoRefresh()
                 .WhereReasonsAre(ListChangeReason.Add)
@@ -259,13 +259,13 @@ namespace Kamban.Core
                     {
                         mon.LogicVerbose($"AppModel.Row add {rvm.Id}::{rvm.Name}::{rvm.Order}");
 
-                        var ri = mapper.Map<RowViewModel, RowInfo>(rvm);
+                        var ri = mapper.Map<RowViewModel, Row>(rvm);
                         await prj.Repository.CreateOrUpdateRow(ri);
 
                         rvm.Id = ri.Id;
                     }));
 
-            db.Rows
+            box.Rows
                 .Connect()
                 //.AutoRefresh()
                 .WhereReasonsAre(ListChangeReason.Remove)
@@ -277,18 +277,18 @@ namespace Kamban.Core
             //////////////////
             // Cards AutoSaver
             //////////////////
-            db.Cards
+            box.Cards
                 .Connect()
                 .WhenAnyPropertyChanged("Header", "Color", "ColumnDeterminant", "RowDeterminant",
                     "Order", "Body", "Modified", "BoardId")
                 .Subscribe(async cvm =>
                 {
                     mon.LogicVerbose("AppModel.Cards.WhenAnyPropertyChanged");
-                    var iss = mapper.Map<CardViewModel, Issue>(cvm);
-                    await prj.Repository.CreateOrUpdateIssue(iss);
+                    var iss = mapper.Map<CardViewModel, Card>(cvm);
+                    await prj.Repository.CreateOrUpdateCard(iss);
                 });
 
-            db.Cards
+            box.Cards
                 .Connect()
                 .WhereReasonsAre(ListChangeReason.Add)
                 .Subscribe(x => x
@@ -297,13 +297,13 @@ namespace Kamban.Core
                     .ForEach(async cvm =>
                     {
                         mon.LogicVerbose("AppModel.Cards add");
-                        var iss = mapper.Map<CardViewModel, Issue>(cvm);
-                        await prj.Repository.CreateOrUpdateIssue(iss);
+                        var iss = mapper.Map<CardViewModel, Card>(cvm);
+                        await prj.Repository.CreateOrUpdateCard(iss);
 
                         cvm.Id = iss.Id;
                     }));
 
-            db.Cards
+            box.Cards
                 .Connect()
                 .WhereReasonsAre(ListChangeReason.Remove)
                 .Subscribe(x => x
@@ -312,7 +312,7 @@ namespace Kamban.Core
                     .ForEach(async cvm =>
                     {
                         mon.LogicVerbose("AppModel.Cards remove");
-                        await prj.Repository.DeleteIssue(cvm.Id);
+                        await prj.Repository.DeleteCard(cvm.Id);
                     }));
         }
 

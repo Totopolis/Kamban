@@ -33,7 +33,7 @@ namespace Kamban.ViewModels
 
         private ReadOnlyObservableCollection<CardViewModel> cardList;
 
-        public DbViewModel Db { get; set; }
+        public BoxViewModel Box { get; set; }
 
         [Reactive] public bool EnableMatrix { get; set; }
         [Reactive] public IMonik Monik { get; set; }
@@ -45,16 +45,16 @@ namespace Kamban.ViewModels
 
         [Reactive] public CardsObservableType CardsObservable { get; set; }
 
-        [Reactive] public ICard IssueOfContextMenu { get; set; }
+        [Reactive] public ICard CardOfContextMenu { get; set; }
 
         public ReactiveCommand<ICard, Unit> CardClickCommand { get; set; }
         public ReactiveCommand<Unit, Unit> NormalizeGridCommand { get; set; }
 
-        public ReactiveCommand<ICard, Unit> MoveIssueCommand { get; set; }
-        public ReactiveCommand<ICard, Unit> DeleteIssueCommand { get; set; }
+        public ReactiveCommand<ICard, Unit> MoveCardCommand { get; set; }
+        public ReactiveCommand<ICard, Unit> DeleteCardCommand { get; set; }
 
-        [Reactive] public IssueViewModel IssueFlyout { get; set; }
-        [Reactive] public MoveViewModel MoveFlyout { get; set; }
+        [Reactive] public CardEditViewModel CardEditFlyout { get; set; }
+        [Reactive] public CardMoveViewModel CardMoveFlyout { get; set; }
 
         [Reactive] public object HeadOfContextMenu { get; set; }
 
@@ -86,7 +86,7 @@ namespace Kamban.ViewModels
             mapper = mp;
             appModel = am;
 
-            mon.LogicVerbose("BoardViewModel.ctor started");
+            mon.LogicVerbose($"{nameof(BoardEditViewModel)}.ctor started");
 
             EnableMatrix = false;
             Monik = mon;
@@ -97,15 +97,15 @@ namespace Kamban.ViewModels
             CardsObservable = null;
 
             BoardsInFile = null;
-            IssueFlyout = new IssueViewModel();
-            MoveFlyout = new MoveViewModel(mapper);
+            CardEditFlyout = new CardEditViewModel();
+            CardMoveFlyout = new CardMoveViewModel(mapper);
 
-            CardClickCommand = ReactiveCommand.Create<ICard>(c => ShowFlyout(IssueFlyout, c));
+            CardClickCommand = ReactiveCommand.Create<ICard>(c => ShowFlyout(CardEditFlyout, c));
             NormalizeGridCommand = ReactiveCommand.Create(() => { });
 
-            MoveIssueCommand = ReactiveCommand.Create<ICard>(c => ShowFlyout(MoveFlyout, c));
+            MoveCardCommand = ReactiveCommand.Create<ICard>(c => ShowFlyout(CardMoveFlyout, c));
 
-            DeleteIssueCommand = ReactiveCommand
+            DeleteCardCommand = ReactiveCommand
                 .Create<ICard>(async card => await DeleteCardCommandExecuteAsync(card));
 
             HeadRenameCommand = ReactiveCommand
@@ -120,10 +120,10 @@ namespace Kamban.ViewModels
             InsertHeadAfterCommand = ReactiveCommand
                 .Create<IDim>(async head => await InsertHeadAfterCommandExecute(head));
 
-            CreateTiketCommand = ReactiveCommand.Create(() => ShowFlyout(IssueFlyout, null));
+            CreateTiketCommand = ReactiveCommand.Create(() => ShowFlyout(CardEditFlyout, null));
 
             CellDoubleClickCommand = ReactiveCommand.Create<(object column, object row)>(
-                (tup) => ShowFlyout(IssueFlyout, null, (int)tup.column, (int)tup.row));
+                (tup) => ShowFlyout(CardEditFlyout, null, (int)tup.column, (int)tup.row));
 
             CreateColumnCommand = ReactiveCommand.CreateFromTask(() =>
                 InsertHeadAfterCommandExecute(Columns.Last()));
@@ -135,8 +135,8 @@ namespace Kamban.ViewModels
             {
                 this.shell.ShowView<WizardView>(new WizardViewRequest
                 {
-                    ViewId = $"Creating new board in {Db.Uri}",
-                    Uri = Db.Uri
+                    ViewId = $"Creating new board in {Box.Uri}",
+                    Uri = Box.Uri
                 });
             });
 
@@ -145,10 +145,10 @@ namespace Kamban.ViewModels
             SelectBoardCommand = ReactiveCommand
                 .Create((object mi) =>
                 {
-                    mon.LogicVerbose("BoardViewModel.SelectBoardCommand executed");
+                    mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(SelectBoardCommand)} executed");
 
                     string name = ((MenuItem)mi).Header as string;
-                    CurrentBoard = BoardsInFile.Where(x => x.Name == name).First();
+                    CurrentBoard = BoardsInFile.First(x => x.Name == name);
                 });
 
             this.ObservableForProperty(w => w.CurrentBoard)
@@ -156,29 +156,30 @@ namespace Kamban.ViewModels
                 .ObserveOnDispatcher()
                 .Subscribe(_ => OnBoardChanged());
 
-            this.ObservableForProperty(w => w.IssueFlyout.IsOpened)
-                .Where(x => x.Value == false && IssueFlyout.Result == IssueEditResult.Created)
+            this.ObservableForProperty(w => w.CardEditFlyout.IsOpened)
+                .Where(x => x.Value == false && CardEditFlyout.Result == CardEditResult.Created)
                 .Subscribe(_ =>
                 {
-                    mon.LogicVerbose("BoardViewModel.IssueFlyout closed and issue need create");
+                    mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(CardEditFlyout)} closed and card will be created");
 
-                    var card = IssueFlyout.Card;
+                    var card = CardEditFlyout.Card;
                     var targetCards = cardList
                         .Where(x => x.ColumnDeterminant == card.ColumnDeterminant
-                            && x.RowDeterminant == card.RowDeterminant);
+                            && x.RowDeterminant == card.RowDeterminant)
+                        .ToList();
 
-                    card.Order = targetCards.Count() == 0 ? 0 :
+                    card.Order = !targetCards.Any() ? 0 :
                         targetCards.Max(x => x.Order) + 10;
 
-                    Db.Cards.Add(card);
+                    Box.Cards.Add(card);
                 });
 
-            mon.LogicVerbose("BoardViewModel.ctor finished");
+            mon.LogicVerbose($"{nameof(BoardEditViewModel)}.ctor finished");
         }
 
         private void OnBoardChanged()
         {
-            mon.LogicVerbose("BoardViewModel.CurrentBoard changed");
+            mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(CurrentBoard)} changed");
 
             BoardsInFile.ToList().ForEach(x => x.IsChecked = false);
 
@@ -186,7 +187,7 @@ namespace Kamban.ViewModels
 
             EnableMatrix = false;
 
-            Db.Columns
+            Box.Columns
                 .Connect()
                 .AutoRefresh()
                 .Filter(x => x.BoardId == CurrentBoard.Id)
@@ -196,7 +197,7 @@ namespace Kamban.ViewModels
 
             Columns = temp3;
 
-            Db.Rows
+            Box.Rows
                 .Connect()
                 .AutoRefresh()
                 .Filter(x => x.BoardId == CurrentBoard.Id)
@@ -207,15 +208,15 @@ namespace Kamban.ViewModels
             Rows = temp4;
 
             Title = CurrentBoard.Name;
-            FullTitle = Db.Uri;
+            FullTitle = Box.Uri;
 
-            CardsObservable = Db.Cards
+            CardsObservable = Box.Cards
                 .Connect()
                 .AutoRefresh()
                 .Filter(x => x.BoardId == CurrentBoard.Id)
                 .Transform(x => x as ICard);
 
-            Db.Cards
+            Box.Cards
                 .Connect()
                 .AutoRefresh()
                 .Filter(x => x.BoardId == CurrentBoard.Id)
@@ -233,20 +234,20 @@ namespace Kamban.ViewModels
 
         private void ShowFlyout(IInitializableViewModel vm, ICard cvm, int column = 0, int row = 0)
         {
-            vm.Initialize(new IssueViewRequest
+            vm.Initialize(new CardViewRequest
             {
-                Db = this.Db,
+                Box = this.Box,
                 ColumnId = column,
                 RowId = row,
                 Card = cvm as CardViewModel,
-                BoardVM = this,
+                BoardVm = this,
                 Board = CurrentBoard
             });
         }
 
         public void Initialize(ViewRequest viewRequest)
         {
-            mon.LogicVerbose("BoardViewModel.Initialize started");
+            mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(Initialize)} started");
 
             shell.AddVMCommand("Edit", "Add Tiket", "CreateTiketCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.W);
@@ -271,9 +272,9 @@ namespace Kamban.ViewModels
 
             var request = viewRequest as BoardViewRequest;
 
-            Db = request.Db;
+            Box = request.Box;
 
-            DeleteBoardCommand = ReactiveCommand.CreateFromTask(DeleteBoardCommandExecute, Db.BoardsCountMoreOne);
+            DeleteBoardCommand = ReactiveCommand.CreateFromTask(DeleteBoardCommandExecute, Box.BoardsCountMoreOne);
 
             PrevBoardCommand = ReactiveCommand.Create(() =>
             {
@@ -282,7 +283,7 @@ namespace Kamban.ViewModels
                 CurrentBoard = indx > 0 ?
                     BoardsInFile[indx - 1] :
                     BoardsInFile[BoardsInFile.Count - 1];
-            }, Db.BoardsCountMoreOne);
+            }, Box.BoardsCountMoreOne);
 
             NextBoardCommand = ReactiveCommand.Create(() =>
             {
@@ -291,9 +292,9 @@ namespace Kamban.ViewModels
                 CurrentBoard = indx < BoardsInFile.Count - 1 ?
                     BoardsInFile[indx + 1] :
                     BoardsInFile[0];
-            }, Db.BoardsCountMoreOne);
+            }, Box.BoardsCountMoreOne);
 
-            Db.Boards
+            Box.Boards
                 .Connect()
                 .AutoRefresh()
                 .Sort(SortExpressionComparer<BoardViewModel>.Ascending(t => t.Created))
@@ -306,29 +307,29 @@ namespace Kamban.ViewModels
                 .ToList()
                 .ForEach(x => x.MenuCommand = shell.AddInstanceCommand("Boards", x.Name, "SelectBoardCommand", this));
 
-            Db.Boards
+            Box.Boards
                 .Connect()
                 .WhereReasonsAre(ListChangeReason.Add)
                 .Select(x => x.Select(q => q.Item.Current).First())
                 .Subscribe(bvm => bvm.MenuCommand = shell.AddInstanceCommand("Boards", bvm.Name, "SelectBoardCommand", this));
 
-            Db.Boards
+            Box.Boards
                 .Connect()
                 .WhereReasonsAre(ListChangeReason.Remove)
                 .Select(x => x.Select(q => q.Item.Current).First())
                 .Subscribe(bvm => shell.RemoveCommand(bvm.MenuCommand));
 
-            mon.LogicVerbose("BoardViewModel.Initialize finished");
+            mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(Initialize)} finished");
         }
 
         public void Activate(ViewRequest viewRequest)
         {
-            mon.LogicVerbose("BoardViewModel.Activate started");
+            mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(Activate)} started");
 
             var request = viewRequest as BoardViewRequest;
-            CurrentBoard = request.Board ?? BoardsInFile.First();
+            CurrentBoard = request?.Board ?? BoardsInFile.First();
 
-            mon.LogicVerbose("BoardViewModel.Activate finished");
+            mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(Activate)} finished");
         }
     }//end of class
 }

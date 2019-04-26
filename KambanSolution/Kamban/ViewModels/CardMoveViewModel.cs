@@ -1,28 +1,24 @@
 ﻿using AutoMapper;
 using DynamicData;
-using Kamban.MatrixControl;
 using Kamban.Model;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using ReactiveUI.Legacy;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
 
 namespace Kamban.ViewModels
 {
-    public class MoveViewModel : ViewModelBase, IInitializableViewModel
+    public class CardMoveViewModel : ViewModelBase, IInitializableViewModel
     {
         private readonly IMapper mapper;
 
-        private DbViewModel db;
+        private BoxViewModel box;
         private CardViewModel card;
 
         [Reactive] public Brush Background { get; set; }
@@ -42,7 +38,7 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> CopyToCommand { get; set; }
         public ReactiveCommand<Unit, Unit> MoveToCommand { get; set; }
 
-        public MoveViewModel(IMapper mp)
+        public CardMoveViewModel(IMapper mp)
         {
             mapper = mp;
 
@@ -69,11 +65,11 @@ namespace Kamban.ViewModels
                 .Where(x => x != null)
                 .Subscribe(_ =>
                 {
-                    AvailableColumns = db.Columns.Items
+                    AvailableColumns = box.Columns.Items
                         .Where(x => x.BoardId == SelectedBoard.Id)
                         .ToList();
 
-                    AvailableRows = db.Rows.Items
+                    AvailableRows = box.Rows.Items
                         .Where(x => x.BoardId == SelectedBoard.Id)
                         .ToList();
 
@@ -99,7 +95,7 @@ namespace Kamban.ViewModels
             };
 
             if (card.BoardId == SelectedBoard.Id)
-                db.Cards.Add(copyCard);
+                box.Cards.Add(copyCard);
 
             IsOpened = false;
         }
@@ -120,14 +116,14 @@ namespace Kamban.ViewModels
 
         public void Initialize(ViewRequest viewRequest)
         {
-            var request = viewRequest as IssueViewRequest;
+            var request = viewRequest as CardViewRequest;
             if (request == null)
                 return;
 
-            db = request.Db;
+            box = request.Box;
             card = request.Card;
 
-            AvailableBoards = db.Boards.Items.ToList();
+            AvailableBoards = box.Boards.Items.ToList();
             SelectedBoard = AvailableBoards.First();
 
             var str = request.Card.Header;
@@ -136,7 +132,7 @@ namespace Kamban.ViewModels
                 request.Card.Header.Substring(0, maxLen) +
                 (str.Length > 22 ? "..." : "") + "\"";
 
-            Title = $"Move issue {card.Header} to";
+            Title = $"Move card {card.Header} to";
             IsOpened = true;
         }
     }//emd of classs

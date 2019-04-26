@@ -1,6 +1,6 @@
 ﻿namespace Kamban.Repository
 {
-    public class RowInfo
+    public class Column
     {
         public int Id { get; set; }
         public string Name { get; set; }

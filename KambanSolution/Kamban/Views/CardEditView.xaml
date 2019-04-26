@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Kamban.Views.IssueView"
+﻿<UserControl x:Class="Kamban.Views.CardEditView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -36,7 +36,7 @@
             FontWeight="Bold"
             FontSize="20"
             Text="{Binding Head,UpdateSourceTrigger=PropertyChanged}" 
-            mah:TextBoxHelper.Watermark="Issue name..."
+            mah:TextBoxHelper.Watermark="Name..."
             mah:TextBoxHelper.ClearTextButton="True"
             AcceptsReturn="True">
             <TextBox.InputBindings>
