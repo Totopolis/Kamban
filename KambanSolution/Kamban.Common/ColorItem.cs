@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 using System.Windows.Media;
 
 namespace Kamban.Common
@@ -42,6 +43,13 @@ namespace Kamban.Common
         }
 
         public static string ToColorName(string systemName)
+        {
+            return Application.Current.Dispatcher.CheckAccess()
+                ? ToColorNameInternal(systemName)
+                : Application.Current.Dispatcher.Invoke(() => ToColorNameInternal(systemName));
+        }
+
+        private static string ToColorNameInternal(string systemName)
         {
             return Colors.Values
                 .FirstOrDefault(x => x.SystemName == systemName)?

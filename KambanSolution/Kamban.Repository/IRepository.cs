@@ -1,13 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Kamban.Repository
 {
-    public interface IRepository
+    public interface IRepository : IDisposable
     {
         Task<Card> CreateOrUpdateCard(Card card);
         Task<Row> CreateOrUpdateRow(Row row);
-        Task<Column> CreateOrUpdateColumn(Column column);        
+        Task<Column> CreateOrUpdateColumn(Column column);
         Task<Board> CreateOrUpdateBoard(Board board);
 
         Task<List<Card>> GetAllCards();

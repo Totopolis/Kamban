@@ -1,15 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Documents;
-using System.Windows.Forms;
-using DynamicData;
+﻿using DynamicData;
 using Kamban.Core;
 using Kamban.Export;
 using Kamban.Export.Options;
@@ -20,6 +9,17 @@ using MahApps.Metro.Controls.Dialogs;
 using PdfSharp;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Documents;
+using System.Windows.Forms;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
 
@@ -174,7 +174,7 @@ namespace Kamban.ViewModels
             }
 
             // 2. export
-            DoExportForNeededFormats(jb, fileName);
+            await DoExportForNeededFormats(jb, fileName);
         }
 
         private async Task DoExportSplit(string fileName)
@@ -195,7 +195,7 @@ namespace Kamban.ViewModels
                 jb.CardList.AddRange(cards);
 
                 // 2. export
-                DoExportForNeededFormats(jb, fileName + "_" + brd.Name);
+                await DoExportForNeededFormats(jb, fileName + "_" + brd.Name);
             }
         }
 
@@ -211,16 +211,17 @@ namespace Kamban.ViewModels
             return boardsAll.Where(x => selectedBoardIds.Contains(x.Id));
         }
 
-        private void DoExportForNeededFormats(BoxToExport box, string fileName)
+        private async Task DoExportForNeededFormats(BoxToExport box, string fileName)
         {
+            var tasks = new List<Task>();
             if (ExportJson)
-                export.ToJson(box, fileName);
+                tasks.Add(export.ToJson(box, fileName));
 
             if (ExportKamban)
-                export.ToKamban(box, fileName);
+                tasks.Add(export.ToKamban(box, fileName));
 
             if (ExportXlsx)
-                export.ToXlsx(box, fileName);
+                tasks.Add(export.ToXlsx(box, fileName));
 
             if (ExportPdf)
             {
@@ -236,8 +237,11 @@ namespace Kamban.ViewModels
                         size, PdfOptions.ScaleOptions);
                 }
 
-                export.ToPdf(box, RenderToXps, fileName, PdfOptions);
+                tasks.Add(export.ToPdf(box, RenderToXps, fileName, PdfOptions));
             }
+
+            if (tasks.Any())
+                await Task.WhenAll(tasks.ToArray());
         }
 
         private void SelectTargetFolderCommandExecute()

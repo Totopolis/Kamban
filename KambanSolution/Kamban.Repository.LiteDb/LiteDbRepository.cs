@@ -133,5 +133,10 @@ namespace Kamban.Repository.LiteDb
                 boards.Delete(x => x.Id == boardId);
             });
         }
+
+        public void Dispose()
+        {
+            db?.Dispose();
+        }
     } //end of class
 }
