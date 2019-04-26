@@ -1,15 +1,4 @@
-﻿using DynamicData;
-using Kamban.Core;
-using Kamban.Export;
-using Kamban.Export.Options;
-using Kamban.Repository;
-using Kamban.ViewModels.Core;
-using Kamban.Views;
-using MahApps.Metro.Controls.Dialogs;
-using PdfSharp;
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -20,6 +9,18 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Forms;
+using AutoMapper;
+using DynamicData;
+using Kamban.Core;
+using Kamban.Export;
+using Kamban.Export.Options;
+using Kamban.Repository;
+using Kamban.ViewModels.Core;
+using Kamban.Views;
+using MahApps.Metro.Controls.Dialogs;
+using PdfSharp;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
 
@@ -36,8 +37,8 @@ namespace Kamban.ViewModels
         private readonly IShell shell;
         private readonly IAppModel appModel;
         private readonly IDialogCoordinator dialCoord;
+        private readonly IMapper mapper;
         private readonly IExportService export;
-        private IProjectService prjService;
         private SourceList<BoardToExport> boards;
 
         [Reactive] public ReadOnlyObservableCollection<BoxViewModel> AvailableBoxes { get; set; }
@@ -64,11 +65,13 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> ExportCommand { get; set; }
         public ReactiveCommand<Unit, Unit> CancelCommand { get; set; }
 
-        public ExportViewModel(IShell sh, IAppModel am, IDialogCoordinator dc, IAppConfig cfg, IExportService ex)
+        public ExportViewModel(IShell sh, IAppModel am, IDialogCoordinator dc, IAppConfig cfg, IMapper mapper,
+            IExportService ex)
         {
             shell = sh;
             appModel = am;
             dialCoord = dc;
+            this.mapper = mapper;
             export = ex;
 
             AvailableBoxes = appModel.Boxes;
@@ -139,8 +142,6 @@ namespace Kamban.ViewModels
                 return;
             }
 
-            prjService = appModel.GetProjectService(SelectedBox.Uri);
-
             string fileName = TargetFolder + "\\" + TargetFile;
             if (DatePostfix)
                 fileName += "_" + DateTime.Now.ToString("yyyyMMdd-hhmmss");
@@ -155,51 +156,33 @@ namespace Kamban.ViewModels
 
         private async Task DoExportWhole(string fileName)
         {
-            var boardsSelected = await GetBoardsSelectedToExport();
-
-            // 1. prepare database
             var jb = new BoxToExport();
-            jb.BoardList.AddRange(boardsSelected);
+            jb.BoardList.AddRange(GetBoardsSelectedToExport());
+            jb.CardList.AddRange(mapper.Map<IEnumerable<Card>>(SelectedBox.Cards.Items));
+            jb.RowList.AddRange(mapper.Map<IEnumerable<Row>>(SelectedBox.Rows.Items));
+            jb.ColumnList.AddRange(mapper.Map<IEnumerable<Column>>(SelectedBox.Columns.Items));
 
-            foreach (var brd in jb.BoardList)
-            {
-                var columns = await prjService.Repository.GetColumns(brd.Id);
-                jb.ColumnList.AddRange(columns);
-
-                var rows = await prjService.Repository.GetRows(brd.Id);
-                jb.RowList.AddRange(rows);
-
-                var cards = await prjService.Repository.GetCards(brd.Id);
-                jb.CardList.AddRange(cards);
-            }
-
-            // 2. export
             await DoExportForNeededFormats(jb, fileName);
         }
 
         private async Task DoExportSplit(string fileName)
         {
-            var boardsSelected = await GetBoardsSelectedToExport();
-
-            foreach (var brd in boardsSelected)
+            foreach (var brd in GetBoardsSelectedToExport())
             {
-                // 1. prepare database
                 var jb = new BoxToExport();
                 jb.BoardList.Add(brd);
+                jb.CardList.AddRange(
+                    mapper.Map<IEnumerable<Card>>(SelectedBox.Cards.Items.Where(x => x.BoardId == brd.Id)));
+                jb.RowList.AddRange(
+                    mapper.Map<IEnumerable<Row>>(SelectedBox.Rows.Items.Where(x => x.BoardId == brd.Id)));
+                jb.ColumnList.AddRange(
+                    mapper.Map<IEnumerable<Column>>(SelectedBox.Columns.Items.Where(x => x.BoardId == brd.Id)));
 
-                var columns = await prjService.Repository.GetColumns(brd.Id);
-                jb.ColumnList.AddRange(columns);
-                var rows = await prjService.Repository.GetRows(brd.Id);
-                jb.RowList.AddRange(rows);
-                var cards = await prjService.Repository.GetCards(brd.Id);
-                jb.CardList.AddRange(cards);
-
-                // 2. export
                 await DoExportForNeededFormats(jb, fileName + "_" + brd.Name);
             }
         }
 
-        private async Task<IEnumerable<Board>> GetBoardsSelectedToExport()
+        private IEnumerable<Board> GetBoardsSelectedToExport()
         {
             var selectedBoardIds = new HashSet<int>(
                 AvailableBoards
@@ -207,8 +190,8 @@ namespace Kamban.ViewModels
                     .Select(x => x.Board.Id)
             );
 
-            var boardsAll = await prjService.Repository.GetAllBoards();
-            return boardsAll.Where(x => selectedBoardIds.Contains(x.Id));
+            return mapper.Map<IEnumerable<Board>>(SelectedBox.Boards.Items)
+                .Where(x => selectedBoardIds.Contains(x.Id));
         }
 
         private async Task DoExportForNeededFormats(BoxToExport box, string fileName)
@@ -228,7 +211,7 @@ namespace Kamban.ViewModels
                 FixedDocument RenderToXps(Size size)
                 {
                     var selectedBoardIds = new HashSet<int>(box.BoardList.Select(x => x.Id));
-                    return ((ShellEx) shell).ViewsToDocument<BoardForExportView>(
+                    return ((ShellEx) shell).ViewsToDocument<BoardEditForExportView>(
                         SelectedBox.Boards.Items
                             .Where(x => selectedBoardIds.Contains(x.Id))
                             .Select(x => new BoardViewRequest {ViewId = SelectedBox.Uri, Box = SelectedBox, Board = x})

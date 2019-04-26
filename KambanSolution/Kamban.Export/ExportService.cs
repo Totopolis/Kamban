@@ -1,10 +1,4 @@
-﻿using Kamban.Common;
-using Kamban.Export.Options;
-using Kamban.Repository.LiteDb;
-using Newtonsoft.Json;
-using OfficeOpenXml;
-using PdfSharp.Pdf;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,6 +6,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Xps.Packaging;
+using Kamban.Common;
+using Kamban.Export.Options;
+using Kamban.Repository.LiteDb;
+using Newtonsoft.Json;
+using OfficeOpenXml;
+using PdfSharp.Pdf;
 
 namespace Kamban.Export
 {

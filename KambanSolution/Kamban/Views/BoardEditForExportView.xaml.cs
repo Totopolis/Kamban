@@ -7,9 +7,9 @@ using Ui.Wpf.Common.ViewModels;
 
 namespace Kamban.Views
 {
-    public partial class BoardForExportView : IView, IStretchedSizeView
+    public partial class BoardEditForExportView : IView, IStretchedSizeView
     {
-        public BoardForExportView(BoardEditForExportViewModel localBoardViewModel)
+        public BoardEditForExportView(BoardEditForExportViewModel localBoardViewModel)
         {
             InitializeComponent();
             ViewModel = localBoardViewModel;

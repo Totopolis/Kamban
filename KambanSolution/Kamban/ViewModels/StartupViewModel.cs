@@ -99,7 +99,7 @@ namespace Kamban.ViewModels
                 .CreateFromTask<PublicBoardJson>(OpenPublicBoardCommandExecute);
 
             ExportCommand = ReactiveCommand.Create(() => 
-                this.shell.ShowView<ExportView>(), appModel.Exist);
+                this.shell.ShowView<ExportView>());
 
             PrintCommand = ReactiveCommand.Create(PrintCommandExecute,
                 shell.WhenAny(x => x.SelectedView, x => x.Value?.ViewModel is BoardEditViewModel));
@@ -281,7 +281,7 @@ namespace Kamban.ViewModels
         {
             if (shell.SelectedView.ViewModel is BoardEditViewModel bvm)
             {
-                ((ShellEx)shell).PrintView<BoardForExportView>(
+                ((ShellEx)shell).PrintView<BoardEditForExportView>(
                     bvm.Box.Boards.Items.Select(x =>
                             new BoardViewRequest
                             {

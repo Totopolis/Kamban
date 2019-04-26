@@ -40,10 +40,6 @@ namespace Kamban
                 .As<IDockWindow>();
 
             builder
-                .RegisterType<ProjectService>()
-                .As<IProjectService>();
-
-            builder
                 .RegisterType<ExportService>()
                 .As<IExportService>();
 
@@ -69,10 +65,12 @@ namespace Kamban
                 .As<IMapper>()
                 .SingleInstance();
 
+            builder.RegisterType<BoxViewModel>();
+
             ConfigureSingleView<StartupViewModel, StartupView>(builder);
             ConfigureView<WizardViewModel, WizardView>(builder);
             ConfigureView<BoardEditViewModel, BoardView>(builder);
-            ConfigureView<BoardEditForExportViewModel, BoardForExportView>(builder);
+            ConfigureView<BoardEditForExportViewModel, BoardEditForExportView>(builder);
             ConfigureView<ExportViewModel, ExportView>(builder);
 
             return builder.Build();
