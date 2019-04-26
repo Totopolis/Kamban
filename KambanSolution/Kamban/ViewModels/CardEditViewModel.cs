@@ -1,16 +1,16 @@
-﻿using DynamicData;
-using Kamban.Common;
-using Kamban.Model;
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Windows.Media;
+using DynamicData;
+using Kamban.Common;
+using Kamban.ViewModels.Core;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
-using Brush = System.Windows.Media.Brush;
 
 namespace Kamban.ViewModels
 {

@@ -1,5 +1,5 @@
-﻿using Kamban.MatrixControl;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using Kamban.ViewModels.Core;
 
 namespace Kamban.SampleData
 {

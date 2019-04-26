@@ -1,13 +1,7 @@
-﻿using Kamban.MatrixControl;
-using ReactiveUI;
+﻿using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Kamban.Model
+namespace Kamban.ViewModels.Core
 {
     public class ColumnViewModel : ReactiveObject, IDim
     {

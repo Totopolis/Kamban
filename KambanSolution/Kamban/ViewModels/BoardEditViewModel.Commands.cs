@@ -1,14 +1,9 @@
-﻿using DynamicData;
-using Kamban.MatrixControl;
-using Kamban.Model;
-using MahApps.Metro.Controls.Dialogs;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System;
 using System.Linq;
-using System.Reactive.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using DynamicData;
+using Kamban.ViewModels.Core;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace Kamban.ViewModels
 {

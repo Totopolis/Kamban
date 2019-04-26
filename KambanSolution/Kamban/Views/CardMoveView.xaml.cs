@@ -1,6 +1,4 @@
-﻿using System.Windows.Controls;
-
-namespace Kamban.Views
+﻿namespace Kamban.Views
 {
     public partial class CardMoveView
     {

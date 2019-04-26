@@ -1,7 +1,7 @@
-﻿using Kamban.Export.Options;
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Documents;
+using Kamban.Export.Options;
 
 namespace Kamban.Export
 {

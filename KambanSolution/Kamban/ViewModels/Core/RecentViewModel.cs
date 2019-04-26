@@ -1,9 +1,9 @@
-﻿using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
-using System;
+﻿using System;
 using System.IO;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
-namespace Kamban.Model
+namespace Kamban.ViewModels.Core
 {
     public class RecentViewModel : ReactiveObject
     {

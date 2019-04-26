@@ -1,16 +1,16 @@
-﻿using Autofac;
-using AutoMapper;
-using DynamicData;
-using DynamicData.Binding;
-using Kamban.Model;
-using Kamban.Repository;
-using Monik.Common;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Autofac;
+using AutoMapper;
+using DynamicData;
+using DynamicData.Binding;
+using Kamban.Repository;
+using Kamban.ViewModels.Core;
+using Monik.Common;
 using Ui.Wpf.Common;
 
 namespace Kamban.Core

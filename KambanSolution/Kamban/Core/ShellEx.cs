@@ -1,15 +1,15 @@
-﻿using Autofac;
-using Kamban.Export.Options;
-using Kamban.Views;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Autofac;
+using Kamban.Export.Options;
+using Kamban.Views;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
-using PrintDialog = System.Windows.Controls.PrintDialog;
 
 namespace Kamban.Core
 {
@@ -58,7 +58,7 @@ namespace Kamban.Core
 
                 if (scaleOptions.ScaleToFit)
                 {
-                    var viewStretched = view as IStretchedSize;
+                    var viewStretched = view as IStretchedSizeView;
 
                     var scaleX = viewStretched != null
                         ? viewSize.Width / viewStretched.StretchedWidth

@@ -1,16 +1,16 @@
-﻿using DynamicData;
-using Kamban.Model;
-using Monik.Common;
-using Newtonsoft.Json;
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
-using Squirrel;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using DynamicData;
+using Kamban.ViewModels.Core;
+using Monik.Common;
+using Newtonsoft.Json;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+using Squirrel;
 
 namespace Kamban.Core
 {

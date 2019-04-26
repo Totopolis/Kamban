@@ -1,12 +1,6 @@
-﻿using Kamban.ViewModels;
+﻿using System.Windows;
+using Kamban.ViewModels;
 using Kamban.Views;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ShowOptions;
 

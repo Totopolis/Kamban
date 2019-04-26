@@ -1,13 +1,13 @@
-﻿using Kamban.ViewModels;
-using System;
+﻿using System;
 using System.Linq;
+using Kamban.ViewModels;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ShowOptions;
 using Ui.Wpf.Common.ViewModels;
 
 namespace Kamban.Views
 {
-    public partial class BoardForExportView : IView, IStretchedSize
+    public partial class BoardForExportView : IView, IStretchedSizeView
     {
         public BoardForExportView(BoardEditForExportViewModel localBoardViewModel)
         {

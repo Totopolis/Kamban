@@ -1,21 +1,15 @@
-﻿using DynamicData;
-using GongSolutions.Wpf.DragDrop;
-using Kamban.Model;
-using ReactiveUI;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using DynamicData;
+using GongSolutions.Wpf.DragDrop;
+using Kamban.ViewModels.Core;
+using ReactiveUI;
 
 namespace Kamban.MatrixControl
 {

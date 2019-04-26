@@ -2,9 +2,9 @@
 using AutoMapper;
 using Kamban.Core;
 using Kamban.Export;
-using Kamban.Model;
 using Kamban.Repository;
 using Kamban.ViewModels;
+using Kamban.ViewModels.Core;
 using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
 using Monik.Common;

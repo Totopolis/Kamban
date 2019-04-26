@@ -1,7 +1,6 @@
-﻿using Kamban.MatrixControl;
-using Kamban.Model;
+﻿using System.Linq;
+using Kamban.ViewModels.Core;
 using ReactiveUI.Fody.Helpers;
-using System.Linq;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
 

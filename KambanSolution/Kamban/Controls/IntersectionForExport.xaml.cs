@@ -1,4 +1,5 @@
 ﻿using System.Windows.Controls;
+using Kamban.ViewModels.Core;
 
 namespace Kamban.MatrixControl
 {

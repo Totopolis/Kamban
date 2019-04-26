@@ -1,8 +1,7 @@
-﻿using Kamban.MatrixControl;
-using ReactiveUI;
+﻿using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
-namespace Kamban.Model
+namespace Kamban.ViewModels.Core
 {
     public class RowViewModel : ReactiveObject, IDim
     {

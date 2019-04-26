@@ -1,38 +1,7 @@
-﻿using System;
-using System.ComponentModel;
-using System.Windows;
+﻿using System.Windows;
 
 namespace Kamban.MatrixControl
 {
-    /// <summary>
-    /// Row or column description
-    /// </summary>
-    public interface IDim
-    {
-        int Id { get; set; }
-        string Name { get; set; }
-        int Size { get; set; }
-        int Order { get; set; }
-    }
-
-    public interface ICard : INotifyPropertyChanged
-    {
-        int Id { get; set; }
-        string Header { get; set; }
-        string Color { get; set; }
-
-        int ColumnDeterminant { get; set; }
-        int RowDeterminant { get; set; }
-        int Order { get; set; }
-
-        string Body { get; set; }
-        DateTime Created { get; set; }
-        DateTime Modified { get; set; }
-
-        int BoardId { get; set; }
-        bool ShowDescription { get; set; }
-    }
-
     public static class ContextMenuServiceExtensions
     {
         public static readonly DependencyProperty DataContextProperty =

@@ -1,6 +1,6 @@
-﻿using Kamban.Model;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
+using Kamban.ViewModels.Core;
 
 namespace Kamban.MatrixControl
 {

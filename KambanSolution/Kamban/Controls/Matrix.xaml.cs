@@ -1,21 +1,12 @@
-﻿using DynamicData;
-using GongSolutions.Wpf.DragDrop;
-using Kamban.Model;
-using Monik.Common;
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
-using ReactiveUI.Legacy;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Numerics;
+﻿using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using CardsObservableType = System.IObservable<DynamicData.IChangeSet<Kamban.MatrixControl.ICard>>;
+using GongSolutions.Wpf.DragDrop;
+using Kamban.ViewModels.Core;
+using Monik.Common;
+using ReactiveUI;
+using CardsObservableType = System.IObservable<DynamicData.IChangeSet<Kamban.ViewModels.Core.ICard>>;
 
 namespace Kamban.MatrixControl
 {

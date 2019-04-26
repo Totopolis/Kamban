@@ -1,24 +1,23 @@
-﻿using AutoMapper;
-using DynamicData;
-using DynamicData.Binding;
-using Kamban.Core;
-using Kamban.MatrixControl;
-using Kamban.Model;
-using Kamban.Views;
-using MahApps.Metro.Controls.Dialogs;
-using Monik.Common;
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
+using AutoMapper;
+using DynamicData;
+using DynamicData.Binding;
+using Kamban.Core;
+using Kamban.ViewModels.Core;
+using Kamban.Views;
+using MahApps.Metro.Controls.Dialogs;
+using Monik.Common;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
-using CardsObservableType = System.IObservable<DynamicData.IChangeSet<Kamban.MatrixControl.ICard>>;
+using CardsObservableType = System.IObservable<DynamicData.IChangeSet<Kamban.ViewModels.Core.ICard>>;
 
 namespace Kamban.ViewModels
 {
@@ -65,7 +64,7 @@ namespace Kamban.ViewModels
 
         [Reactive] public ReadOnlyObservableCollection<BoardViewModel> BoardsInFile { get; set; }
 
-        public ReactiveCommand<Unit, Unit> CreateTiketCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> CreateCardCommand { get; set; }
         public ReactiveCommand<(object column, object row), Unit> CellDoubleClickCommand { get; set; }
 
         public ReactiveCommand<Unit, Unit> CreateColumnCommand { get; set; }
@@ -120,7 +119,7 @@ namespace Kamban.ViewModels
             InsertHeadAfterCommand = ReactiveCommand
                 .Create<IDim>(async head => await InsertHeadAfterCommandExecute(head));
 
-            CreateTiketCommand = ReactiveCommand.Create(() => ShowFlyout(CardEditFlyout, null));
+            CreateCardCommand = ReactiveCommand.Create(() => ShowFlyout(CardEditFlyout, null));
 
             CellDoubleClickCommand = ReactiveCommand.Create<(object column, object row)>(
                 (tup) => ShowFlyout(CardEditFlyout, null, (int)tup.column, (int)tup.row));
@@ -249,7 +248,7 @@ namespace Kamban.ViewModels
         {
             mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(Initialize)} started");
 
-            shell.AddVMCommand("Edit", "Add Tiket", "CreateTiketCommand", this)
+            shell.AddVMCommand("Edit", "Add Card", "CreateCardCommand", this)
                 .SetHotKey(ModifierKeys.Control, Key.W);
 
             shell.AddVMCommand("Edit", "Add Column", "CreateColumnCommand", this);

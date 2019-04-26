@@ -1,10 +1,10 @@
 ﻿<sampleData:CardsSample
     xmlns:sampleData="clr-namespace:Kamban.SampleData"
-    xmlns:model="clr-namespace:Kamban.Model">
+    xmlns:core="clr-namespace:Kamban.ViewModels.Core">
 
-    <model:CardViewModel Header="111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111"/>
-    <model:CardViewModel Header="111"/>
-    <model:CardViewModel Header="111"/>
-    <model:CardViewModel Header="111"/>
+    <core:CardViewModel Header="111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111 111"/>
+    <core:CardViewModel Header="111"/>
+    <core:CardViewModel Header="111"/>
+    <core:CardViewModel Header="111"/>
 
 </sampleData:CardsSample>

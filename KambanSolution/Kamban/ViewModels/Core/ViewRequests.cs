@@ -1,6 +1,6 @@
 ﻿using Ui.Wpf.Common;
 
-namespace Kamban.Model
+namespace Kamban.ViewModels.Core
 {
     public class WizardViewRequest : ViewRequest
     {

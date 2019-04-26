@@ -1,7 +1,7 @@
-﻿using Kamban.Model;
+﻿using System.Collections.Generic;
+using Kamban.ViewModels.Core;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using System.Collections.Generic;
 
 namespace Kamban.Core
 {
