@@ -1,5 +1,5 @@
-﻿using LiteDB;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using LiteDB;
 
 namespace Kamban.Repository.LiteDb
 {

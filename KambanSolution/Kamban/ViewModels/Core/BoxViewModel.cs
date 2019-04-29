@@ -1,13 +1,13 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
 using DynamicData;
 using Kamban.Repository;
 using Monik.Common;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using System;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
 
 namespace Kamban.ViewModels.Core
 {
@@ -59,7 +59,7 @@ namespace Kamban.ViewModels.Core
                 });
         }
 
-        public void Connect(IRepository repo)
+        public void Connect(ISaveRepository repo)
         {
             ///////////////////
             // Boards AutoSaver
@@ -229,7 +229,7 @@ namespace Kamban.ViewModels.Core
             cardsChanges.Connect();
         }
 
-        public async Task Load(IRepository repo)
+        public async Task Load(ILoadRepository repo)
         {
             var box = await repo.Load();
             

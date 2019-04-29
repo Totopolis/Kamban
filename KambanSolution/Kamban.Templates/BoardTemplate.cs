@@ -1,5 +1,5 @@
-﻿using Kamban.Repository;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Kamban.Repository;
 
 namespace Kamban.Templates
 {

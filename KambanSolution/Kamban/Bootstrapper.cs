@@ -2,7 +2,6 @@
 using AutoMapper;
 using Kamban.Core;
 using Kamban.Export;
-using Kamban.Repository;
 using Kamban.Templates;
 using Kamban.ViewModels;
 using Kamban.ViewModels.Core;

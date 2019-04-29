@@ -1,10 +1,10 @@
+using System.Threading.Tasks;
 using AutoMapper;
 using DynamicData;
 using Kamban.Repository;
 using Kamban.ViewModels.Core;
 using Monik.Common;
 using Moq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Kamban.Tests
@@ -14,11 +14,11 @@ namespace Kamban.Tests
         private readonly BoxViewModel _box;
         private readonly Mock<IMonik> _monik;
         private readonly IMapper _mapper;
-        private readonly Mock<IRepository> _repo;
+        private readonly Mock<ISaveRepository> _repo;
 
         public BoxViewModelConnectTest()
         {
-            _repo = new Mock<IRepository>();
+            _repo = new Mock<ISaveRepository>();
             _monik = new Mock<IMonik>();
             _mapper = new MapperConfiguration(cfg => { cfg.AddProfile<MapperProfile>(); }).CreateMapper();
             _box = new BoxViewModel(_monik.Object, _mapper);
@@ -54,7 +54,7 @@ namespace Kamban.Tests
             _repo.Setup(x => x.CreateOrUpdateColumn(It.IsAny<Column>())).Returns<Column>(Task.FromResult);
             _box.Connect(_repo.Object);
 
-            var column = new ColumnViewModel() {Id = 1};
+            var column = new ColumnViewModel {Id = 1};
             _box.Columns.Add(column);
 
             _repo.Verify(x => x.CreateOrUpdateColumn(It.Is<Column>(b => b.Id == column.Id)), Times.Once);
@@ -66,7 +66,7 @@ namespace Kamban.Tests
             _repo.Setup(x => x.CreateOrUpdateCard(It.IsAny<Card>())).Returns<Card>(Task.FromResult);
             _box.Connect(_repo.Object);
 
-            var card = new CardViewModel() {Id = 1};
+            var card = new CardViewModel {Id = 1};
             _box.Cards.Add(card);
 
             _repo.Verify(x => x.CreateOrUpdateCard(It.Is<Card>(b => b.Id == card.Id)), Times.Once);
@@ -99,7 +99,7 @@ namespace Kamban.Tests
         [Fact]
         public void RemoveColumnAfterConnect_WillRemoveColumnFromRepo()
         {
-            var column = new ColumnViewModel() {Id = 1};
+            var column = new ColumnViewModel {Id = 1};
             _box.Columns.Add(column);
             _box.Connect(_repo.Object);
 
@@ -111,7 +111,7 @@ namespace Kamban.Tests
         [Fact]
         public void RemoveCardAfterConnect_WillRemoveCardFromRepo()
         {
-            var card = new CardViewModel() {Id = 1};
+            var card = new CardViewModel {Id = 1};
             _box.Cards.Add(card);
             _box.Connect(_repo.Object);
 
@@ -123,7 +123,7 @@ namespace Kamban.Tests
         [Fact]
         public void ChangeBoardAfterConnect_WillUpdateBoardInRepo()
         {
-            var board = new BoardViewModel { Id = 1 };
+            var board = new BoardViewModel {Id = 1};
             _box.Boards.Add(board);
             _box.Connect(_repo.Object);
 
@@ -135,7 +135,7 @@ namespace Kamban.Tests
         [Fact]
         public void ChangeRowAfterConnect_WillChangeRowInRepo()
         {
-            var row = new RowViewModel { Id = 1 };
+            var row = new RowViewModel {Id = 1};
             _box.Rows.Add(row);
             _box.Connect(_repo.Object);
 
@@ -147,7 +147,7 @@ namespace Kamban.Tests
         [Fact]
         public void ChangeColumnAfterConnect_WillChangeColumnInRepo()
         {
-            var column = new ColumnViewModel() { Id = 1 };
+            var column = new ColumnViewModel {Id = 1};
             _box.Columns.Add(column);
             _box.Connect(_repo.Object);
 
@@ -159,7 +159,7 @@ namespace Kamban.Tests
         [Fact]
         public void ChangeCardAfterConnect_WillRemoveCardInRepo()
         {
-            var card = new CardViewModel() { Id = 1 };
+            var card = new CardViewModel {Id = 1};
             _box.Cards.Add(card);
             _box.Connect(_repo.Object);
 
