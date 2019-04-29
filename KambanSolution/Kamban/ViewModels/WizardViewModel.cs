@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using AutoMapper;
 using DynamicData;
 using Kamban.Core;
+using Kamban.Repository;
+using Kamban.Templates;
 using Kamban.ViewModels.Core;
 using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
@@ -26,16 +28,14 @@ namespace Kamban.ViewModels
         [Reactive] public bool IsNewFile { get; set; }
         [Reactive] public string BoardName { get; set; }
 
-        [Reactive]
-        public List<BoardTemplate> Templates { get; set; } =
-            InternalBoardTemplates.Templates;
+        [Reactive] public List<BoardTemplate> Templates { get; set; }
 
         [Reactive] public BoardTemplate SelectedTemplate { get; set; }
         [Reactive] public string FileName { get; set; }
         [Reactive] public string FolderName { get; set; }
 
-        [Reactive] public ObservableCollection<ColumnViewModel> Columns { get; set; }
-        [Reactive] public ObservableCollection<RowViewModel> Rows { get; set; }
+        [Reactive] public ObservableCollection<Column> Columns { get; set; }
+        [Reactive] public ObservableCollection<Row> Rows { get; set; }
 
         public ReactiveCommand<Unit, Unit> FillFromTemplateCommand { get; set; }
         public ReactiveCommand<Unit, Unit> AddColumnCommand { get; set; }
@@ -50,20 +50,20 @@ namespace Kamban.ViewModels
         private readonly IAppModel appModel;
         private readonly IShell shell;
         private readonly IDialogCoordinator dialCoord;
-        private readonly IMapper mapper;
         private readonly IAppConfig appConfig;
 
-        public WizardViewModel(IAppModel appModel, IShell shell, IDialogCoordinator dc, IMapper mp,
-            IAppConfig cfg)
+        public WizardViewModel(IAppModel appModel, IShell shell, IDialogCoordinator dc,
+            IAppConfig cfg, ITemplates templates)
         {
             this.appModel = appModel;
             this.shell = shell;
             dialCoord = dc;
-            mapper = mp;
             appConfig = cfg;
 
-            Columns = new ObservableCollection<ColumnViewModel>();
-            Rows = new ObservableCollection<RowViewModel>();
+            Templates = templates.GetBoardTemplates().Result;
+
+            Columns = new ObservableCollection<Column>();
+            Rows = new ObservableCollection<Row>();
 
             FillFromTemplateCommand = ReactiveCommand.Create(() =>
             {
@@ -84,16 +84,15 @@ namespace Kamban.ViewModels
             });
 
             CreateCommand = ReactiveCommand.CreateFromTask(CreateCommandExecute);
-            CancelCommand = ReactiveCommand.Create(() => this.Close());
+            CancelCommand = ReactiveCommand.Create(this.Close);
 
             SelectFolderCommand = ReactiveCommand.Create(() =>
             {
-                FolderBrowserDialog dialog = new FolderBrowserDialog
+                var dialog = new FolderBrowserDialog
                 {
                     ShowNewFolderButton = false,
                     SelectedPath = FolderName
                 };
-                //dialog.RootFolder = Environment.SpecialFolder.MyDocuments;
 
                 if (dialog.ShowDialog() == DialogResult.OK)
                     FolderName = dialog.SelectedPath;
@@ -106,10 +105,10 @@ namespace Kamban.ViewModels
                 if (string.IsNullOrEmpty(ts))
                     return;
 
-                if (Columns.Where(x => x.Name == ts).Count() > 0)
+                if (Columns.Any(x => x.Name == ts))
                     return;
 
-                Columns.Add(new ColumnViewModel { Name = ts });
+                Columns.Add(new Column {Name = ts});
             });
 
             AddRowCommand = ReactiveCommand.CreateFromTask(async _ =>
@@ -119,10 +118,10 @@ namespace Kamban.ViewModels
                 if (string.IsNullOrEmpty(ts))
                     return;
 
-                if (Rows.Where(x => x.Name == ts).Count() > 0)
+                if (Rows.Any(x => x.Name == ts))
                     return;
 
-                Rows.Add(new RowViewModel { Name = ts });
+                Rows.Add(new Row {Name = ts});
             });
 
             Title = "Creating new board";
@@ -137,7 +136,7 @@ namespace Kamban.ViewModels
         {
             // 1. Checks
             if (string.IsNullOrWhiteSpace(BoardName) || string.IsNullOrWhiteSpace(FileName)
-                || string.IsNullOrWhiteSpace(FolderName))
+                                                     || string.IsNullOrWhiteSpace(FolderName))
             {
                 await dialCoord.ShowMessageAsync(this, "Error", "Empty string");
                 return;
@@ -215,18 +214,12 @@ namespace Kamban.ViewModels
 
             // 3. Normalize grid
             double colSize = Columns.Count == 1 ? 100 : 100 / (Columns.Count - 1);
-            for (int i = 0; i < Columns.Count; i++)
-            {
+            for (var i = 0; i < Columns.Count; i++)
                 Columns[i].Order = i;
-                Columns[i].Size = (int)colSize * 10;
-            }
 
             double rowSize = Rows.Count == 1 ? 100 : 100 / (Rows.Count - 1);
-            for (int i = 0; i < Rows.Count; i++)
-            {
+            for (var i = 0; i < Rows.Count; i++)
                 Rows[i].Order = i;
-                Rows[i].Size = (int)rowSize * 10;
-            }
 
             // 4. Create columns
             foreach (var cvm in Columns)
@@ -234,7 +227,7 @@ namespace Kamban.ViewModels
                 var colToAdd = new ColumnViewModel
                 {
                     BoardId = bvm.Id,
-                    Size = cvm.Size,
+                    Size = (int) colSize * 10,
                     Order = cvm.Order,
                     Name = cvm.Name
                 };
@@ -248,7 +241,7 @@ namespace Kamban.ViewModels
                 var rowToAdd = new RowViewModel
                 {
                     BoardId = bvm.Id,
-                    Size = rvm.Size,
+                    Size = (int) rowSize * 10,
                     Order = rvm.Order,
                     Name = rvm.Name
                 };
@@ -257,8 +250,8 @@ namespace Kamban.ViewModels
             }
 
             shell.ShowView<BoardView>(
-                viewRequest: new BoardViewRequest { ViewId = uri, Box = box, Board = bvm },
-                options: new UiShowOptions { Title = BoardName });
+                viewRequest: new BoardViewRequest {ViewId = uri, Box = box, Board = bvm},
+                options: new UiShowOptions {Title = BoardName});
 
             this.Close();
         }
@@ -302,7 +295,7 @@ namespace Kamban.ViewModels
                 .Execute()
                 .Subscribe();
         }
-    }//end of class
+    } //end of class
 
     public static class ExtensionMethods
     {

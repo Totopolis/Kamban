@@ -8,6 +8,7 @@ using System.Windows.Documents;
 using System.Windows.Xps.Packaging;
 using Kamban.Common;
 using Kamban.Export.Options;
+using Kamban.Repository;
 using Kamban.Repository.LiteDb;
 using Newtonsoft.Json;
 using OfficeOpenXml;
@@ -26,7 +27,7 @@ namespace Kamban.Export
         private const int WPF_DPI = 96; // default dpi
 
 
-        public Task ToJson(BoxToExport box, string fileName)
+        public Task ToJson(Box box, string fileName)
         {
             return Task.Run(() =>
             {
@@ -37,29 +38,29 @@ namespace Kamban.Export
             });
         }
 
-        public async Task ToKamban(BoxToExport box, string fileName)
+        public async Task ToKamban(Box box, string fileName)
         {
             var kamFileName = fileName + EXT_KAM;
 
             using (var repo = new LiteDbRepository(kamFileName))
             {
-                foreach (var brd in box.BoardList)
+                foreach (var brd in box.Boards)
                 {
                     await repo.CreateOrUpdateBoard(brd);
 
-                    foreach (var col in box.ColumnList)
+                    foreach (var col in box.Columns)
                         await repo.CreateOrUpdateColumn(col);
 
-                    foreach (var row in box.RowList)
+                    foreach (var row in box.Rows)
                         await repo.CreateOrUpdateRow(row);
 
-                    foreach (var iss in box.CardList)
+                    foreach (var iss in box.Cards)
                         await repo.CreateOrUpdateCard(iss);
                 }
             }
         }
 
-        public Task ToXlsx(BoxToExport box, string fileName)
+        public Task ToXlsx(Box box, string fileName)
         {
             return Task.Run(() =>
             {
@@ -68,9 +69,9 @@ namespace Kamban.Export
                 using (var package = new ExcelPackage())
                 {
                     var boardsWithCards =
-                        from b in box.BoardList
+                        from b in box.Boards
                         join g in
-                            from i in box.CardList group i by i.BoardId
+                            from i in box.Cards group i by i.BoardId
                             on b.Id equals g.Key into bg
                         from g in bg.DefaultIfEmpty()
                         select new {Info = b, Cards = g?.ToList()};
@@ -97,8 +98,8 @@ namespace Kamban.Export
 
                         var cards =
                             from i in board.Cards
-                            join r in box.RowList on i.RowId equals r.Id
-                            join c in box.ColumnList on i.ColumnId equals c.Id
+                            join r in box.Rows on i.RowId equals r.Id
+                            join c in box.Columns on i.ColumnId equals c.Id
                             orderby c.Id, r.Id, i.Order, i.Id
                             select new {Info = i, RowInfo = r, ColInfo = c};
 
@@ -142,7 +143,7 @@ namespace Kamban.Export
             }
         }
 
-        public Task ToPdf(BoxToExport box,
+        public Task ToPdf(Box box,
             Func<Size, FixedDocument> renderToXps,
             string fileName, PdfOptions options)
         {

@@ -156,11 +156,11 @@ namespace Kamban.ViewModels
 
         private async Task DoExportWhole(string fileName)
         {
-            var jb = new BoxToExport();
-            jb.BoardList.AddRange(GetBoardsSelectedToExport());
-            jb.CardList.AddRange(mapper.Map<IEnumerable<Card>>(SelectedBox.Cards.Items));
-            jb.RowList.AddRange(mapper.Map<IEnumerable<Row>>(SelectedBox.Rows.Items));
-            jb.ColumnList.AddRange(mapper.Map<IEnumerable<Column>>(SelectedBox.Columns.Items));
+            var jb = new Box();
+            jb.Boards.AddRange(GetBoardsSelectedToExport());
+            jb.Cards.AddRange(mapper.Map<IEnumerable<Card>>(SelectedBox.Cards.Items));
+            jb.Rows.AddRange(mapper.Map<IEnumerable<Row>>(SelectedBox.Rows.Items));
+            jb.Columns.AddRange(mapper.Map<IEnumerable<Column>>(SelectedBox.Columns.Items));
 
             await DoExportForNeededFormats(jb, fileName);
         }
@@ -169,13 +169,13 @@ namespace Kamban.ViewModels
         {
             foreach (var brd in GetBoardsSelectedToExport())
             {
-                var jb = new BoxToExport();
-                jb.BoardList.Add(brd);
-                jb.CardList.AddRange(
+                var jb = new Box();
+                jb.Boards.Add(brd);
+                jb.Cards.AddRange(
                     mapper.Map<IEnumerable<Card>>(SelectedBox.Cards.Items.Where(x => x.BoardId == brd.Id)));
-                jb.RowList.AddRange(
+                jb.Rows.AddRange(
                     mapper.Map<IEnumerable<Row>>(SelectedBox.Rows.Items.Where(x => x.BoardId == brd.Id)));
-                jb.ColumnList.AddRange(
+                jb.Columns.AddRange(
                     mapper.Map<IEnumerable<Column>>(SelectedBox.Columns.Items.Where(x => x.BoardId == brd.Id)));
 
                 await DoExportForNeededFormats(jb, fileName + "_" + brd.Name);
@@ -194,7 +194,7 @@ namespace Kamban.ViewModels
                 .Where(x => selectedBoardIds.Contains(x.Id));
         }
 
-        private async Task DoExportForNeededFormats(BoxToExport box, string fileName)
+        private async Task DoExportForNeededFormats(Box box, string fileName)
         {
             var tasks = new List<Task>();
             if (ExportJson)
@@ -210,7 +210,7 @@ namespace Kamban.ViewModels
             {
                 FixedDocument RenderToXps(Size size)
                 {
-                    var selectedBoardIds = new HashSet<int>(box.BoardList.Select(x => x.Id));
+                    var selectedBoardIds = new HashSet<int>(box.Boards.Select(x => x.Id));
                     return ((ShellEx) shell).ViewsToDocument<BoardEditForExportView>(
                         SelectedBox.Boards.Items
                             .Where(x => selectedBoardIds.Contains(x.Id))

@@ -231,20 +231,12 @@ namespace Kamban.ViewModels.Core
 
         public async Task Load(IRepository repo)
         {
-            var cardsTask = repo.GetAllCards();
-            var rowsTask = repo.GetAllRows();
-            var columnsTask = repo.GetAllColumns();
-            var boardsTask = repo.GetAllBoards();
-
-            var cards = await cardsTask;
-            var columns = await columnsTask;
-            var rows = await rowsTask;
-            var boards = await boardsTask;
-
-            Cards.AddRange(cards.Select(x => mapper.Map<Card, CardViewModel>(x)));
-            Columns.AddRange(columns.Select(x => mapper.Map<Column, ColumnViewModel>(x)));
-            Rows.AddRange(rows.Select(x => mapper.Map<Row, RowViewModel>(x)));
-            Boards.AddRange(boards.Select(x => mapper.Map<Board, BoardViewModel>(x)));
+            var box = await repo.Load();
+            
+            Cards.AddRange(box.Cards.Select(x => mapper.Map<Card, CardViewModel>(x)));
+            Columns.AddRange(box.Columns.Select(x => mapper.Map<Column, ColumnViewModel>(x)));
+            Rows.AddRange(box.Rows.Select(x => mapper.Map<Row, RowViewModel>(x)));
+            Boards.AddRange(box.Boards.Select(x => mapper.Map<Board, BoardViewModel>(x)));
 
             Loaded = true;
         }

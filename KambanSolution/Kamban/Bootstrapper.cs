@@ -3,6 +3,7 @@ using AutoMapper;
 using Kamban.Core;
 using Kamban.Export;
 using Kamban.Repository;
+using Kamban.Templates;
 using Kamban.ViewModels;
 using Kamban.ViewModels.Core;
 using Kamban.Views;
@@ -42,6 +43,11 @@ namespace Kamban
             builder
                 .RegisterType<ExportService>()
                 .As<IExportService>();
+
+            builder
+                .RegisterType<StaticTemplates>()
+                .As<ITemplates>()
+                .SingleInstance();
 
             builder
                 .RegisterType<AppConfig>()
