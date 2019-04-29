@@ -1,13 +1,13 @@
-﻿using System;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using DynamicData;
 using Kamban.Repository;
 using Monik.Common;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace Kamban.ViewModels.Core
 {
@@ -26,8 +26,6 @@ namespace Kamban.ViewModels.Core
         [Reactive] public SourceList<ColumnViewModel> Columns { get; set; }
         [Reactive] public SourceList<RowViewModel> Rows { get; set; }
         [Reactive] public SourceList<BoardViewModel> Boards { get; set; }
-
-        public IObservable<bool> BoardsCountMoreOne { get; set; }
 
         [Reactive] public SourceList<CardViewModel> Cards { get; set; }
 
@@ -50,11 +48,6 @@ namespace Kamban.ViewModels.Core
                 .AutoRefresh()
                 .Subscribe(x => TotalTickets = Cards.Count);
 
-            BoardsCountMoreOne = Boards
-                .Connect()
-                .AutoRefresh()
-                .Select(x => Boards.Count > 1);
-
             Boards
                 .Connect()
                 .AutoRefresh()
@@ -71,165 +64,169 @@ namespace Kamban.ViewModels.Core
             ///////////////////
             // Boards AutoSaver
             ///////////////////
-            Boards
-                .Connect()
-                .WhenAnyPropertyChanged("Name", "Modified")
+            var boardsChanges = Boards.Connect().Publish();
+            boardsChanges
+                .WhenAnyPropertyChanged()
                 .Subscribe(async bvm =>
                 {
-                    mon.LogicVerbose($"AppModel.Boards.ItemChanged {bvm.Id}::{bvm.Name}::{bvm.Modified}");
+                    mon.LogicVerbose($"Box.Boards.ItemChanged {bvm.Id}::{bvm.Name}::{bvm.Modified}");
                     var bi = mapper.Map<BoardViewModel, Board>(bvm);
                     await repo.CreateOrUpdateBoard(bi);
                 });
 
-            Boards
-                .Connect()
+            boardsChanges
                 .WhereReasonsAre(ListChangeReason.Add)
                 .Subscribe(x => x
                     .Select(q => q.Item.Current)
                     .ToList()
-                    .ForEach(async bvm =>
+                    .ForEach(bvm =>
                     {
-                        mon.LogicVerbose($"AppModel.Board add {bvm.Id}::{bvm.Name}");
+                        mon.LogicVerbose($"Box.Boards.Add {bvm.Id}::{bvm.Name}");
 
                         var bi = mapper.Map<BoardViewModel, Board>(bvm);
-                        await repo.CreateOrUpdateBoard(bi);
+                        bi = repo.CreateOrUpdateBoard(bi).Result;
 
                         bvm.Id = bi.Id;
                     }));
 
-            Boards
-                .Connect()
+            boardsChanges
                 .WhereReasonsAre(ListChangeReason.Remove)
                 .Subscribe(x => x
                     .Select(q => q.Item.Current)
                     .ToList()
                     .ForEach(async bvm =>
                     {
-                        mon.LogicVerbose($"AppModel.Board remove {bvm.Id}::{bvm.Name}");
+                        mon.LogicVerbose($"Box.Boards.Remove {bvm.Id}::{bvm.Name}");
 
                         await repo.DeleteBoard(bvm.Id);
                     }));
 
+            boardsChanges.Connect();
+
             ////////////////////
             // Columns AutoSaver
             ////////////////////
-            Columns
-                .Connect()
-                //.AutoRefresh()
-                .WhenAnyPropertyChanged("Name", "Order", "Size", "BoardId")
+            var columnsChanges = Columns.Connect().Publish();
+            columnsChanges
+                .WhenAnyPropertyChanged()
                 .Subscribe(async cvm =>
                 {
-                    mon.LogicVerbose($"AppModel.Columns.ItemChanged {cvm.Id}::{cvm.Name}::{cvm.Order}");
+                    mon.LogicVerbose($"Box.Columns.ItemChanged {cvm.Id}::{cvm.Name}::{cvm.Order}");
                     var ci = mapper.Map<ColumnViewModel, Column>(cvm);
                     await repo.CreateOrUpdateColumn(ci);
                 });
 
-            Columns
-                .Connect()
-                //.AutoRefresh()
+            columnsChanges
                 .WhereReasonsAre(ListChangeReason.Add)
                 .Subscribe(x => x
                     .Select(q => q.Item.Current)
                     .ToList()
                     .ForEach(async cvm =>
                     {
-                        mon.LogicVerbose($"AppModel.Column add {cvm.Id}::{cvm.Name}::{cvm.Order}");
+                        mon.LogicVerbose($"Box.Columns.Add {cvm.Id}::{cvm.Name}::{cvm.Order}");
 
                         var ci = mapper.Map<ColumnViewModel, Column>(cvm);
-                        await repo.CreateOrUpdateColumn(ci);
+                        ci = await repo.CreateOrUpdateColumn(ci);
 
                         cvm.Id = ci.Id;
                     }));
 
-            Columns
-                .Connect()
-                //.AutoRefresh()
+            columnsChanges
                 .WhereReasonsAre(ListChangeReason.Remove)
                 .Subscribe(x => x
                     .Select(q => q.Item.Current)
                     .ToList()
-                    .ForEach(async cvm => await repo.DeleteColumn(cvm.Id)));
+                    .ForEach(async cvm =>
+                    {
+                        mon.LogicVerbose($"Box.Columns.Remove {cvm.Id}::{cvm.Name}::{cvm.Order}");
+
+                        await repo.DeleteColumn(cvm.Id);
+                    }));
+
+            columnsChanges.Connect();
 
             /////////////////
             // Rows AutoSaver
             /////////////////
-            Rows
-                .Connect()
-                //.AutoRefresh()
-                .WhenAnyPropertyChanged("Name", "Order", "Size", "BoardId")
+            var rowsChanges = Rows.Connect().Publish();
+            rowsChanges
+                .WhenAnyPropertyChanged()
                 .Subscribe(async rvm =>
                 {
-                    mon.LogicVerbose($"AppModel.Rows.ItemChanged {rvm.Id}::{rvm.Name}::{rvm.Order}");
+                    mon.LogicVerbose($"Box.Rows.ItemChanged {rvm.Id}::{rvm.Name}::{rvm.Order}");
                     var row = mapper.Map<RowViewModel, Row>(rvm);
                     await repo.CreateOrUpdateRow(row);
                 });
 
-            Rows
-                .Connect()
-                //.AutoRefresh()
+            rowsChanges
                 .WhereReasonsAre(ListChangeReason.Add)
                 .Subscribe(x => x
                     .Select(q => q.Item.Current)
                     .ToList()
                     .ForEach(async rvm =>
                     {
-                        mon.LogicVerbose($"AppModel.Row add {rvm.Id}::{rvm.Name}::{rvm.Order}");
+                        mon.LogicVerbose($"Box.Rows.Add {rvm.Id}::{rvm.Name}::{rvm.Order}");
 
                         var ri = mapper.Map<RowViewModel, Row>(rvm);
-                        await repo.CreateOrUpdateRow(ri);
+                        ri = await repo.CreateOrUpdateRow(ri);
 
                         rvm.Id = ri.Id;
                     }));
 
-            Rows
-                .Connect()
-                //.AutoRefresh()
+            rowsChanges
                 .WhereReasonsAre(ListChangeReason.Remove)
                 .Subscribe(x => x
                     .Select(q => q.Item.Current)
                     .ToList()
-                    .ForEach(async rvm => await repo.DeleteRow(rvm.Id)));
+                    .ForEach(async rvm =>
+                    {
+                        mon.LogicVerbose($"Box.Rows.Remove {rvm.Id}::{rvm.Name}::{rvm.Order}");
+
+                        await repo.DeleteRow(rvm.Id);
+                    }));
+
+            rowsChanges.Connect();
 
             //////////////////
             // Cards AutoSaver
             //////////////////
-            Cards
-                .Connect()
-                .WhenAnyPropertyChanged("Header", "Color", "ColumnDeterminant", "RowDeterminant",
-                    "Order", "Body", "Modified", "BoardId")
+            var cardsChanges = Cards.Connect().Publish();
+            cardsChanges
+                .WhenAnyPropertyChanged()
                 .Subscribe(async cvm =>
                 {
-                    mon.LogicVerbose("AppModel.Cards.WhenAnyPropertyChanged");
+                    mon.LogicVerbose($"Box.Cards.ItemChanged {cvm.Id}::{cvm.Header}");
                     var iss = mapper.Map<CardViewModel, Card>(cvm);
                     await repo.CreateOrUpdateCard(iss);
                 });
 
-            Cards
-                .Connect()
+            cardsChanges
                 .WhereReasonsAre(ListChangeReason.Add)
                 .Subscribe(x => x
                     .Select(q => q.Item.Current)
                     .ToList()
                     .ForEach(async cvm =>
                     {
-                        mon.LogicVerbose("AppModel.Cards add");
-                        var iss = mapper.Map<CardViewModel, Card>(cvm);
-                        await repo.CreateOrUpdateCard(iss);
+                        mon.LogicVerbose($"Box.Cards.Add {cvm.Id}::{cvm.Header}");
+                        var ci = mapper.Map<CardViewModel, Card>(cvm);
+                        ci = await repo.CreateOrUpdateCard(ci);
 
-                        cvm.Id = iss.Id;
+                        cvm.Id = ci.Id;
                     }));
 
-            Cards
-                .Connect()
+            cardsChanges
                 .WhereReasonsAre(ListChangeReason.Remove)
                 .Subscribe(x => x
                     .Select(q => q.Item.Current)
                     .ToList()
                     .ForEach(async cvm =>
                     {
-                        mon.LogicVerbose("AppModel.Cards remove");
+                        mon.LogicVerbose($"Box.Cards.Remove {cvm.Id}::{cvm.Header}");
+
                         await repo.DeleteCard(cvm.Id);
                     }));
+
+            cardsChanges.Connect();
         }
 
         public async Task Load(IRepository repo)

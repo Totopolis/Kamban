@@ -73,10 +73,7 @@ namespace Kamban.Core
             box.Loaded = true;
 
             box.Title = fi.Name;
-            box.LastEdit = File.GetLastWriteTime(box.Uri);
-            box.Path = fi.DirectoryName;
-            box.SizeOf = SizeSuffix(fi.Length);
-
+            
             var repo = new LiteDbRepository(uri);
             await box.Load(repo);
             box.Connect(repo);

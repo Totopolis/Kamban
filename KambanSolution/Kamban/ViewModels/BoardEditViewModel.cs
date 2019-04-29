@@ -1,20 +1,20 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Windows.Controls;
-using System.Windows.Input;
-using AutoMapper;
+﻿using AutoMapper;
 using DynamicData;
 using DynamicData.Binding;
-using Kamban.Core;
 using Kamban.ViewModels.Core;
 using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
 using Monik.Common;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Windows.Controls;
+using System.Windows.Input;
+using DynamicData.Aggregation;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
 using CardsObservableType = System.IObservable<DynamicData.IChangeSet<Kamban.ViewModels.Core.ICard>>;
@@ -28,8 +28,7 @@ namespace Kamban.ViewModels
         private readonly IDialogCoordinator dialCoord;
         private readonly IMonik mon;
         private readonly IMapper mapper;
-        private readonly IAppModel appModel;
-
+        
         private ReadOnlyObservableCollection<CardViewModel> cardList;
 
         public BoxViewModel Box { get; set; }
@@ -77,13 +76,12 @@ namespace Kamban.ViewModels
         [Reactive] public ReactiveCommand<Unit, Unit> DeleteBoardCommand { get; set; }
         public ReactiveCommand<object, Unit> SelectBoardCommand { get; set; }
 
-        public BoardEditViewModel(IShell shell, IDialogCoordinator dc, IMonik m, IMapper mp, IAppModel am)
+        public BoardEditViewModel(IShell shell, IDialogCoordinator dc, IMonik m, IMapper mp)
         {
             this.shell = shell;
             dialCoord = dc;
             mon = m;
             mapper = mp;
-            appModel = am;
 
             mon.LogicVerbose($"{nameof(BoardEditViewModel)}.ctor started");
 
@@ -248,75 +246,81 @@ namespace Kamban.ViewModels
         {
             mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(Initialize)} started");
 
-            shell.AddVMCommand("Edit", "Add Card", "CreateCardCommand", this)
+            shell.AddVMCommand("Edit", "Add Card", nameof(CreateCardCommand), this)
                 .SetHotKey(ModifierKeys.Control, Key.W);
 
-            shell.AddVMCommand("Edit", "Add Column", "CreateColumnCommand", this);
-            shell.AddVMCommand("Edit", "Add Row", "CreateRowCommand", this, true);
+            shell.AddVMCommand("Edit", "Add Column", nameof(CreateColumnCommand), this);
+            shell.AddVMCommand("Edit", "Add Row", nameof(CreateRowCommand), this, true);
 
-            shell.AddVMCommand("Edit", "Normalize Grid", "NormalizeGridCommand", this)
+            shell.AddVMCommand("Edit", "Normalize Grid", nameof(NormalizeGridCommand), this)
                 .SetHotKey(ModifierKeys.Control, Key.G);
 
-            shell.AddVMCommand("Boards", "Add board", "AddBoardCommand", this)
+            shell.AddVMCommand("Boards", "Add board", nameof(AddBoardCommand), this)
                 .SetHotKey(ModifierKeys.Control | ModifierKeys.Shift, Key.N);
 
-            shell.AddVMCommand("Boards", "Rename board", "RenameBoardCommand", this);
-            shell.AddVMCommand("Boards", "Delete board", "DeleteBoardCommand", this);
+            shell.AddVMCommand("Boards", "Rename board", nameof(RenameBoardCommand), this);
+            shell.AddVMCommand("Boards", "Delete board", nameof(DeleteBoardCommand), this);
 
-            shell.AddVMCommand("Boards", "Prev board", "PrevBoardCommand", this)
+            shell.AddVMCommand("Boards", "Prev board", nameof(PrevBoardCommand), this)
                 .SetHotKey(ModifierKeys.Control, Key.Q);
 
-            shell.AddVMCommand("Boards", "Next board", "NextBoardCommand", this, true)
+            shell.AddVMCommand("Boards", "Next board", nameof(NextBoardCommand), this, true)
                 .SetHotKey(ModifierKeys.Control, Key.E);
 
-            var request = viewRequest as BoardViewRequest;
+            var request = (BoardViewRequest) viewRequest;
 
             Box = request.Box;
 
-            DeleteBoardCommand = ReactiveCommand.CreateFromTask(DeleteBoardCommandExecute, Box.BoardsCountMoreOne);
+            var boardsChanges = Box.Boards.Connect().Publish();
 
-            PrevBoardCommand = ReactiveCommand.Create(() =>
-            {
-                int indx = BoardsInFile.IndexOf(CurrentBoard);
-
-                CurrentBoard = indx > 0 ?
-                    BoardsInFile[indx - 1] :
-                    BoardsInFile[BoardsInFile.Count - 1];
-            }, Box.BoardsCountMoreOne);
-
-            NextBoardCommand = ReactiveCommand.Create(() =>
-            {
-                int indx = BoardsInFile.IndexOf(CurrentBoard);
-
-                CurrentBoard = indx < BoardsInFile.Count - 1 ?
-                    BoardsInFile[indx + 1] :
-                    BoardsInFile[0];
-            }, Box.BoardsCountMoreOne);
-
-            Box.Boards
-                .Connect()
+            boardsChanges
                 .AutoRefresh()
                 .Sort(SortExpressionComparer<BoardViewModel>.Ascending(t => t.Created))
-                .Bind(out ReadOnlyObservableCollection<BoardViewModel> temp)
+                .Bind(out var temp)
                 .Subscribe();
 
             BoardsInFile = temp;
 
-            BoardsInFile
-                .ToList()
-                .ForEach(x => x.MenuCommand = shell.AddInstanceCommand("Boards", x.Name, "SelectBoardCommand", this));
-
-            Box.Boards
-                .Connect()
+            boardsChanges
                 .WhereReasonsAre(ListChangeReason.Add)
                 .Select(x => x.Select(q => q.Item.Current).First())
-                .Subscribe(bvm => bvm.MenuCommand = shell.AddInstanceCommand("Boards", bvm.Name, "SelectBoardCommand", this));
+                .Subscribe(bvm => bvm.MenuCommand = shell.AddInstanceCommand("Boards", bvm.Name, nameof(SelectBoardCommand), this));
 
-            Box.Boards
-                .Connect()
+            boardsChanges
                 .WhereReasonsAre(ListChangeReason.Remove)
                 .Select(x => x.Select(q => q.Item.Current).First())
                 .Subscribe(bvm => shell.RemoveCommand(bvm.MenuCommand));
+
+            var boxHasMoreThanOneBoard = boardsChanges
+                .Count()
+                .Select(x => x > 1);
+
+            DeleteBoardCommand = ReactiveCommand.CreateFromTask(DeleteBoardCommandExecute, boxHasMoreThanOneBoard);
+
+            PrevBoardCommand = ReactiveCommand.Create(() =>
+            {
+                var idx = BoardsInFile.IndexOf(CurrentBoard);
+
+                CurrentBoard = idx > 0 ?
+                    BoardsInFile[idx - 1] :
+                    BoardsInFile[BoardsInFile.Count - 1];
+            }, boxHasMoreThanOneBoard);
+
+            NextBoardCommand = ReactiveCommand.Create(() =>
+            {
+                var idx = BoardsInFile.IndexOf(CurrentBoard);
+
+                CurrentBoard = idx < BoardsInFile.Count - 1 ?
+                    BoardsInFile[idx + 1] :
+                    BoardsInFile[0];
+            }, boxHasMoreThanOneBoard);
+
+            boardsChanges.Connect();
+
+            BoardsInFile
+                .ToList()
+                .ForEach(x => x.MenuCommand = shell.AddInstanceCommand("Boards", x.Name, nameof(SelectBoardCommand), this));
+
 
             mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(Initialize)} finished");
         }
@@ -326,7 +330,7 @@ namespace Kamban.ViewModels
             mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(Activate)} started");
 
             var request = viewRequest as BoardViewRequest;
-            CurrentBoard = request?.Board ?? BoardsInFile.First();
+            CurrentBoard = request?.Board ?? BoardsInFile.FirstOrDefault();
 
             mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(Activate)} finished");
         }

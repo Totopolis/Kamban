@@ -7,7 +7,7 @@ namespace Kamban.ViewModels.Core
     {
         public ColumnViewModel() { }
 
-        [Reactive] public int Id { get; set; }
+        public int Id { get; set; }
         [Reactive] public int BoardId { get; set; }
         [Reactive] public string Name { get; set; }
         [Reactive] public int Size { get; set; }

@@ -13,7 +13,7 @@ namespace Kamban.ViewModels.Core
                 .Subscribe(x => ShowDescription = !string.IsNullOrEmpty(x));
         }
 
-        [Reactive] public int Id { get; set; }
+        public int Id { get; set; }
         [Reactive] public string Header { get; set; }
         [Reactive] public string Color { get; set; }
         [Reactive] public int ColumnDeterminant { get; set; }
