@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kamban.Templates", "Kamban.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kamban.Tests", "Kamban.Tests\Kamban.Tests.csproj", "{13718DEE-5C72-411F-B091-86B578B1D575}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kamban.Repository.Redmine", "Kamban.Repository.Redmine\Kamban.Repository.Redmine.csproj", "{2621B3F3-C179-4C8C-908E-3922D664047A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{13718DEE-5C72-411F-B091-86B578B1D575}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13718DEE-5C72-411F-B091-86B578B1D575}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13718DEE-5C72-411F-B091-86B578B1D575}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2621B3F3-C179-4C8C-908E-3922D664047A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2621B3F3-C179-4C8C-908E-3922D664047A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2621B3F3-C179-4C8C-908E-3922D664047A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2621B3F3-C179-4C8C-908E-3922D664047A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

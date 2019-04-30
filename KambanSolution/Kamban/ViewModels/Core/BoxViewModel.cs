@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using DynamicData;
+using Kamban.Extensions;
 using Kamban.Repository;
 using Monik.Common;
 using ReactiveUI;
@@ -17,9 +18,6 @@ namespace Kamban.ViewModels.Core
         [Reactive] public bool Loaded { get; set; }
 
         [Reactive] public string Title { get; set; }
-        [Reactive] public string Path { get; set; }
-        [Reactive] public string SizeOf { get; set; }
-        [Reactive] public DateTime LastEdit { get; set; }
         [Reactive] public int TotalTickets { get; set; }
         [Reactive] public string BoardList { get; set; }
 
@@ -66,7 +64,7 @@ namespace Kamban.ViewModels.Core
             ///////////////////
             var boardsChanges = Boards.Connect().Publish();
             boardsChanges
-                .WhenAnyPropertyChanged()
+                .WhenAnyAutoSavePropertyChanged()
                 .Subscribe(async bvm =>
                 {
                     mon.LogicVerbose($"Box.Boards.ItemChanged {bvm.Id}::{bvm.Name}::{bvm.Modified}");
@@ -108,7 +106,7 @@ namespace Kamban.ViewModels.Core
             ////////////////////
             var columnsChanges = Columns.Connect().Publish();
             columnsChanges
-                .WhenAnyPropertyChanged()
+                .WhenAnyAutoSavePropertyChanged()
                 .Subscribe(async cvm =>
                 {
                     mon.LogicVerbose($"Box.Columns.ItemChanged {cvm.Id}::{cvm.Name}::{cvm.Order}");
@@ -150,7 +148,7 @@ namespace Kamban.ViewModels.Core
             /////////////////
             var rowsChanges = Rows.Connect().Publish();
             rowsChanges
-                .WhenAnyPropertyChanged()
+                .WhenAnyAutoSavePropertyChanged()
                 .Subscribe(async rvm =>
                 {
                     mon.LogicVerbose($"Box.Rows.ItemChanged {rvm.Id}::{rvm.Name}::{rvm.Order}");
@@ -192,7 +190,7 @@ namespace Kamban.ViewModels.Core
             //////////////////
             var cardsChanges = Cards.Connect().Publish();
             cardsChanges
-                .WhenAnyPropertyChanged()
+                .WhenAnyAutoSavePropertyChanged()
                 .Subscribe(async cvm =>
                 {
                     mon.LogicVerbose($"Box.Cards.ItemChanged {cvm.Id}::{cvm.Header}");

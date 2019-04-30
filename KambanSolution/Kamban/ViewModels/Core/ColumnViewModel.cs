@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using Kamban.Repository.Attributes;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 namespace Kamban.ViewModels.Core
@@ -7,10 +8,10 @@ namespace Kamban.ViewModels.Core
     {
         public ColumnViewModel() { }
 
-        public int Id { get; set; }
-        [Reactive] public int BoardId { get; set; }
-        [Reactive] public string Name { get; set; }
-        [Reactive] public int Size { get; set; }
-        [Reactive] public int Order { get; set; }
+        [Reactive] public int Id { get; set; }
+        [AutoSave, Reactive] public int BoardId { get; set; }
+        [AutoSave, Reactive] public string Name { get; set; }
+        [AutoSave, Reactive] public int Size { get; set; }
+        [AutoSave, Reactive] public int Order { get; set; }
     }
 }
