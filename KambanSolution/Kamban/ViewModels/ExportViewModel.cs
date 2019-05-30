@@ -14,7 +14,7 @@ using DynamicData;
 using Kamban.Core;
 using Kamban.Export;
 using Kamban.Export.Options;
-using Kamban.Repository;
+using Kamban.Repository.Models;
 using Kamban.ViewModels.Core;
 using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;

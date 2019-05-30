@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Kamban.Repository.Models;
 using Redmine.Net.Api;
 using Redmine.Net.Api.Async;
 using Redmine.Net.Api.Types;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,8 +29,24 @@ namespace Kamban.Repository.Redmine
 
         public async Task<Box> Load()
         {
-            var box = new Box();
-            var issuesTask = _rm.GetObjectsAsync<Issue>(new NameValueCollection());
+            var schemeTask = LoadScheme();
+            var cardsTask = LoadCards(CardFilter.None);
+
+            var scheme = await schemeTask;
+            var cards = await cardsTask;
+
+            return new Box
+            {
+                Boards = scheme.Boards,
+                Rows = scheme.Rows,
+                Columns = scheme.Columns,
+                Cards = cards
+            };
+        }
+
+        public async Task<BoxScheme> LoadScheme()
+        {
+            var scheme = new BoxScheme();
             var trackerTask = _rm.GetObjectsAsync<Tracker>(new NameValueCollection());
             var statusesTask = _rm.GetObjectsAsync<IssueStatus>(new NameValueCollection());
             var projectsTask = _rm.GetObjectsAsync<Project>(
@@ -39,58 +56,74 @@ namespace Kamban.Repository.Redmine
                     {RedmineKeys.INCLUDE, RedmineKeys.ISSUE_CATEGORIES}
                 });
 
-            var issues = await issuesTask;
             var trackers = await trackerTask;
             var statuses = await statusesTask;
             var projects = await projectsTask;
 
-            box.Cards = issues.Select(c =>
-                new Card
-                {
-                    Id = c.Id,
-                    BoardId = c.Project.Id,
-                    RowId = c.Tracker.Id + trackers.Count * c.Project.Id,
-                    ColumnId = c.Status.Id + statuses.Count * c.Project.Id,
-                    Head = c.Subject,
-                    Body = c.Description,
-                    Created = c.CreatedOn.GetValueOrDefault(),
-                }).ToList();
+            var boards = new List<Board>(projects.Count);
+            foreach (var project in projects)
+            {
+                scheme.Rows.AddRange(trackers
+                    .Where(t => project.Trackers.Any(x => x.Id == t.Id))
+                    .Select((t, i) =>
+                        new Row
+                        {
+                            Id = t.Id + trackers.Count * project.Id,
+                            BoardId = project.Id,
+                            Name = t.Name,
+                            Order = i
+                        })
+                );
+                scheme.Columns.AddRange(statuses
+                    .Select((s, i) =>
+                        new Column
+                        {
+                            Id = s.Id + statuses.Count * project.Id,
+                            BoardId = project.Id,
+                            Name = s.Name,
+                            Order = i
+                        })
+                );
+                boards.Add(
+                    new Board
+                    {
+                        Id = project.Id,
+                        Name = project.Name,
+                        Created = project.CreatedOn.GetValueOrDefault()
+                    }
+                );
+            }
 
-            box.Boards = projects.Select(x =>
-                {
-                    var projectTrackers = new HashSet<int>(x.Trackers.Select(t => t.Id));
-                    box.Rows.AddRange(trackers
-                        .Where(t => projectTrackers.Contains(t.Id))
-                        .Select((t, i) =>
-                            new Row
-                            {
-                                Id = t.Id + trackers.Count * x.Id,
-                                BoardId = x.Id,
-                                Name = t.Name,
-                                Order = i,
-                                Height = 20
-                            })
-                    );
-                    box.Columns.AddRange(
-                        statuses.Select((s, i) =>
-                            new Column
-                            {
-                                Id = s.Id + statuses.Count * x.Id,
-                                BoardId = x.Id,
-                                Name = s.Name,
-                                Order = i,
-                                Width = 20
-                            })
-                    );
-                    return new Board
+            scheme.Boards = boards;
+
+            return scheme;
+        }
+
+        public async Task<List<Card>> LoadCards(CardFilter filter)
+        {
+            var trackerTask = _rm.GetObjectsAsync<Tracker>(new NameValueCollection());
+            var statusesTask = _rm.GetObjectsAsync<IssueStatus>(new NameValueCollection());
+            var issuesTask = _rm.GetObjectsAsync<Issue>(new NameValueCollection());
+
+            var trackers = await trackerTask;
+            var statuses = await statusesTask;
+            var issues = await issuesTask;
+
+            return issues
+                .Where(x => (filter.BoardIds == null || filter.BoardIds.Contains(x.Project.Id)) &&
+                            (filter.RowIds == null || filter.RowIds.Contains(x.Tracker.Id + trackers.Count * x.Project.Id)) &&
+                            (filter.ColumnIds == null || filter.ColumnIds.Contains(x.Status.Id + statuses.Count * x.Project.Id)))
+                .Select(x =>
+                    new Card
                     {
                         Id = x.Id,
-                        Name = x.Name,
-                        Created = x.CreatedOn.GetValueOrDefault()
-                    };
-                })
-                .ToList();
-            return box;
+                        BoardId = x.Project.Id,
+                        RowId = x.Tracker.Id + trackers.Count * x.Project.Id,
+                        ColumnId = x.Status.Id + statuses.Count * x.Project.Id,
+                        Head = x.Subject,
+                        Body = x.Description,
+                        Created = x.CreatedOn.GetValueOrDefault(),
+                    }).ToList();
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using Kamban.Export.Options;
-using Kamban.Repository;
+using Kamban.Repository.Models;
 
 namespace Kamban.Export
 {

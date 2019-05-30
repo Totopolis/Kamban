@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using DynamicData;
 using Kamban.Repository;
+using Kamban.Repository.Models;
 using Kamban.ViewModels.Core;
 using Monik.Common;
 using Moq;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Kamban.Repository.Models;
 
 namespace Kamban.Repository
 {

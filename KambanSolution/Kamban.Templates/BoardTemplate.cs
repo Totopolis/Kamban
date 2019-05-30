@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Kamban.Repository;
+using Kamban.Repository.Models;
 
 namespace Kamban.Templates
 {
