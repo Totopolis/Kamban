@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
              xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:wpfresources="clr-namespace:Kamban.Views.WpfResources"
@@ -13,12 +14,23 @@
              FontFamily="Italic"
              Background="{Binding Background}">
 
-    <!--UserControl.Resources>
-        <ResourceDictionary Source="WpfResources/TemplatesDictionary.xaml"/>
-    </-->
 
-    <UserControl.InputBindings>
+    <UserControl.Resources>
+        <CollectionViewSource x:Key="AvailableColumnsSorted" Source="{Binding AvailableColumns}">
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="Order" Direction="Ascending"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+        <CollectionViewSource x:Key="AvailableRowsSorted" Source="{Binding AvailableRows}">
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="Order" Direction="Ascending"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+    </UserControl.Resources>
+
+            <UserControl.InputBindings>
         <KeyBinding Command="{Binding CancelCommand}" Key="Esc" />
+   
     </UserControl.InputBindings>
 
     <Grid Margin="20">
@@ -50,7 +62,7 @@
             Orientation="Horizontal">
             <ComboBox Foreground="Gray"
                       Background="{Binding Background}"
-                      ItemsSource="{Binding AvailableColumns}"
+                      ItemsSource="{Binding  Source={StaticResource AvailableColumnsSorted}}"
                       SelectedItem="{Binding SelectedColumn}"
                       BorderThickness="0"
                       BorderBrush="{DynamicResource AccentBaseColorBrush}"
@@ -60,7 +72,7 @@
                       BorderThickness="0"
                       Background="{Binding Background}"
                       BorderBrush="{DynamicResource AccentBaseColorBrush}"
-                      ItemsSource="{Binding AvailableRows}"
+                      ItemsSource="{Binding Source={StaticResource AvailableRowsSorted}}"
                       DisplayMemberPath="Name"
                       SelectedItem="{Binding SelectedRow}"
                       />
