@@ -28,9 +28,8 @@
         </CollectionViewSource>
     </UserControl.Resources>
 
-            <UserControl.InputBindings>
+    <UserControl.InputBindings>
         <KeyBinding Command="{Binding CancelCommand}" Key="Esc" />
-   
     </UserControl.InputBindings>
 
     <Grid Margin="20">
