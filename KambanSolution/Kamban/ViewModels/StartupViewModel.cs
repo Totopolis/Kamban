@@ -45,6 +45,7 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> NewFileCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> OpenFileCommand { get; private set; }
         [Reactive] public ReactiveCommand<RecentViewModel, Unit> OpenRecentBoxCommand { get; private set; }
+        public ReactiveCommand<Unit, Unit> ImportCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> ExportCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> PrintCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> ShowStartupCommand { get; private set; }
@@ -98,11 +99,20 @@ namespace Kamban.ViewModels
             OpenPublicBoardCommand = ReactiveCommand
                 .CreateFromTask<PublicBoardJson>(OpenPublicBoardCommandExecute);
 
-            ExportCommand = ReactiveCommand.Create(() => 
-                this.shell.ShowView<ExportView>());
+            ImportCommand = ReactiveCommand.Create(() =>
+                this.shell.ShowView<ImportView>(null, new UiShowOptions { Title = "Import" }));
 
-            PrintCommand = ReactiveCommand.Create(PrintCommandExecute,
-                shell.WhenAny(x => x.SelectedView, x => x.Value?.ViewModel is BoardEditViewModel));
+            var whenBoardSelected = shell
+                .WhenAny(x => x.SelectedView, x => x.Value?.ViewModel is BoardEditViewModel)
+                .Publish();
+
+            ExportCommand = ReactiveCommand.Create(() =>
+                this.shell.ShowView<ExportView>(null, new UiShowOptions { Title = "Export" }),
+                whenBoardSelected);
+
+            PrintCommand = ReactiveCommand.Create(PrintCommandExecute, whenBoardSelected);
+
+            whenBoardSelected.Connect();
 
             ShowStartupCommand = ReactiveCommand.Create(() =>
             {
@@ -227,21 +237,24 @@ namespace Kamban.ViewModels
             if (initialized)
                 return;
 
-            shell.AddGlobalCommand("File", "Create", "NewFileCommand", this)
+            shell.AddGlobalCommand("File", "Create", nameof(NewFileCommand), this)
                 .SetHotKey(ModifierKeys.Control, Key.N);
 
-            shell.AddGlobalCommand("File", "Open", "OpenFileCommand", this)
+            shell.AddGlobalCommand("File", "Open", nameof(OpenFileCommand), this)
                 .SetHotKey(ModifierKeys.Control, Key.O);
 
-            shell.AddGlobalCommand("File", "Export", "ExportCommand", this)
+            shell.AddGlobalCommand("File", "Import", nameof(ImportCommand), this)
+                .SetHotKey(ModifierKeys.Control, Key.I);
+
+            shell.AddGlobalCommand("File", "Export", nameof(ExportCommand), this)
                 .SetHotKey(ModifierKeys.Control, Key.U);
 
-            shell.AddGlobalCommand("File", "Print", "PrintCommand", this)
+            shell.AddGlobalCommand("File", "Print", nameof(PrintCommand), this)
                 .SetHotKey(ModifierKeys.Control, Key.P);
 
-            shell.AddGlobalCommand("File", "Show Startup", "ShowStartupCommand", this, true);
+            shell.AddGlobalCommand("File", "Show Startup", nameof(ShowStartupCommand), this, true);
 
-            shell.AddGlobalCommand("File", "Exit", "ExitCommand", this);
+            shell.AddGlobalCommand("File", "Exit", nameof(ExitCommand), this);
 
             initialized = true;
 
@@ -254,26 +267,13 @@ namespace Kamban.ViewModels
 
         public async Task ReadAsFileAsync(HttpContent content, string filename, bool overwrite)
         {
-            string pathname = Path.GetFullPath(filename);
+            var pathname = Path.GetFullPath(filename);
             if (!overwrite && File.Exists(filename))
-                throw new InvalidOperationException(string.Format("File {0} already exists.", pathname));
+                throw new InvalidOperationException($"File {pathname} already exists.");
 
-            FileStream fileStream = null;
-            try
-            {
-                fileStream = new FileStream(pathname, FileMode.Create, FileAccess.Write, FileShare.None);
-                await content.CopyToAsync(fileStream).ContinueWith(
-                    (copyTask) =>
-                    {
-                        fileStream.Close();
-                    });
-            }
-            catch
-            {
-                if (fileStream != null)
-                    fileStream.Close();
-
-                throw;
+            using (Stream fs = new FileStream(pathname, FileMode.Create, FileAccess.Write, FileShare.None))
+            { 
+                await content.CopyToAsync(fs);
             }
         }
 
