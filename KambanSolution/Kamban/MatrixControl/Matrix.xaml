@@ -14,13 +14,18 @@
             BorderThickness="1"
             Margin="-1, 0, 0, 0"
             Background="#F4F4F4">
-                <TextBlock 
-                Margin="6" 
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
+                <TextBlock Margin="6" 
                 FontSize="14"
                 FontWeight="Bold"
-                Text="{Binding Name}"/>
+                VerticalAlignment="Center"> 
+              
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="xxx {0} ({1})">
+                            <Binding Path="Name"/>
+                            <Binding Path="Size"/>
+                        </MultiBinding>
+                   </TextBlock.Text>
+                </TextBlock>  
             </Border>
         </DataTemplate>
 
