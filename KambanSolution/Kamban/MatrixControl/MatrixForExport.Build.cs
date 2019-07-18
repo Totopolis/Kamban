@@ -1,6 +1,18 @@
 ﻿using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+using ReactiveUI.Legacy;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Numerics;
+using System.Reactive;
+
+
 
 namespace Kamban.MatrixControl
 {
@@ -29,6 +41,18 @@ namespace Kamban.MatrixControl
             for (var i = 0; i < columnCount; i++)
             {
                 var it = Columns[i];
+
+
+
+                // https://github.com/reactiveui/ReactiveUI        
+                 var numCards =Cards.Where(x => x.ColumnDeterminant == it.Id).Count();
+                 IObservable<Boolean> changedCard = Cards.WhenAnyValue(x => x, true);
+              // ReactiveCommand<ICard, int>  c_count =ReactiveCommand.CreateFromTask(_ => 34, changedCard)
+               //     c_count.ToProperty(it, x => x.CurNumberOfCards);
+               
+
+
+                //columns[i].CurNumberOfCards =4;
 
                 var cd = new ColumnDefinition
                 {

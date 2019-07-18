@@ -22,7 +22,7 @@
                     <TextBlock.Text>
                         <MultiBinding StringFormat="xxx {0} ({1})">
                             <Binding Path="Name"/>
-                            <Binding Path="Size"/>
+                            <Binding Path="CurNumberOfCards"/>
                         </MultiBinding>
                    </TextBlock.Text>
                 </TextBlock>  
