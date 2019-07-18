@@ -32,7 +32,7 @@ namespace Kamban.ViewModels
         [Reactive] public bool IsChecked { get; set; }
     }
 
-    public class ExportViewModel : ViewModelBase, IInitializableViewModel
+    public class ExportViewModel : ViewModelBase
     {
         private readonly IShell shell;
         private readonly IAppModel appModel;
@@ -238,11 +238,6 @@ namespace Kamban.ViewModels
 
             if (dialog.ShowDialog() == DialogResult.OK)
                 TargetFolder = dialog.SelectedPath;
-        }
-
-        public void Initialize(ViewRequest viewRequest)
-        {
-            Title = "Export";
         }
     }
 }

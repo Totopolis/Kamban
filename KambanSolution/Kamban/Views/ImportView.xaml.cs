@@ -5,9 +5,12 @@ using Ui.Wpf.Common.ViewModels;
 
 namespace Kamban.Views
 {
-    public partial class ExportView : IView
+    /// <summary>
+    /// Interaction logic for ImportView.xaml
+    /// </summary>
+    public partial class ImportView : IView
     {
-        public ExportView(ExportViewModel vm)
+        public ImportView(ImportViewModel vm)
         {
             InitializeComponent();
             ViewModel = vm;
@@ -18,7 +21,7 @@ namespace Kamban.Views
 
         public void Configure(UiShowOptions options)
         {
-            ViewModel.Title = options.Title;
+            ViewModel.Title = options.Title;            
         }
     }
 }
