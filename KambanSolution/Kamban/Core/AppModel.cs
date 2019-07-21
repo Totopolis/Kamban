@@ -121,7 +121,8 @@ namespace Kamban.Core
                         db.Cards.AddRange(issues.Select(x => mapper.Map<Issue, CardViewModel>(x)));
                     }
 
-              
+
+
                     db.Loaded = true;
                 }
                 // Skip broken file
@@ -228,6 +229,8 @@ namespace Kamban.Core
                         prj.CreateOrUpdateColumnAsync(ci);
 
                         cvm.Id = ci.Id;
+
+                        
                     }));
 
             db.Columns

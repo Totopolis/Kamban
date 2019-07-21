@@ -41,19 +41,7 @@ namespace Kamban.MatrixControl
             for (var i = 0; i < columnCount; i++)
             {
                 var it = Columns[i];
-
-
-
-                // https://github.com/reactiveui/ReactiveUI        
-                 var numCards =Cards.Where(x => x.ColumnDeterminant == it.Id).Count();
-                 IObservable<Boolean> changedCard = Cards.WhenAnyValue(x => x, true);
-              // ReactiveCommand<ICard, int>  c_count =ReactiveCommand.CreateFromTask(_ => 34, changedCard)
-               //     c_count.ToProperty(it, x => x.CurNumberOfCards);
-               
-
-
-                //columns[i].CurNumberOfCards =4;
-
+                
                 var cd = new ColumnDefinition
                 {
                     DataContext = it,

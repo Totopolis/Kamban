@@ -47,6 +47,8 @@ namespace Kamban.MatrixControl
                 var it = columns[i];
                 Monik?.ApplicationVerbose($"Matrix.RebuildGrid add column {it.Id}::{it.Name}::{it.Order}");
 
+
+
                 var cd = new ColumnDefinition();
                 cd.DataContext = it;
                 cd.Width = new GridLength(it.Size / 10, GridUnitType.Star);
@@ -61,6 +63,12 @@ namespace Kamban.MatrixControl
                 cc.ContextMenu = HeadContextMenu;
                 cc.ContentTemplate = (DataTemplate)this.Resources["DefaultHorizontalHeaderTemplate"];
                 MainGrid.Children.Add(cc);
+
+                // Update number of Cards in Column
+                CardsObservable
+                    .Filter(x => x.ColumnDeterminant == it.Id)
+                    .Subscribe(y =>  it.CurNumberOfCards += y.Adds - y.Removes  );
+                                                          
 
                 // dont draw excess splitter
                 if (i < columnCount - 1)
@@ -84,6 +92,8 @@ namespace Kamban.MatrixControl
                 var it = rows[i];
                 Monik?.ApplicationVerbose($"Matrix.RebuildGrid add row {it.Id}::{it.Name}::{it.Order}");
 
+            
+
                 var rd = new RowDefinition();
                 rd.DataContext = it;
                 rd.Height = new GridLength(it.Size / 10, GridUnitType.Star);
@@ -98,6 +108,13 @@ namespace Kamban.MatrixControl
                 cc.ContextMenu = HeadContextMenu;
                 cc.ContentTemplate = (DataTemplate)this.Resources["DefaulVerticalHeaderTemplate"];
                 MainGrid.Children.Add(cc);
+
+
+                // Update number of Cards in Column
+                CardsObservable
+                    .Filter(x => x.RowDeterminant == it.Id)
+                    .Subscribe(y => it.CurNumberOfCards += y.Adds - y.Removes);
+
 
                 // dont draw excess splitter
                 if (i < rowCount - 1)
