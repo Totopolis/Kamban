@@ -1,18 +1,6 @@
 ﻿using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
-using ReactiveUI.Legacy;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Numerics;
-using System.Reactive;
-
-
 
 namespace Kamban.MatrixControl
 {
@@ -41,7 +29,7 @@ namespace Kamban.MatrixControl
             for (var i = 0; i < columnCount; i++)
             {
                 var it = Columns[i];
-                
+
                 var cd = new ColumnDefinition
                 {
                     DataContext = it,
