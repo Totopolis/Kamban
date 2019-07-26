@@ -27,10 +27,11 @@
                                 <DataTrigger.Binding>
                                     <MultiBinding>
                                         <MultiBinding.Converter>
-                                            <local:GreaterThan/>
+                                            <local:GreaterThanLimit/>
                                         </MultiBinding.Converter>
                                         <Binding Path="CurNumberOfCards"/>
-                                        <Binding Source="{StaticResource limit}"/>
+                                        <Binding Path="MaxNumberOfCards"/>
+                                        <Binding Path="LimitSet"/>
                                     </MultiBinding>
                                 </DataTrigger.Binding>
                                 <Setter Property="Border.Background" Value="NavajoWhite" />
@@ -39,10 +40,11 @@
                                 <DataTrigger.Binding>
                                     <MultiBinding>
                                         <MultiBinding.Converter>
-                                            <local:GreaterThan/>
+                                            <local:GreaterThanLimit/>
                                         </MultiBinding.Converter>
                                         <Binding Path="CurNumberOfCards"/>
-                                        <Binding Source="{StaticResource limit}"/>
+                                        <Binding Path="MaxNumberOfCards"/>
+                                        <Binding Path="LimitSet"/>
                                     </MultiBinding>
                                 </DataTrigger.Binding>
                                 <Setter Property="Border.Background" Value="#F4F4F4" />
@@ -56,17 +58,39 @@
                 FontSize="14"
                 FontWeight="Bold"
                 VerticalAlignment="Center"
-                HorizontalAlignment="Center"> 
-              
-                    <TextBlock.Text>
-                        <MultiBinding StringFormat=" {0} ({1})">
-                            <Binding Path="Name"/>
-                            <Binding Path="CurNumberOfCards"/>
-                        </MultiBinding>
-                   </TextBlock.Text>
-                    
-                    
-                    
+                HorizontalAlignment="Center">
+
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+
+                                <DataTrigger  Binding="{Binding LimitSet}"  Value="False">
+                                    <Setter Property="TextBlock.Text">
+                                        <Setter.Value>
+                                            <MultiBinding StringFormat=" {0} ({1})">
+                                                <Binding Path="Name"/>
+                                                <Binding Path="CurNumberOfCards"/>
+                                            </MultiBinding>
+                                        </Setter.Value>
+                                    </Setter>
+                                 </DataTrigger>
+                                <DataTrigger  Binding="{Binding LimitSet}"  Value="True">
+                                    <Setter Property="TextBlock.Text">
+                                        <Setter.Value>
+                                            <MultiBinding StringFormat=" {0} ({1}/{2})">
+                                                <Binding Path="Name"/>
+                                                <Binding Path="CurNumberOfCards"/>
+                                                <Binding Path="MaxNumberOfCards"/>
+                                            </MultiBinding>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+
+                            </Style.Triggers>
+                   </Style>
+             </TextBlock.Style>
+
+
                 </TextBlock>  
             </Border>
         </DataTemplate>

@@ -20,15 +20,15 @@ namespace Kamban.MatrixControl
     /// </summary>
     /// 
 
-    public class GreaterThan : IMultiValueConverter
+    public class GreaterThanLimit : IMultiValueConverter
     {
 
 
         object IMultiValueConverter.Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values.Length != 2) return false;
+            if (values.Length != 3) return false;
             
-            return (Int32)values[0] > (Int32)values[1]; //  (int)values[1];
+            return ((Int32)values[0] > (Int32)values[1]) & ((bool)values[2]); 
         }
 
         object[] IMultiValueConverter.ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
