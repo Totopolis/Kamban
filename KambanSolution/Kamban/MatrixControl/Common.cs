@@ -10,12 +10,33 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Data;
+using System.Globalization;
 
 namespace Kamban.MatrixControl
 {
     /// <summary>
     /// Row or column description
     /// </summary>
+    /// 
+
+    public class GreaterThan : IMultiValueConverter
+    {
+
+
+        object IMultiValueConverter.Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values.Length != 2) return false;
+            
+            return (Int32)values[0] > (Int32)values[1]; //  (int)values[1];
+        }
+
+        object[] IMultiValueConverter.ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public interface IDim
     {
         int Id { get; set; }

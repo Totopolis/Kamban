@@ -3,17 +3,55 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:Kamban.MatrixControl"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
+
+        <sys:Int32 x:Key="limit">4</sys:Int32>
+
         <DataTemplate x:Key="DefaultHorizontalHeaderTemplate">
+
+           
+            
             <Border
             BorderBrush="#E1E1E1"
             BorderThickness="1"
-            Margin="-1, 0, 0, 0"
-            Background="#F4F4F4">
+            Margin="-1, 0, 0, 0"            >
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <DataTrigger Value="True">
+                                <DataTrigger.Binding>
+                                    <MultiBinding>
+                                        <MultiBinding.Converter>
+                                            <local:GreaterThan/>
+                                        </MultiBinding.Converter>
+                                        <Binding Path="CurNumberOfCards"/>
+                                        <Binding Source="{StaticResource limit}"/>
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+                                <Setter Property="Border.Background" Value="NavajoWhite" />
+                            </DataTrigger>
+                            <DataTrigger Value="False">
+                                <DataTrigger.Binding>
+                                    <MultiBinding>
+                                        <MultiBinding.Converter>
+                                            <local:GreaterThan/>
+                                        </MultiBinding.Converter>
+                                        <Binding Path="CurNumberOfCards"/>
+                                        <Binding Source="{StaticResource limit}"/>
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+                                <Setter Property="Border.Background" Value="#F4F4F4" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+
+
                 <TextBlock Margin="6" 
                 FontSize="14"
                 FontWeight="Bold"
@@ -26,6 +64,9 @@
                             <Binding Path="CurNumberOfCards"/>
                         </MultiBinding>
                    </TextBlock.Text>
+                    
+                    
+                    
                 </TextBlock>  
             </Border>
         </DataTemplate>
@@ -36,13 +77,16 @@
             BorderThickness="1"
             Margin="0, -1, 0, 0"
             Background="#F4F4F4">
+                
+                
                 <TextBlock 
                 Margin="6" 
                 FontSize="14"
                 FontWeight="Bold"
                 VerticalAlignment="Center"
                 HorizontalAlignment="Center">
-                    <TextBlock.Text>
+                                    
+                     <TextBlock.Text>
                         <MultiBinding StringFormat=" {0} ({1})">
                             <Binding Path="Name"/>
                             <Binding Path="CurNumberOfCards"/>
@@ -52,6 +96,9 @@
                     <TextBlock.LayoutTransform>
                         <RotateTransform Angle="270"/>
                     </TextBlock.LayoutTransform>
+                    
+                    
+                
                 </TextBlock>
             </Border>
         </DataTemplate>
