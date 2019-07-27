@@ -16,6 +16,11 @@ namespace Kamban.ViewModels
     {
         private async Task HeadRenameCommandExecute(IDim head)
         {
+            Kamban.Views.HeaderPropertyView PropView = new Kamban.Views.HeaderPropertyView();
+            
+            PropView.ShowDialog();
+
+
             var headTxt = head is ColumnViewModel ? "column" : "row";
             headTxt += $" {head.Name}";
 

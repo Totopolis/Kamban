@@ -313,6 +313,9 @@
     <Compile Include="Views\StartupView.xaml.cs">
       <DependentUpon>StartupView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\HeaderPropertyView.xaml.cs">
+      <DependentUpon>HeaderPropertyView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\WizardView.xaml.cs">
       <DependentUpon>WizardView.xaml</DependentUpon>
     </Compile>
@@ -405,6 +408,10 @@
     <Page Include="Views\StartupView.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="Views\HeaderPropertyView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\WizardView.xaml">
       <SubType>Designer</SubType>

@@ -54,7 +54,7 @@
             <mykanban:Matrix.HeadContextMenu>
                 <ContextMenu>
                     <MenuItem 
-                        Header="Rename"
+                        Header="Edit Properties"
                         CommandParameter="{Binding HeadOfContextMenu}"
                         Command="{Binding HeadRenameCommand}"/>
                     <MenuItem

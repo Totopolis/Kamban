@@ -62,11 +62,14 @@ namespace Kamban.MatrixControl
                 cc.ContentTemplate = (DataTemplate)this.Resources["DefaultHorizontalHeaderTemplate"];
                 MainGrid.Children.Add(cc);
 
-                // Update number of Cards in Column
+                // Update number of Cards in Column   // FIXMEE .. Bug if columns are addeded. Then Subsribe is evaluated twice.
+                //                CardsObservable
+                //                  .Filter(x => x.ColumnDeterminant == it.Id)
+                //                .Subscribe(y =>  it.CurNumberOfCards += y.Adds - y.Removes  );
                 CardsObservable
                     .Filter(x => x.ColumnDeterminant == it.Id)
-                    .Subscribe(y =>  it.CurNumberOfCards += y.Adds - y.Removes  );
-                                                          
+                    .ToCollection()
+                    .Subscribe(x => it.CurNumberOfCards = x.Count());
 
                 // dont draw excess splitter
                 if (i < columnCount - 1)
