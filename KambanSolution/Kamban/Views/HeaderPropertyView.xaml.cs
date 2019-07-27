@@ -11,6 +11,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Text.RegularExpressions;
+using Kamban.Model;
 
 namespace Kamban.Views
 {
@@ -24,5 +26,17 @@ namespace Kamban.Views
         {
             InitializeComponent();
         }
-    }
+
+        public ColumnViewModel Cvm { get; set; }
+
+        public String HeadName { get; set; }
+        
+        
+
+        private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
+        }
+}
 }

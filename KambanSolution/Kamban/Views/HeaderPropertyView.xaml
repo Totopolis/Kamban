@@ -5,10 +5,31 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Kamban.Views"
         mc:Ignorable="d"
-        Title="Window1" Height="450" Width="800">
+        Title="Properties" Height="150" Width="300">
   <Grid Margin="10,0,10,10">
-    <TextBlock x:Name = "textBlock" HorizontalAlignment = "Left"
-         Margin = "235,143,0,0" TextWrapping = "Wrap" Text = "Hello World!"
-         VerticalAlignment = "Top" Height = "44" Width = "102" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="10" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="10" />
+        </Grid.ColumnDefinitions>
+        <Label Grid.Row="1" Grid.Column="1" Content="Name" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="1" Grid.Column="2" Width="150" Text="Test" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <Label Grid.Row="2" Grid.Column="1" Content="Card Limit " HorizontalAlignment="Right" VerticalAlignment="Center"/>
+        <CheckBox Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+
+        <Label Grid.Row="3" Grid.Column="1" Content="Max Cards" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="3" Grid.Column="2" Width="20" Text="1" PreviewTextInput="NumberValidationTextBox" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+
+
+
+ 
   </Grid>
 </Window>
