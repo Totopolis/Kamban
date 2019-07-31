@@ -289,6 +289,8 @@
     <Compile Include="ViewModels\BoardEditViewModel.Commands.cs" />
     <Compile Include="ViewModels\BoardEditViewModel.cs" />
     <Compile Include="ViewModels\ExportViewModel.cs" />
+    <Compile Include="ViewModels\HeaderPropertyViewModel.cs" />
+    <Compile Include="ViewModels\HeaderPropertyViewRequest.cs" />
     <Compile Include="ViewModels\IssueViewModel.cs" />
     <Compile Include="ViewModels\IssueViewRequest.cs" />
     <Compile Include="ViewModels\MoveViewModel.cs" />

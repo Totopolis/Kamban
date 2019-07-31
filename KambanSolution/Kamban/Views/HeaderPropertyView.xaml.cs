@@ -19,7 +19,7 @@ namespace Kamban.Views
     /// <summary>
     /// Interaktionslogik für Window1.xaml
     /// </summary>
-    public partial class HeaderPropertyView : Window
+    public partial class HeaderPropertyView 
     {
         public HeaderPropertyView()
         

@@ -16,11 +16,11 @@ namespace Kamban.ViewModels
     {
         private async Task HeadRenameCommandExecute(IDim head)
         {
-            Kamban.Views.HeaderPropertyView PropView = new Kamban.Views.HeaderPropertyView();
-            PropView.HeadName = head.Name;   // FIXME  shoudl work for rows also 
+   //         Kamban.Views.HeaderPropertyView PropView = new Kamban.Views.HeaderPropertyView();
+      //      PropView.HeadName = head.Name;   // FIXME  shoudl work for rows also 
 
 
-            PropView.ShowDialog();
+         //   PropView.ShowDialog();
 
 
             var headTxt = head is ColumnViewModel ? "column" : "row";

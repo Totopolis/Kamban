@@ -54,6 +54,10 @@
         <views:IssueView/>
     </DataTemplate>
 
+    <DataTemplate DataType="{x:Type viewModels:HeaderPropertyViewModel }">
+        <views:HeaderPropertyView/>
+    </DataTemplate>
+
     <DataTemplate DataType="{x:Type viewModels:MoveViewModel }">
         <views:MoveView/>
     </DataTemplate>
