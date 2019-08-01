@@ -36,7 +36,13 @@ namespace Kamban.ViewModels
         private BoardViewModel board;
         IDim Header { get; set; }
 
+       
+        public String TitleText { get; set;  }
 
+
+        private String OldName;
+        private int OldMaxNumberOfCards;
+        private bool OldLimitSet;
 
         [Reactive] public CardViewModel Card { get; set; }
 
@@ -98,16 +104,21 @@ namespace Kamban.ViewModels
 
         private void HeaderCancelCommandExecute()
         {
+            // restore previous Values
+            Header.LimitSet = OldLimitSet;
+            HeaderMaxNumber = OldMaxNumberOfCards;
+            Header.Name = OldName;
+
+
             IsOpened = false;
-            //throw new NotImplementedException();
+            
         }
 
         private void HeaderSaveCommandExecute()
         {
-            Header.Name = HeaderName ;
-
+            
             IsOpened = false;
-            //throw new NotImplementedException();
+            
         }
 
 
@@ -122,8 +133,17 @@ namespace Kamban.ViewModels
             db = request.Db;
             board = request.Board;
 
+            if (Header == null)
+                return;
+
+            OldLimitSet = Header.LimitSet;
+            OldMaxNumberOfCards = HeaderMaxNumber;
+            OldName = Header.Name;
+
+            TitleText = Header is ColumnViewModel ? "Column Properties" : "Row Properties";
             IsOpened = true;
 
+            this.RaisePropertyChanged("TitleText");
             this.RaisePropertyChanged("HeaderName");
             this.RaisePropertyChanged("HeaderLimitSet");
             this.RaisePropertyChanged("HeaderMaxNumber");

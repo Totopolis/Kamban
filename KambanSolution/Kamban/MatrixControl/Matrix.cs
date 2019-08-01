@@ -147,6 +147,22 @@ namespace Kamban.MatrixControl
             HeadOfContextMenu = border.DataContext;
         }
 
+        private void Head_DoubleClick(object sender, MouseEventArgs e)
+        {
+            var ic = sender as ContentControl;
+            if (ic == null) return;
+
+          
+        /*    var point = e.GetPosition(ic);
+            HitTestResult result = VisualTreeHelper.HitTest(ic, point);
+
+            var border = result.VisualHit as Border;
+            if (border == null) return;
+            HeadOfContextMenu = border.DataContext; */
+        }
+
+
+
         void IDropTarget.DragOver(IDropInfo dropInfo)
         {
             dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;

@@ -36,6 +36,7 @@
             CardOfContextMenu="{Binding IssueOfContextMenu, Mode=TwoWay}"
             HeadOfContextMenu="{Binding HeadOfContextMenu, Mode=TwoWay}"
             CellDoubleClickCommand="{Binding CellDoubleClickCommand}"
+                        
             mykanban:ContextMenuServiceExtensions.DataContext="{Binding}">
 
             <mykanban:Matrix.CardContextMenu>
@@ -53,15 +54,15 @@
 
             <mykanban:Matrix.HeadContextMenu>
                 <ContextMenu>
+               <!--     <MenuItem 
+                        Header="Edit Properties"
+                        CommandParameter="{Binding HeadOfContextMenu}"
+                        Command="{Binding HeadRenameCommand}"/>  -->
+
                     <MenuItem 
                         Header="Edit Properties"
                         CommandParameter="{Binding HeadOfContextMenu}"
-                        Command="{Binding HeadRenameCommand}"/>
-
-                    <MenuItem 
-                        Header="Doubel Click Experimental"
-                        CommandParameter="{Binding HeadOfContextMenu}"
-                        Command="{Binding HeaderDoubleClickCommand}"/>
+                        Command="{Binding HeaderPropertyChanged}"/>
 
 
                     <MenuItem

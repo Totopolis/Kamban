@@ -60,6 +60,7 @@ namespace Kamban.MatrixControl
                 cc.MouseMove += Head_MouseMove;
                 cc.ContextMenu = HeadContextMenu;
                 cc.ContentTemplate = (DataTemplate)this.Resources["DefaultHorizontalHeaderTemplate"];
+                cc.MouseDoubleClick += Head_DoubleClick; 
                 MainGrid.Children.Add(cc);
 
 

@@ -62,8 +62,8 @@ namespace Kamban.ViewModels
 
         [Reactive] public object HeadOfContextMenu { get; set; }
 
-        public ReactiveCommand<IDim, Unit> HeadRenameCommand { get; set; }
-        public ReactiveCommand<IDim, Unit> HeaderDoubleClickCommand { get; set; }
+   //     public ReactiveCommand<IDim, Unit> HeadRenameCommand { get; set; }
+        public ReactiveCommand<IDim, Unit> HeaderPropertyChanged { get; set; }
         public ReactiveCommand<IDim, Unit> HeadDeleteCommand { get; set; }
         public ReactiveCommand<IDim, Unit> HeadDeleteCardsinColumn { get; set; }
 
@@ -108,7 +108,7 @@ namespace Kamban.ViewModels
             HeaderPropertyFlyout = new HeaderPropertyViewModel();
             MoveFlyout = new MoveViewModel(mapper);
 
-            HeaderDoubleClickCommand = ReactiveCommand.Create<IDim>(c => 
+            HeaderPropertyChanged = ReactiveCommand.Create<IDim>(c => 
             {
                 HeaderPropertyFlyout.Initialize(new HeaderPropertyViewRequest
                 {
@@ -131,8 +131,8 @@ namespace Kamban.ViewModels
             DeleteIssueCommand = ReactiveCommand
                 .Create<ICard>(async card => await DeleteCardCommandExecuteAsync(card));
 
-            HeadRenameCommand = ReactiveCommand
-                .Create<IDim>(async head => await HeadRenameCommandExecute(head));
+      //      HeadRenameCommand = ReactiveCommand
+      //          .Create<IDim>(async head => await HeadRenameCommandExecute(head));
 
             HeadDeleteCommand = ReactiveCommand
                 .Create<IDim>(async head => await HeadDeleteCommandExecute(head));

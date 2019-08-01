@@ -37,7 +37,7 @@ namespace Kamban.MatrixControl
         }
     }
 
-    public interface IDim
+    public interface IDim 
     {
         int Id { get; set; }
         string Name { get; set; }

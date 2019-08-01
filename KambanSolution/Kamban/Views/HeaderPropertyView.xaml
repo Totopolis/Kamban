@@ -13,6 +13,7 @@
     <Grid Margin="10,0,10,10">
         <Grid.RowDefinitions>
             <RowDefinition Height="10" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
@@ -25,16 +26,18 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="10" />
         </Grid.ColumnDefinitions>
-        <Label Grid.Row="1" Grid.Column="1" Content="Name" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-        <TextBox x:Name="TB_HeaderName"   Grid.Row="1" Grid.Column="2" Text ="{Binding Path=HeaderName}" Width="150" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <Label Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Content ="{Binding Path=TitleText}" HorizontalAlignment="Center" VerticalAlignment="Center" BorderThickness="0" FontSize="20" FontWeight="Bold"/>
+        
+        <Label Grid.Row="2" Grid.Column="1" Content="Name" HorizontalAlignment="Right" VerticalAlignment="Center" BorderThickness="0"/>
+        <TextBox x:Name="TB_HeaderName"   Grid.Row="2" Grid.Column="2" Text ="{Binding Path=HeaderName}" Width="150" HorizontalAlignment="Left" VerticalAlignment="Center"/>
 
-        <Label Grid.Row="2" Grid.Column="1" Content="Card Limit " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-        <CheckBox Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="{Binding Path=HeaderLimitSet}"/>
+        <Label Grid.Row="3" Grid.Column="1" Content="Card Limit " HorizontalAlignment="Right" VerticalAlignment="Center" BorderThickness="0"/>
+        <CheckBox Grid.Row="3" Grid.Column="2" x:Name="CB_CardLimit" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="{Binding Path=HeaderLimitSet}"/>
 
-        <Label Grid.Row="3" Grid.Column="1" Content="Max Cards" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-        <TextBox Grid.Row="3" Grid.Column="2" Width="20" Text ="{Binding Path=HeaderMaxNumber}"  PreviewTextInput="NumberValidationTextBox" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <Label Grid.Row="4" Grid.Column="1" Content="Max Cards" HorizontalAlignment="Right" IsEnabled="{Binding ElementName=CB_CardLimit, Path=IsChecked}" VerticalAlignment="Center" BorderThickness="0"/>
+        <TextBox Grid.Row="4" Grid.Column="2" Width="80" Text ="{Binding Path=HeaderMaxNumber}" IsEnabled="{Binding ElementName=CB_CardLimit, Path=IsChecked}"  PreviewTextInput="NumberValidationTextBox" HorizontalAlignment="Left" VerticalAlignment="Center"/>
 
-        <StackPanel Grid.Row="4"
+        <StackPanel Grid.Row="5"
                     Grid.Column="0"
                     Grid.ColumnSpan="3"
                     Orientation="Horizontal"

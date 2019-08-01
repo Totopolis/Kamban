@@ -14,14 +14,8 @@ namespace Kamban.ViewModels
 {
     public partial class BoardEditViewModel
     {
-        private async Task HeadRenameCommandExecute(IDim head)
+/*        private async Task HeadRenameCommandExecute(IDim head)
         {
-   //         Kamban.Views.HeaderPropertyView PropView = new Kamban.Views.HeaderPropertyView();
-      //      PropView.HeadName = head.Name;   // FIXME  shoudl work for rows also 
-
-
-         //   PropView.ShowDialog();
-
 
             var headTxt = head is ColumnViewModel ? "column" : "row";
             headTxt += $" {head.Name}";
@@ -45,7 +39,7 @@ namespace Kamban.ViewModels
                 column.Name = ts;
             else
                 row.Name = ts;
-        }
+        }  */
 
         private async Task HeadDeleteCardsinColumnExecute(IDim head)
         {
