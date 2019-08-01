@@ -13,6 +13,9 @@ namespace Kamban.Model
         [Reactive] public string Name { get; set; }
         [Reactive] public int Size { get; set; }
         [Reactive] public int Order { get; set; }
-        [Reactive] public int CurNumberOfCards { get; set; } = 0; 
+        [Reactive] public int CurNumberOfCards { get; set; }
+
+        [Reactive] public bool LimitSet { get; set; }
+        [Reactive] public int MaxNumberOfCards { get; set; }
     }
 }

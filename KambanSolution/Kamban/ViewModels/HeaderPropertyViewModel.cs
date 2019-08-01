@@ -22,18 +22,58 @@ using Ui.Wpf.Common.ViewModels;
 using Brush = System.Windows.Media.Brush;
 using ColorConverter = System.Windows.Media.ColorConverter;
 using WpfColor = System.Windows.Media.Color;
-
+using System.Windows;
+using System.ComponentModel;
 
 namespace Kamban.ViewModels
 {
-    public class HeaderPropertyViewModel : ViewModelBase, IInitializableViewModel
+    public class HeaderPropertyViewModel : ViewModelBase, IInitializableViewModel ,INotifyPropertyChanged
     {
 
-        private DbViewModel db;
+     //   public event PropertyChangedEventHandler PropertyChanged;
 
-        public ReadOnlyObservableCollection<String> HeaderName { get; set; }
+        private DbViewModel db;
+        private BoardViewModel board;
+        IDim Header { get; set; }
+
+
+
+        [Reactive] public CardViewModel Card { get; set; }
+
         
-        public String xyz ="xyz";
+        public string HeaderName
+        {
+            get { return Header != null ? Header.Name : "nulll"; }
+            set { if (Header != null)
+                    {
+                    Header.Name = value;
+                    }
+                }
+        }
+
+        public bool HeaderLimitSet
+        {
+            get { return Header != null ? Header.LimitSet : false; }
+            set
+            {
+                if (Header != null)
+                {
+                    Header.LimitSet = value;
+                }
+            }
+        }
+
+        public int HeaderMaxNumber
+        {
+            get { return Header != null ? Header.MaxNumberOfCards : 8 ; }
+            set
+            {
+                if (Header != null)
+                {
+                    Header.MaxNumberOfCards = value;
+                }
+            }
+        }
 
 
         public ReactiveCommand<Unit, Unit> HeaderCancelCommand { get; set; }
@@ -64,37 +104,29 @@ namespace Kamban.ViewModels
 
         private void HeaderSaveCommandExecute()
         {
+            Header.Name = HeaderName ;
+
             IsOpened = false;
             //throw new NotImplementedException();
         }
 
+
         public void Initialize(ViewRequest viewRequest)
         {
-            var request = viewRequest as HeaderPropertyViewRequest;
-            
+            HeaderPropertyViewRequest request = viewRequest as HeaderPropertyViewRequest;
 
             if (request == null)
                 return;
 
-            IDim Header = request.Header;
+            Header = request.Header;
             db = request.Db;
-
-
-
-            ColumnViewModel cvm = (ColumnViewModel)Header;
-
-              db.Columns
-                  .Connect()
-                  .AutoRefresh()
-                  .Filter(x => x.BoardId == 1 & x.Id == Header.Id)
-                 
-                  .Cast(x => x.Name)
-                  .Bind(out ReadOnlyObservableCollection<String> temp)
-                  .Subscribe();
-
-            HeaderName=   temp;
+            board = request.Board;
 
             IsOpened = true;
+
+            this.RaisePropertyChanged("HeaderName");
+            this.RaisePropertyChanged("HeaderLimitSet");
+            this.RaisePropertyChanged("HeaderMaxNumber");
 
 
 

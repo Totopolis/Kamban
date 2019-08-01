@@ -26,12 +26,13 @@
             <ColumnDefinition Width="10" />
         </Grid.ColumnDefinitions>
         <Label Grid.Row="1" Grid.Column="1" Content="Name" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-        <TextBox Grid.Row="1" Grid.Column="2" Width="150" Text="Hallo{Binding Path=xyz, Mode=TwoWay}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <TextBox x:Name="TB_HeaderName"   Grid.Row="1" Grid.Column="2" Text ="{Binding Path=HeaderName}" Width="150" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+
         <Label Grid.Row="2" Grid.Column="1" Content="Card Limit " HorizontalAlignment="Right" VerticalAlignment="Center"/>
-        <CheckBox Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <CheckBox Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="{Binding Path=HeaderLimitSet}"/>
 
         <Label Grid.Row="3" Grid.Column="1" Content="Max Cards" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-        <TextBox Grid.Row="3" Grid.Column="2" Width="20" Text="1" PreviewTextInput="NumberValidationTextBox" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="3" Grid.Column="2" Width="20" Text ="{Binding Path=HeaderMaxNumber}"  PreviewTextInput="NumberValidationTextBox" HorizontalAlignment="Left" VerticalAlignment="Center"/>
 
         <StackPanel Grid.Row="4"
                     Grid.Column="0"

@@ -27,16 +27,22 @@ namespace Kamban.Views
             InitializeComponent();
         }
 
-        public ColumnViewModel Cvm { get; set; }
+   //     public string HeaderName { get; set; }
 
-        public String HeadName { get; set; }
-        
-        
+
+       private void update_Bindings()
+        {
+            TB_HeaderName.GetBindingExpression(TextBox.TextProperty).UpdateSource();
+        }
+
+
 
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
             Regex regex = new Regex("[^0-9]+");
             e.Handled = regex.IsMatch(e.Text);
+
+            
         }
 }
 }

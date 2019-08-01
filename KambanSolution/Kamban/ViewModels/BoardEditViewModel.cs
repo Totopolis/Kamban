@@ -113,7 +113,9 @@ namespace Kamban.ViewModels
                 HeaderPropertyFlyout.Initialize(new HeaderPropertyViewRequest
                 {
                     Header = c,
-                    Db = this.Db
+                    Db = this.Db,
+                    BoardVM = this,
+                    Board = CurrentBoard
 
                 }); ;
                 ;
