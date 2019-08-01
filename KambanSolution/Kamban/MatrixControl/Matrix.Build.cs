@@ -109,7 +109,8 @@ namespace Kamban.MatrixControl
                 // Update number of Cards in Column
                 CardsObservable
                     .Filter(x => x.RowDeterminant == it.Id)
-                    .Subscribe(y => it.CurNumberOfCards += y.Adds - y.Removes);
+                    .ToCollection()
+                    .Subscribe(x => it.CurNumberOfCards = x.Count());
 
 
                 // dont draw excess splitter
