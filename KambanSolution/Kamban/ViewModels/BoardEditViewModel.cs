@@ -10,6 +10,7 @@ using DynamicData;
 using DynamicData.Aggregation;
 using DynamicData.Binding;
 using Kamban.ViewModels.Core;
+using Kamban.ViewRequests;
 using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
 using Monik.Common;

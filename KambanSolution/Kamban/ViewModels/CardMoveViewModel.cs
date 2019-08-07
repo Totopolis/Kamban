@@ -7,6 +7,7 @@ using System.Windows.Media;
 using AutoMapper;
 using DynamicData;
 using Kamban.ViewModels.Core;
+using Kamban.ViewRequests;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;

@@ -80,6 +80,7 @@ namespace Kamban
             ConfigureView<BoardEditForExportViewModel, BoardEditForExportView>(builder);
             ConfigureView<ExportViewModel, ExportView>(builder);
             ConfigureView<ImportViewModel, ImportView>(builder);
+            ConfigureView<ImportSchemeViewModel, ImportSchemeView>(builder);
 
             return builder.Build();
         }
