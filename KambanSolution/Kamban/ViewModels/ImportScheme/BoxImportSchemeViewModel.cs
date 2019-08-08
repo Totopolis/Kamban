@@ -152,5 +152,24 @@ namespace Kamban.ViewModels.ImportScheme
 
             SelectedBoard = _boardsSource.Items.FirstOrDefault();
         }
+
+        public CardFilter GetCardFilter()
+        {
+            return new CardFilter
+            {
+                BoardIds = _boardsSource.Items
+                    .Where(x => x.IsSelected)
+                    .Select(x => x.Id)
+                    .ToArray(),
+                ColumnIds = _columnsSource.Items
+                    .Where(x => x.IsSelected)
+                    .Select(x => x.Id)
+                    .ToArray(),
+                RowIds = _rowsSource.Items
+                    .Where(x => x.IsSelected)
+                    .Select(x => x.Id)
+                    .ToArray()
+            };
+        }
     }
 }

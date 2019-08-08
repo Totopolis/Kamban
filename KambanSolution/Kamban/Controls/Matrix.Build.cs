@@ -47,7 +47,7 @@ namespace Kamban.MatrixControl
 
                 var cd = new ColumnDefinition();
                 cd.DataContext = it;
-                cd.Width = new GridLength(it.Size / 10, GridUnitType.Star);
+                cd.Width = new GridLength(it.Size / 10.0, GridUnitType.Star);
                 MainGrid.ColumnDefinitions.Add(cd);
 
                 PropertyDescriptor pd = DependencyPropertyDescriptor.FromProperty(ColumnDefinition.WidthProperty, typeof(ColumnDefinition));
@@ -84,7 +84,7 @@ namespace Kamban.MatrixControl
 
                 var rd = new RowDefinition();
                 rd.DataContext = it;
-                rd.Height = new GridLength(it.Size / 10, GridUnitType.Star);
+                rd.Height = new GridLength(it.Size / 10.0, GridUnitType.Star);
                 MainGrid.RowDefinitions.Add(rd);
 
                 PropertyDescriptor pd = DependencyPropertyDescriptor.FromProperty(RowDefinition.HeightProperty, typeof(RowDefinition));
