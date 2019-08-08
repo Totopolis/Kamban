@@ -21,25 +21,33 @@
 
                 <Button Command="{Binding ImportCommand}">Import</Button>
 
-                <Separator Margin="0, 10, 0, 10" />
+                <Separator Margin="0, 10, 0, 5" />
 
                 <Grid DataContext="{Binding Scheme}">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="40" />
                         <RowDefinition Height="400" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
-                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="20" />
                         <ColumnDefinition />
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
-                    <TextBlock HorizontalAlignment="Center"
-                               FontWeight="DemiBold"
-                               Grid.Row="0"
+                    <DockPanel Grid.Row="0"
                                Grid.Column="0">
-                        Boards
-                    </TextBlock>
+                        <CheckBox IsChecked="{Binding IsAllBoardsSelected, Mode=OneWay}"
+                                  Command="{Binding AllBoardsSelectionCommand}"
+                                  CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"
+                                  IsThreeState="True"
+                                  Margin="5" />
+                        <TextBlock HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontWeight="DemiBold">
+                            Boards
+                        </TextBlock>
+                    </DockPanel>
+
                     <ListBox ItemsSource="{Binding Boards}"
                              SelectedItem="{Binding SelectedBoard}"
                              ScrollViewer.VerticalScrollBarVisibility="Visible"
@@ -48,7 +56,7 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
+                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" />
                                     <TextBlock Text="{Binding Path=Name}" />
                                 </StackPanel>
                             </DataTemplate>
@@ -60,54 +68,68 @@
                                 Grid.RowSpan="2"
                                 Grid.Column="1">
                         <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
-                                   Width="3" 
-                                   Margin="5,0,5,0"/>
+                                   Width="3"
+                                   Margin="5,0,5,0" />
                     </StackPanel>
-                    
-                    <TextBlock HorizontalAlignment="Center"
-                               FontWeight="DemiBold"
-                               Grid.Row="0"
+
+                    <DockPanel Grid.Row="0"
                                Grid.Column="2">
-                        Columns
-                    </TextBlock>
+                        <CheckBox IsChecked="{Binding IsAllColumnsSelected, Mode=OneWay}"
+                                  Command="{Binding AllColumnsSelectionCommand}"
+                                  CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"
+                                  IsThreeState="True"
+                                  Margin="5" />
+                        <TextBlock HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontWeight="DemiBold">
+                            Columns
+                        </TextBlock>
+                    </DockPanel>
                     <ListBox ItemsSource="{Binding Columns}"
                              ScrollViewer.VerticalScrollBarVisibility="Visible"
                              Grid.Row="1"
                              Grid.Column="2">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="{x:Type ListBoxItem}">
-                                <Setter Property="Focusable" Value="False"/>
+                                <Setter Property="Focusable" Value="False" />
                             </Style>
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
+                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" />
                                     <TextBlock Text="{Binding Path=Name}" />
                                 </StackPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
 
-                    <TextBlock HorizontalAlignment="Center"
-                               FontWeight="DemiBold"
-                               Grid.Row="0"
+                    <DockPanel Grid.Row="0"
                                Grid.Column="3">
-                        Rows
-                    </TextBlock>
+                        <CheckBox IsChecked="{Binding IsAllRowsSelected, Mode=OneWay}"
+                                  Command="{Binding AllRowsSelectionCommand}"
+                                  CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"
+                                  IsThreeState="True"
+                                  Margin="5"/>
+                        <TextBlock HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontWeight="DemiBold">
+                            Rows
+                        </TextBlock>
+                    </DockPanel>
                     <ListBox ItemsSource="{Binding Rows}"
                              ScrollViewer.VerticalScrollBarVisibility="Visible"
                              Grid.Row="1"
                              Grid.Column="3">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="{x:Type ListBoxItem}">
-                                <Setter Property="Focusable" Value="False"/>
+                                <Setter Property="Focusable" Value="False" />
                             </Style>
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
+                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" />
                                     <TextBlock Text="{Binding Path=Name}" />
                                 </StackPanel>
                             </DataTemplate>
@@ -115,7 +137,7 @@
                     </ListBox>
                 </Grid>
 
-                <Separator Margin="0, 10, 0, 10" />
+                <Separator Margin="0, 5, 0, 10" />
             </StackPanel>
         </ScrollViewer>
     </Grid>

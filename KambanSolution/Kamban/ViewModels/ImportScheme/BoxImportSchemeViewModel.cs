@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
 using Kamban.Repository.Models;
@@ -11,6 +12,15 @@ namespace Kamban.ViewModels.ImportScheme
 {
     public class BoxImportSchemeViewModel : ReactiveObject
     {
+        [Reactive] public bool? IsAllBoardsSelected { get; set; }
+        public ReactiveCommand<bool?, Unit> AllBoardsSelectionCommand { get; set; }
+
+        [Reactive] public bool? IsAllColumnsSelected { get; set; }
+        public ReactiveCommand<bool?, Unit> AllColumnsSelectionCommand { get; set; }
+
+        [Reactive] public bool? IsAllRowsSelected { get; set; }
+        public ReactiveCommand<bool?, Unit> AllRowsSelectionCommand { get; set; }
+
         [Reactive] public BoardImportSchemeViewModel SelectedBoard { get; set; }
 
         private readonly SourceList<BoardImportSchemeViewModel> _boardsSource;
@@ -25,36 +35,82 @@ namespace Kamban.ViewModels.ImportScheme
 
         private readonly ReadOnlyObservableCollection<RowImportSchemeViewModel> _rows;
         public ReadOnlyObservableCollection<RowImportSchemeViewModel> Rows => _rows;
-        
+
         public BoxImportSchemeViewModel()
         {
             _boardsSource = new SourceList<BoardImportSchemeViewModel>();
             _columnsSource = new SourceList<ColumnImportSchemeViewModel>();
             _rowsSource = new SourceList<RowImportSchemeViewModel>();
 
-            _boardsSource.Connect()
+            var boardsPublish = _boardsSource.Connect()
                 .ObserveOnDispatcher()
+                .Publish();
+            boardsPublish
                 .Bind(out _boards)
-                .DisposeMany()
                 .Subscribe();
+            boardsPublish
+                .WhenPropertyChanged(x => x.IsSelected)
+                .Subscribe(x =>
+                    IsAllBoardsSelected = _boards.All(b => b.IsSelected)
+                        ? true
+                        : _boards.Any(b => b.IsSelected)
+                            ? (bool?) null
+                            : false);
+            boardsPublish.Connect();
 
             var selectedBoardChanged = this.WhenAnyValue(x => x.SelectedBoard).Publish();
 
-            _columnsSource.Connect()
+            var columnsPublish = _columnsSource.Connect()
                 .Filter(selectedBoardChanged.Select(CreateColumnPredicate))
                 .ObserveOnDispatcher()
+                .Publish();
+            columnsPublish
                 .Bind(out _columns)
-                .DisposeMany()
                 .Subscribe();
+            columnsPublish
+                .WhenPropertyChanged(x => x.IsSelected)
+                .Subscribe(x =>
+                    IsAllColumnsSelected = _columns.All(c => c.IsSelected)
+                        ? true
+                        : _columns.Any(c => c.IsSelected)
+                            ? (bool?) null
+                            : false);
+            columnsPublish.Connect();
 
-            _rowsSource.Connect()
+            var rowsPublish = _rowsSource.Connect()
                 .Filter(selectedBoardChanged.Select(CreateRowPredicate))
                 .ObserveOnDispatcher()
+                .Publish();
+            rowsPublish
                 .Bind(out _rows)
-                .DisposeMany()
                 .Subscribe();
+            rowsPublish
+                .WhenPropertyChanged(x => x.IsSelected)
+                .Subscribe(x =>
+                    IsAllRowsSelected = _rows.All(r => r.IsSelected)
+                        ? true
+                        : _rows.Any(r => r.IsSelected)
+                            ? (bool?) null
+                            : false);
+            rowsPublish.Connect();
 
             selectedBoardChanged.Connect();
+
+            AllBoardsSelectionCommand = ReactiveCommand.Create<bool?>(x =>
+            {
+                foreach (var board in _boards)
+                    board.IsSelected = x.HasValue && x.Value;
+            });
+            AllColumnsSelectionCommand = ReactiveCommand.Create<bool?>(x =>
+            {
+                foreach (var column in _columns)
+                    column.IsSelected = x.HasValue && x.Value;
+            });
+            AllRowsSelectionCommand = ReactiveCommand.Create<bool?>(x =>
+            {
+                foreach (var row in _rows)
+                    row.IsSelected = x.HasValue && x.Value;
+            });
         }
 
         private static Func<ColumnImportSchemeViewModel, bool> CreateColumnPredicate(BoardImportSchemeViewModel selectedBoard)
@@ -85,13 +141,13 @@ namespace Kamban.ViewModels.ImportScheme
             {
                 x.Clear();
                 x.AddRange(scheme.Columns.Select(y => new ColumnImportSchemeViewModel
-                    { Id = y.Id, BoardId = y.BoardId, Name = y.Name, IsSelected = true }));
+                    {Id = y.Id, BoardId = y.BoardId, Name = y.Name, IsSelected = true}));
             });
             _rowsSource.Edit(x =>
             {
                 x.Clear();
                 x.AddRange(scheme.Rows.Select(y => new RowImportSchemeViewModel
-                    { Id = y.Id, BoardId = y.BoardId, Name = y.Name, IsSelected = true }));
+                    {Id = y.Id, BoardId = y.BoardId, Name = y.Name, IsSelected = true}));
             });
 
             SelectedBoard = _boardsSource.Items.FirstOrDefault();
