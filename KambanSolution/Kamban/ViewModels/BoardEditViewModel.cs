@@ -34,6 +34,8 @@ namespace Kamban.ViewModels
 
         public BoxViewModel Box { get; set; }
 
+        [Reactive] public bool ShowCardIds { get; set; }
+
         [Reactive] public bool EnableMatrix { get; set; }
         [Reactive] public IMonik Monik { get; set; }
 
@@ -77,13 +79,15 @@ namespace Kamban.ViewModels
         [Reactive] public ReactiveCommand<Unit, Unit> DeleteBoardCommand { get; set; }
         public ReactiveCommand<object, Unit> SelectBoardCommand { get; set; }
 
+        public ReactiveCommand<Unit, Unit> ToggleShowCardIdsCommand { get; set; }
+
         public BoardEditViewModel(IShell shell, IDialogCoordinator dc, IMonik m, IMapper mp)
         {
             this.shell = shell;
             dialCoord = dc;
             mon = m;
             mapper = mp;
-
+        
             mon.LogicVerbose($"{nameof(BoardEditViewModel)}.ctor started");
 
             EnableMatrix = false;
@@ -97,6 +101,8 @@ namespace Kamban.ViewModels
             BoardsInFile = null;
             CardEditFlyout = new CardEditViewModel();
             CardMoveFlyout = new CardMoveViewModel(mapper);
+
+            ToggleShowCardIdsCommand = ReactiveCommand.Create(() => { ShowCardIds = !ShowCardIds; });
 
             CardClickCommand = ReactiveCommand.Create<ICard>(c => ShowFlyout(CardEditFlyout, c));
             NormalizeGridCommand = ReactiveCommand.Create(() => { });
@@ -267,6 +273,9 @@ namespace Kamban.ViewModels
 
             shell.AddVMCommand("Boards", "Next board", nameof(NextBoardCommand), this, true)
                 .SetHotKey(ModifierKeys.Control, Key.E);
+
+            shell.AddVMCommand("View", "Toggle Card Ids", nameof(ToggleShowCardIdsCommand), this)
+                .SetHotKey(ModifierKeys.Control, Key.H);
 
             var request = (BoardViewRequest) viewRequest;
 

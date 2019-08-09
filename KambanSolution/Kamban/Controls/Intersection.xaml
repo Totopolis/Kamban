@@ -6,7 +6,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:common="clr-namespace:Kamban.Common;assembly=Kamban.Common"
              xmlns:dd="urn:gong-wpf-dragdrop"
+             xmlns:matrixControl="clr-namespace:Kamban.MatrixControl"
              mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance matrixControl:Matrix}"
              d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
@@ -72,11 +74,19 @@
                         </i:Interaction.Triggers>
 
                         <StackPanel Margin="5">
-                            <TextBlock
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock
+                                    FontSize="14"
+                                    Margin="3, 0, 3, 0"
+                                    Text="{Binding Path=Id, StringFormat=#{0}}"
+                                    Visibility="{Binding ElementName=mainListView, Path=DataContext.ShowCardIds, Mode=OneWay, Converter={StaticResource BoolCvt}}"
+                                    HorizontalAlignment="Left"/>
+                                <TextBlock
                                     FontSize="14"
                                     Margin="3, 0, 3, 0"
                                     Text="{Binding Path=Header}"
                                     HorizontalAlignment="Left"/>
+                            </StackPanel>
                             <StackPanel
                                 Visibility="{Binding ShowDescription, Converter={StaticResource BoolCvt}}"
                                 Margin="3, 5, 3, 3"

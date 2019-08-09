@@ -7,8 +7,10 @@
              dialogs:DialogParticipation.Register="{Binding}"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:mykanban="clr-namespace:Kamban.MatrixControl"
+             xmlns:viewModels="clr-namespace:Kamban.ViewModels"
              x:Name="boardUserControl"
-             mc:Ignorable="d">
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance viewModels:BoardEditViewModel}">
 
     <UserControl.Resources>
         <ResourceDictionary Source="WpfResources/TemplatesDictionary.xaml"/>
@@ -24,6 +26,7 @@
 
         <mykanban:Matrix x:Name="Matrix"
             Monik="{Binding Monik}"
+            ShowCardIds="{Binding ShowCardIds}"
             Columns="{Binding Columns}"
             Rows="{Binding Rows}"
             CardsObservable="{Binding CardsObservable}"

@@ -60,6 +60,7 @@ namespace Kamban.ViewModels
 
         [Reactive] public bool DatePostfix { get; set; }
         [Reactive] public bool SplitBoardsToFiles { get; set; }
+        [Reactive] public bool ShowCardIds { get; set; }
 
         public ReactiveCommand<Unit, Unit> SelectTargetFolderCommand { get; set; }
         public ReactiveCommand<Unit, Unit> ExportCommand { get; set; }
@@ -214,7 +215,13 @@ namespace Kamban.ViewModels
                     return ((ShellEx) shell).ViewsToDocument<BoardEditForExportView>(
                         SelectedBox.Boards.Items
                             .Where(x => selectedBoardIds.Contains(x.Id))
-                            .Select(x => new BoardViewRequest {ViewId = SelectedBox.Uri, Box = SelectedBox, Board = x})
+                            .Select(x => new BoardViewRequest
+                            {
+                                ViewId = SelectedBox.Uri,
+                                ShowCardIds = ShowCardIds,
+                                Box = SelectedBox,
+                                Board = x
+                            })
                             .Cast<ViewRequest>()
                             .ToArray(),
                         size, PdfOptions.ScaleOptions);

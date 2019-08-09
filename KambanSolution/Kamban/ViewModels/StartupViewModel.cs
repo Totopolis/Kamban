@@ -286,6 +286,7 @@ namespace Kamban.ViewModels
                             new BoardViewRequest
                             {
                                 ViewId = bvm.Box.Uri,
+                                ShowCardIds = bvm.ShowCardIds,
                                 Box = bvm.Box,
                                 Board = x
                             })
