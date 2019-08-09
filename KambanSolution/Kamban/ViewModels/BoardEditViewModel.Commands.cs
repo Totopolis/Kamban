@@ -26,13 +26,15 @@ namespace Kamban.ViewModels
             if (string.IsNullOrEmpty(ts))
                 return;
 
-            var column = head as ColumnViewModel;
-            var row = head as RowViewModel;
-
-            if (column!=null)
-                column.Name = ts;
-            else
-                row.Name = ts;
+            switch (head)
+            {
+                case ColumnViewModel column:
+                    column.Name = ts;
+                    break;
+                case RowViewModel row:
+                    row.Name = ts;
+                    break;
+            }
         }
 
         private async Task HeadDeleteCommandExecute(IDim head)
@@ -60,7 +62,7 @@ namespace Kamban.ViewModels
             {
                 // Shift cards
                 var firstColumn = Columns.OrderBy(x => x.Order).First();
-                foreach (var it in cardList.Where(x => (int)x.ColumnDeterminant == column.Id).ToList())
+                foreach (var it in cardList.Where(x => (int) x.ColumnDeterminant == column.Id).ToList())
                     it.ColumnDeterminant = firstColumn.Id;
 
                 Box.Columns.Remove(column);
@@ -69,7 +71,7 @@ namespace Kamban.ViewModels
             {
                 // Shift cards
                 var firstRow = Rows.OrderBy(x => x.Order).First();
-                foreach (var it in cardList.Where(x => (int)x.RowDeterminant == row.Id).ToList())
+                foreach (var it in cardList.Where(x => (int) x.RowDeterminant == row.Id).ToList())
                     it.RowDeterminant = firstRow.Id;
 
                 Box.Rows.Remove(row);
@@ -107,52 +109,54 @@ namespace Kamban.ViewModels
             if (string.IsNullOrEmpty(ts))
                 return;
 
-            var column = head as ColumnViewModel;
-            var row = head as RowViewModel;
+            EnableMatrix = false;
 
-            this.EnableMatrix = false;
-
-            if (column != null)
+            switch (head)
             {
-                var tempColumns = Columns.ToList();
-                var indx = tempColumns.IndexOf(head) + after;
-
-                var cvm = new ColumnViewModel
+                case ColumnViewModel column:
                 {
-                    Name = ts,
-                    BoardId = column.BoardId
-                };
+                    var tempColumns = Columns.ToList();
+                    var indx = tempColumns.IndexOf(head) + after;
 
-                tempColumns.Insert(indx, cvm);
-                Box.Columns.Add(cvm);
+                    var cvm = new ColumnViewModel
+                    {
+                        Name = ts,
+                        BoardId = column.BoardId
+                    };
 
-                int i = 0;
-                foreach (var it in tempColumns)
-                {
-                    it.Order = i;
-                    i++;
+                    tempColumns.Insert(indx, cvm);
+                    Box.Columns.Add(cvm);
+
+                    var i = 0;
+                    foreach (var it in tempColumns)
+                    {
+                        it.Order = i;
+                        i++;
+                    }
                 }
-            }
-            else
-            {
-                var tempRows = Rows.ToList();
-                var indx = tempRows.IndexOf(head) + after;
-
-                var rvm = new RowViewModel
+                    break;
+                case RowViewModel row:
                 {
-                    Name = ts,
-                    BoardId = row.BoardId
-                };
+                    var tempRows = Rows.ToList();
+                    var indx = tempRows.IndexOf(head) + after;
 
-                tempRows.Insert(indx, rvm);
-                Box.Rows.Add(rvm);
+                    var rvm = new RowViewModel
+                    {
+                        Name = ts,
+                        BoardId = row.BoardId
+                    };
 
-                int i = 0;
-                foreach (var it in tempRows)
-                {
-                    it.Order = i;
-                    i++;
+                    tempRows.Insert(indx, rvm);
+                    Box.Rows.Add(rvm);
+
+                    var i = 0;
+                    foreach (var it in tempRows)
+                    {
+                        it.Order = i;
+                        i++;
+                    }
                 }
+                    break;
             }
 
             // Rebuild matrix
@@ -168,13 +172,13 @@ namespace Kamban.ViewModels
             var oldName = CurrentBoard.Name;
             var str = $"Enter new board name for \"{oldName}\"";
             var newName = await dialCoord
-            .ShowInputAsync(this, "Board rename", str,
-                new MetroDialogSettings()
-                {
-                    AffirmativeButtonText = "OK",
-                    NegativeButtonText = "Cancel",
-                    DefaultText = CurrentBoard?.Name
-                });
+                .ShowInputAsync(this, "Board rename", str,
+                    new MetroDialogSettings()
+                    {
+                        AffirmativeButtonText = "OK",
+                        NegativeButtonText = "Cancel",
+                        DefaultText = CurrentBoard?.Name
+                    });
 
             if (string.IsNullOrEmpty(newName))
                 return;
@@ -186,7 +190,7 @@ namespace Kamban.ViewModels
         private async Task DeleteBoardCommandExecute()
         {
             var ts = await dialCoord.ShowMessageAsync(this, "Warning",
-                $"Are you shure to delete board '{CurrentBoard.Name}'?"
+                $"Are you sure to delete board '{CurrentBoard.Name}'?"
                 , MessageDialogStyle.AffirmativeAndNegative);
 
             if (ts == MessageDialogResult.Negative)
@@ -227,6 +231,5 @@ namespace Kamban.ViewModels
 
             Box.Cards.Remove(cvm as CardViewModel);
         }
-
-    }//end of class
+    } //end of class
 }
