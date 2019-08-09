@@ -10,6 +10,7 @@ namespace Kamban.ViewModels
     {
         public BoxViewModel Box { get; set; }
 
+        [Reactive] public bool ShowCardIds { get; set; }
         [Reactive] public bool EnableMatrix { get; set; }
 
         public ColumnViewModel[] Columns { get; set; }
@@ -37,6 +38,7 @@ namespace Kamban.ViewModels
                 .OfType<ICard>()
                 .ToArray();
 
+            ShowCardIds = request.ShowCardIds;
             EnableMatrix = true;
         }
     }//end of class

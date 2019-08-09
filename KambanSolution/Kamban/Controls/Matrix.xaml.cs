@@ -20,6 +20,19 @@ namespace Kamban.MatrixControl
             InitializeComponent();
         }
 
+        public bool ShowCardIds
+        {
+            get => (bool)GetValue(ShowCardIdsProperty);
+            set => SetValue(ShowCardIdsProperty, value);
+        }
+
+        public static readonly DependencyProperty ShowCardIdsProperty =
+            DependencyProperty.Register("ShowCardIds",
+                typeof(bool),
+                typeof(Matrix),
+                new PropertyMetadata(false));
+
+
         public bool EnableWork
         {
             get => (bool)GetValue(EnableWorkProperty);

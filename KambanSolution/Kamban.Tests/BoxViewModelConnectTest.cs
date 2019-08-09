@@ -78,6 +78,8 @@ namespace Kamban.Tests
         {
             var board = new BoardViewModel {Id = 1};
             _box.Boards.Add(board);
+            _repo.Setup(x => x.CreateOrUpdateBoard(It.Is<Board>(b => b.Id == board.Id)))
+                .Returns(Task.FromResult(new Board { Id = board.Id }));
             _box.Connect(_repo.Object);
 
             _box.Boards.Remove(board);
@@ -90,6 +92,8 @@ namespace Kamban.Tests
         {
             var row = new RowViewModel {Id = 1};
             _box.Rows.Add(row);
+            _repo.Setup(x => x.CreateOrUpdateRow(It.Is<Row>(b => b.Id == row.Id)))
+                .Returns(Task.FromResult(new Row { Id = row.Id }));
             _box.Connect(_repo.Object);
 
             _box.Rows.Remove(row);
@@ -102,6 +106,8 @@ namespace Kamban.Tests
         {
             var column = new ColumnViewModel {Id = 1};
             _box.Columns.Add(column);
+            _repo.Setup(x => x.CreateOrUpdateColumn(It.Is<Column>(b => b.Id == column.Id)))
+                .Returns(Task.FromResult(new Column { Id = column.Id }));
             _box.Connect(_repo.Object);
 
             _box.Columns.Remove(column);
@@ -114,6 +120,8 @@ namespace Kamban.Tests
         {
             var card = new CardViewModel {Id = 1};
             _box.Cards.Add(card);
+            _repo.Setup(x => x.CreateOrUpdateCard(It.Is<Card>(b => b.Id == card.Id)))
+                .Returns(Task.FromResult(new Card { Id = card.Id }));
             _box.Connect(_repo.Object);
 
             _box.Cards.Remove(card);
@@ -124,49 +132,69 @@ namespace Kamban.Tests
         [Fact]
         public void ChangeBoardAfterConnect_WillUpdateBoardInRepo()
         {
+            const string name = "name";
             var board = new BoardViewModel {Id = 1};
             _box.Boards.Add(board);
+            _repo.Setup(x => x.CreateOrUpdateBoard(It.Is<Board>(b => b.Id == board.Id)))
+                .Returns(Task.FromResult(new Board {Id = board.Id}));
             _box.Connect(_repo.Object);
 
-            board.Name = "name";
+            board.Name = name;
 
-            _repo.Verify(x => x.CreateOrUpdateBoard(It.Is<Board>(b => b.Id == board.Id)), Times.Once);
+            _repo.Verify(x => x.CreateOrUpdateBoard(
+                It.Is<Board>(b => b.Id == board.Id && name.Equals(b.Name))),
+                Times.Once);
         }
 
         [Fact]
         public void ChangeRowAfterConnect_WillChangeRowInRepo()
         {
+            const string name = "name";
             var row = new RowViewModel {Id = 1};
             _box.Rows.Add(row);
+            _repo.Setup(x => x.CreateOrUpdateRow(It.Is<Row>(b => b.Id == row.Id)))
+                .Returns(Task.FromResult(new Row { Id = row.Id }));
             _box.Connect(_repo.Object);
 
-            row.Name = "name";
+            row.Name = name;
 
-            _repo.Verify(x => x.CreateOrUpdateRow(It.Is<Row>(b => b.Id == row.Id)), Times.Once);
+            _repo.Verify(x => x.CreateOrUpdateRow(
+                It.Is<Row>(b => b.Id == row.Id && name.Equals(b.Name))),
+                Times.Once);
         }
 
         [Fact]
         public void ChangeColumnAfterConnect_WillChangeColumnInRepo()
         {
+            const string name = "name";
             var column = new ColumnViewModel {Id = 1};
             _box.Columns.Add(column);
+            _repo.Setup(x => x.CreateOrUpdateColumn(It.Is<Column>(b => b.Id == column.Id)))
+                .Returns(Task.FromResult(new Column { Id = column.Id }));
             _box.Connect(_repo.Object);
 
-            column.Name = "name";
+            column.Name = name;
 
-            _repo.Verify(x => x.CreateOrUpdateColumn(It.Is<Column>(b => b.Id == column.Id)), Times.Once);
+            _repo.Verify(x => x.CreateOrUpdateColumn(
+                It.Is<Column>(b => b.Id == column.Id && name.Equals(b.Name))),
+                Times.Once);
         }
 
         [Fact]
         public void ChangeCardAfterConnect_WillRemoveCardInRepo()
         {
+            const string header = "header";
             var card = new CardViewModel {Id = 1};
             _box.Cards.Add(card);
+            _repo.Setup(x => x.CreateOrUpdateCard(It.Is<Card>(b => b.Id == card.Id)))
+                .Returns(Task.FromResult(new Card { Id = card.Id }));
             _box.Connect(_repo.Object);
 
-            card.Header = "header";
+            card.Header = header;
 
-            _repo.Verify(x => x.CreateOrUpdateCard(It.Is<Card>(b => b.Id == card.Id)), Times.Once);
+            _repo.Verify(x => x.CreateOrUpdateCard(
+                It.Is<Card>(b => b.Id == card.Id && header.Equals(b.Head))),
+                Times.Once);
         }
     }
 }

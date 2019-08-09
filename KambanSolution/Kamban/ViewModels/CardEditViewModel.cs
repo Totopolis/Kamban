@@ -5,8 +5,10 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows.Media;
 using DynamicData;
+using DynamicData.Binding;
 using Kamban.Common;
 using Kamban.ViewModels.Core;
+using Kamban.ViewRequests;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
@@ -131,6 +133,7 @@ namespace Kamban.ViewModels
                 .Connect()
                 .AutoRefresh()
                 .Filter(x => x.BoardId == board.Id)
+                .Sort(SortExpressionComparer<ColumnViewModel>.Ascending(x => x.Order))
                 .Bind(out ReadOnlyObservableCollection<ColumnViewModel> temp)
                 .Subscribe();
 
@@ -140,6 +143,7 @@ namespace Kamban.ViewModels
                 .Connect()
                 .AutoRefresh()
                 .Filter(x => x.BoardId == board.Id)
+                .Sort(SortExpressionComparer<RowViewModel>.Ascending(x => x.Order))
                 .Bind(out ReadOnlyObservableCollection<RowViewModel> temp2)
                 .Subscribe();
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -74,9 +75,17 @@ namespace Kamban.ViewModels.Core
                 });
 
             boardsChanges
-                .WhereReasonsAre(ListChangeReason.Add)
+                .WhereReasonsAre(ListChangeReason.Add, ListChangeReason.AddRange)
                 .Subscribe(x => x
-                    .Select(q => q.Item.Current)
+                    .SelectMany(q =>
+                    {
+                        var list = new List<BoardViewModel>();
+                        if (q.Range != null)
+                            list.AddRange(q.Range);
+                        if (q.Item.Current != null)
+                            list.Add(q.Item.Current);
+                        return list;
+                    })
                     .ToList()
                     .ForEach(bvm =>
                     {
@@ -116,9 +125,17 @@ namespace Kamban.ViewModels.Core
                 });
 
             columnsChanges
-                .WhereReasonsAre(ListChangeReason.Add)
+                .WhereReasonsAre(ListChangeReason.Add, ListChangeReason.AddRange)
                 .Subscribe(x => x
-                    .Select(q => q.Item.Current)
+                    .SelectMany(q =>
+                    {
+                        var list = new List<ColumnViewModel>();
+                        if (q.Range != null)
+                            list.AddRange(q.Range);
+                        if (q.Item.Current != null)
+                            list.Add(q.Item.Current);
+                        return list;
+                    })
                     .ToList()
                     .ForEach(async cvm =>
                     {
@@ -158,9 +175,17 @@ namespace Kamban.ViewModels.Core
                 });
 
             rowsChanges
-                .WhereReasonsAre(ListChangeReason.Add)
+                .WhereReasonsAre(ListChangeReason.Add, ListChangeReason.AddRange)
                 .Subscribe(x => x
-                    .Select(q => q.Item.Current)
+                    .SelectMany(q =>
+                    {
+                        var list = new List<RowViewModel>();
+                        if (q.Range != null)
+                            list.AddRange(q.Range);
+                        if (q.Item.Current != null)
+                            list.Add(q.Item.Current);
+                        return list;
+                    })
                     .ToList()
                     .ForEach(async rvm =>
                     {
@@ -200,9 +225,17 @@ namespace Kamban.ViewModels.Core
                 });
 
             cardsChanges
-                .WhereReasonsAre(ListChangeReason.Add)
+                .WhereReasonsAre(ListChangeReason.Add, ListChangeReason.AddRange)
                 .Subscribe(x => x
-                    .Select(q => q.Item.Current)
+                    .SelectMany(q =>
+                    {
+                        var list = new List<CardViewModel>();
+                        if (q.Range != null)
+                            list.AddRange(q.Range);
+                        if (q.Item.Current != null)
+                            list.Add(q.Item.Current);
+                        return list;
+                    })
                     .ToList()
                     .ForEach(async cvm =>
                     {
@@ -231,12 +264,15 @@ namespace Kamban.ViewModels.Core
         public async Task Load(ILoadRepository repo)
         {
             var box = await repo.Load();
-            
+            Load(box);
+        }
+
+        public void Load(Box box)
+        {
             Cards.AddRange(box.Cards.Select(x => mapper.Map<Card, CardViewModel>(x)));
             Columns.AddRange(box.Columns.Select(x => mapper.Map<Column, ColumnViewModel>(x)));
             Rows.AddRange(box.Rows.Select(x => mapper.Map<Row, RowViewModel>(x)));
             Boards.AddRange(box.Boards.Select(x => mapper.Map<Board, BoardViewModel>(x)));
-
             Loaded = true;
         }
     }

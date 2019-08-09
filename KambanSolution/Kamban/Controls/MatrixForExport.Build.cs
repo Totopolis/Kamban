@@ -33,7 +33,7 @@ namespace Kamban.MatrixControl
                 var cd = new ColumnDefinition
                 {
                     DataContext = it,
-                    Width = new GridLength(it.Size / 10, GridUnitType.Star)
+                    Width = new GridLength(it.Size / 10.0, GridUnitType.Star)
                 };
                 MainGrid.ColumnDefinitions.Add(cd);
 
@@ -68,7 +68,7 @@ namespace Kamban.MatrixControl
                 var rd = new RowDefinition
                 {
                     DataContext = it,
-                    Height = new GridLength(it.Size / 10, GridUnitType.Star)
+                    Height = new GridLength(it.Size / 10.0, GridUnitType.Star)
                 };
                 MainGrid.RowDefinitions.Add(rd);
 

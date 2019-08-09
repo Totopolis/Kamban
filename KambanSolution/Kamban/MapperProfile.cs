@@ -26,14 +26,14 @@ namespace Kamban
                 .ForMember(dst => dst.Width, opt => opt.MapFrom(src => src.Size));
 
             CreateMap<Column, ColumnViewModel>()
-                .ForMember(dst => dst.Size, opt => opt.MapFrom(src => src.Width));
+                .ForMember(dst => dst.Size, opt => opt.MapFrom(src => src.Width > 0 ? src.Width : 1));
 
             CreateMap<RowViewModel, Row>()
                 // incorrect: .ForMember(dst => dst.Id, opt => opt.MapFrom(src => src.Determinant))
                 .ForMember(dst => dst.Height, opt => opt.MapFrom(src => src.Size));
 
             CreateMap<Row, RowViewModel>()
-                .ForMember(dst => dst.Size, opt => opt.MapFrom(src => src.Height));
+                .ForMember(dst => dst.Size, opt => opt.MapFrom(src => src.Height > 0 ? src.Height : 1));
         }
     }
 }

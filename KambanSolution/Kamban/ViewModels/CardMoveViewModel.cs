@@ -7,6 +7,7 @@ using System.Windows.Media;
 using AutoMapper;
 using DynamicData;
 using Kamban.ViewModels.Core;
+using Kamban.ViewRequests;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
@@ -67,10 +68,12 @@ namespace Kamban.ViewModels
                 {
                     AvailableColumns = box.Columns.Items
                         .Where(x => x.BoardId == SelectedBoard.Id)
+                        .OrderBy(x => x.Order)
                         .ToList();
 
                     AvailableRows = box.Rows.Items
                         .Where(x => x.BoardId == SelectedBoard.Id)
+                        .OrderBy(x => x.Order)
                         .ToList();
 
                     SelectedColumn = null;
