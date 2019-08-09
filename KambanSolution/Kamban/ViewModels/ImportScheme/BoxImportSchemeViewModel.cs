@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
@@ -170,6 +171,30 @@ namespace Kamban.ViewModels.ImportScheme
                     .Select(x => x.Id)
                     .ToArray()
             };
+        }
+
+        public bool IsSchemeValid()
+        {
+            var boardIds = _boardsSource.Items
+                .Where(x => x.IsSelected)
+                .Select(x => x.Id)
+                .ToArray();
+
+            var boardIdsFromColumns = _columnsSource.Items
+                .Where(x => x.IsSelected)
+                .Select(x => x.BoardId);
+
+            if (boardIds.Except(boardIdsFromColumns).Any())
+                return false;
+
+            var boardIdsFromRows = _rowsSource.Items
+                .Where(x => x.IsSelected)
+                .Select(x => x.BoardId);
+
+            if (boardIds.Except(boardIdsFromRows).Any())
+                return false;
+
+            return true;
         }
     }
 }

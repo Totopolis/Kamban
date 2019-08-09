@@ -23,6 +23,20 @@
 
                 <Separator Margin="0, 10, 0, 5" />
 
+                <TextBlock FontWeight="DemiBold">File name</TextBlock>
+                <TextBox Text="{Binding FileName}"/>
+
+                <TextBlock FontWeight="DemiBold">Folder name</TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock MinWidth="100"
+                               Margin="0,0,5,0" 
+                               VerticalAlignment="Center"
+                               Text="{Binding FolderName}"/>
+                    <Button Command="{Binding SelectFolderCommand}">...</Button>
+                </StackPanel>
+
+                <Separator Margin="0, 10, 0, 5" />
+
                 <Grid DataContext="{Binding Scheme}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="40" />
