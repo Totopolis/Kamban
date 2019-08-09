@@ -68,10 +68,12 @@ namespace Kamban.ViewModels
                 {
                     AvailableColumns = box.Columns.Items
                         .Where(x => x.BoardId == SelectedBoard.Id)
+                        .OrderBy(x => x.Order)
                         .ToList();
 
                     AvailableRows = box.Rows.Items
                         .Where(x => x.BoardId == SelectedBoard.Id)
+                        .OrderBy(x => x.Order)
                         .ToList();
 
                     SelectedColumn = null;
