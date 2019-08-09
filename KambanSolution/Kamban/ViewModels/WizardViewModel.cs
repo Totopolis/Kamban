@@ -211,6 +211,8 @@ namespace Kamban.ViewModels
 
             box.Boards.Add(bvm);
 
+            await Task.Delay(1000);
+
             // 3. Normalize grid
             double colSize = Columns.Count == 1 ? 100 : 100 / (Columns.Count - 1);
             for (var i = 0; i < Columns.Count; i++)
