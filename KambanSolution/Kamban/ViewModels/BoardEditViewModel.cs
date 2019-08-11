@@ -61,6 +61,7 @@ namespace Kamban.ViewModels
 
         public ReactiveCommand<IDim, Unit> HeadRenameCommand { get; set; }
         public ReactiveCommand<IDim, Unit> HeadDeleteCommand { get; set; }
+        public ReactiveCommand<IDim, Unit> HeadDeleteCardsCommand { get; set; }
         public ReactiveCommand<IDim, Unit> InsertHeadBeforeCommand { get; set; }
         public ReactiveCommand<IDim, Unit> InsertHeadAfterCommand { get; set; }
 
@@ -117,6 +118,9 @@ namespace Kamban.ViewModels
 
             HeadDeleteCommand = ReactiveCommand
                 .Create<IDim>(async head => await HeadDeleteCommandExecute(head));
+
+            HeadDeleteCardsCommand = ReactiveCommand
+                .Create<IDim>(async head => await HeadDeleteCardsCommandExecute(head));
 
             InsertHeadBeforeCommand = ReactiveCommand
                 .Create<IDim>(async head => await InsertHeadBeforeCommandExecute(head));
