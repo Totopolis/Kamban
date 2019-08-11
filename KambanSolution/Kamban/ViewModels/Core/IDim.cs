@@ -6,5 +6,8 @@
         string Name { get; set; }
         int Size { get; set; }
         int Order { get; set; }
+        int CurNumberOfCards { get; set; }
+        bool LimitSet { get; set; }
+        int MaxNumberOfCards { get; set; }
     }
 }

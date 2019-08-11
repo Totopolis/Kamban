@@ -19,8 +19,37 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 FontSize="14"
-                FontWeight="Bold"
-                Text="{Binding Name}"/>
+                FontWeight="Bold">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger  Binding="{Binding LimitSet}"  Value="False">
+                                    <Setter Property="TextBlock.Text">
+                                        <Setter.Value>
+                                            <MultiBinding StringFormat=" {0} ({1})">
+                                                <Binding Path="Name"/>
+                                                <Binding Path="CurNumberOfCards"/>
+                                            </MultiBinding>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                                <DataTrigger  Binding="{Binding LimitSet}"  Value="True">
+                                    <Setter Property="TextBlock.Text">
+                                        <Setter.Value>
+                                            <MultiBinding StringFormat=" {0} ({1}/{2})">
+                                                <Binding Path="Name"/>
+                                                <Binding Path="CurNumberOfCards"/>
+                                                <Binding Path="MaxNumberOfCards"/>
+                                            </MultiBinding>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+
+                </TextBlock >
             </Border>
         </DataTemplate>
 
@@ -34,8 +63,35 @@
                 Margin="6" 
                 FontSize="14"
                 FontWeight="Bold"
-                VerticalAlignment="Center"
-                Text="{Binding Name}">
+                VerticalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger  Binding="{Binding LimitSet}"  Value="False">
+                                    <Setter Property="TextBlock.Text">
+                                        <Setter.Value>
+                                            <MultiBinding StringFormat=" {0} ({1})">
+                                                <Binding Path="Name"/>
+                                                <Binding Path="CurNumberOfCards"/>
+                                            </MultiBinding>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                                <DataTrigger  Binding="{Binding LimitSet}"  Value="True">
+                                    <Setter Property="TextBlock.Text">
+                                        <Setter.Value>
+                                            <MultiBinding StringFormat=" {0} ({1}/{2})">
+                                                <Binding Path="Name"/>
+                                                <Binding Path="CurNumberOfCards"/>
+                                                <Binding Path="MaxNumberOfCards"/>
+                                            </MultiBinding>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>    
                     <TextBlock.LayoutTransform>
                         <RotateTransform Angle="270"/>
                     </TextBlock.LayoutTransform>
