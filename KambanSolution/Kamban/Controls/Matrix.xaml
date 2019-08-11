@@ -12,8 +12,39 @@
             <Border
             BorderBrush="#E1E1E1"
             BorderThickness="1"
-            Margin="-1, 0, 0, 0"
-            Background="#F4F4F4">
+            Margin="0, -1, 0, 0">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <DataTrigger Value="True">
+                                <DataTrigger.Binding>
+                                    <MultiBinding>
+                                        <MultiBinding.Converter>
+                                            <local:GreaterThanLimit/>
+                                        </MultiBinding.Converter>
+                                        <Binding Path="CurNumberOfCards"/>
+                                        <Binding Path="MaxNumberOfCards"/>
+                                        <Binding Path="LimitSet"/>
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+                                <Setter Property="Border.Background" Value="NavajoWhite" />
+                            </DataTrigger>
+                            <DataTrigger Value="False">
+                                <DataTrigger.Binding>
+                                    <MultiBinding>
+                                        <MultiBinding.Converter>
+                                            <local:GreaterThanLimit/>
+                                        </MultiBinding.Converter>
+                                        <Binding Path="CurNumberOfCards"/>
+                                        <Binding Path="MaxNumberOfCards"/>
+                                        <Binding Path="LimitSet"/>
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+                                <Setter Property="Border.Background" Value="#F4F4F4" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
                 <TextBlock 
                 Margin="6" 
                 HorizontalAlignment="Center"
@@ -57,9 +88,41 @@
             <Border
             BorderBrush="#E1E1E1"
             BorderThickness="1"
-            Margin="0, -1, 0, 0"
-            Background="#F4F4F4">
-                <TextBlock 
+            Margin="0, -1, 0, 0">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <DataTrigger Value="True">
+                                <DataTrigger.Binding>
+                                    <MultiBinding>
+                                        <MultiBinding.Converter>
+                                            <local:GreaterThanLimit/>
+                                        </MultiBinding.Converter>
+                                        <Binding Path="CurNumberOfCards"/>
+                                        <Binding Path="MaxNumberOfCards"/>
+                                        <Binding Path="LimitSet"/>
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+                                <Setter Property="Border.Background" Value="NavajoWhite" />
+                            </DataTrigger>
+                            <DataTrigger Value="False">
+                                <DataTrigger.Binding>
+                                    <MultiBinding>
+                                        <MultiBinding.Converter>
+                                            <local:GreaterThanLimit/>
+                                        </MultiBinding.Converter>
+                                        <Binding Path="CurNumberOfCards"/>
+                                        <Binding Path="MaxNumberOfCards"/>
+                                        <Binding Path="LimitSet"/>
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+                                <Setter Property="Border.Background" Value="#F4F4F4" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+        
+            <TextBlock 
                 Margin="6" 
                 FontSize="14"
                 FontWeight="Bold"

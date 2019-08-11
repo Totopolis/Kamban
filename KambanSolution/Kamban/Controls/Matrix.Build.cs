@@ -1,16 +1,35 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using DynamicData;
 using DynamicData.Binding;
 using Kamban.ViewModels.Core;
 
 namespace Kamban.MatrixControl
 {
+    public class GreaterThanLimit : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values.Length != 3) return false;
+
+            return ((Int32)values[0] > (Int32)values[1]) & ((bool)values[2]);
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+
+
+    }
+
     public partial class Matrix
     {
         public void RebuildGrid()
@@ -60,6 +79,12 @@ namespace Kamban.MatrixControl
                 cc.ContentTemplate = (DataTemplate)this.Resources["DefaultHorizontalHeaderTemplate"];
                 MainGrid.Children.Add(cc);
 
+                // Update number of Cards in Column
+                CardsObservable
+                    .Filter(x => x.ColumnDeterminant == it.Id)
+                    .ToCollection()
+                    .Subscribe(x => it.CurNumberOfCards = x.Count());
+
                 // dont draw excess splitter
                 if (i < columnCount - 1)
                     MainGrid.Children.Add(BuildVerticalSpliter(i, rowCount));
@@ -96,6 +121,12 @@ namespace Kamban.MatrixControl
                 cc.ContextMenu = HeadContextMenu;
                 cc.ContentTemplate = (DataTemplate)this.Resources["DefaulVerticalHeaderTemplate"];
                 MainGrid.Children.Add(cc);
+
+                // Update number of Cards in Row
+                CardsObservable
+                    .Filter(x => x.RowDeterminant == it.Id)
+                    .ToCollection()
+                    .Subscribe(x => it.CurNumberOfCards = x.Count());
 
                 // dont draw excess splitter
                 if (i < rowCount - 1)
@@ -138,6 +169,8 @@ namespace Kamban.MatrixControl
 
             Monik?.ApplicationVerbose("Matrix.RebuildGrid finished");
         }
+
+       
 
         private int GetHashValue(object a, object b)
         {
