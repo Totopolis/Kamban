@@ -223,8 +223,6 @@ namespace Kamban.ViewModels
 
             var title = file.FullName;
 
-            await Task.Delay(200);
-
             shell.ShowView<BoardView>(
                 viewRequest: new BoardViewRequest { ViewId = title, Box = box },
                 options: new UiShowOptions { Title = title });
