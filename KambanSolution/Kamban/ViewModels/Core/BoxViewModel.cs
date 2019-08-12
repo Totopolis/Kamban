@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using DynamicData;
@@ -66,33 +65,32 @@ namespace Kamban.ViewModels.Core
             ///////////////////
             // Boards AutoSaver
             ///////////////////
-            var boardsLocker = new SemaphoreSlim(1, 1);
             var boardsChanges = Boards.Connect().Publish();
-            SubscribeChanged(boardsChanges, boardsLocker,
-                async bvm =>
+            SubscribeChanged(boardsChanges,
+                bvm =>
                 {
                     mon.LogicVerbose($"Box.Boards.ItemChanged {bvm.Id}::{bvm.Name}::{bvm.Modified}");
                     var bi = mapper.Map<BoardViewModel, Board>(bvm);
-                    await repo.CreateOrUpdateBoard(bi);
+                    repo.CreateOrUpdateBoard(bi).Wait();
                 });
 
-            SubscribeAdded(boardsChanges, boardsLocker,
-                async bvm =>
+            SubscribeAdded(boardsChanges,
+                bvm =>
                 {
                     mon.LogicVerbose($"Box.Boards.Add {bvm.Id}::{bvm.Name}");
 
                     var bi = mapper.Map<BoardViewModel, Board>(bvm);
-                    bi = await repo.CreateOrUpdateBoard(bi);
+                    bi = repo.CreateOrUpdateBoard(bi).Result;
 
                     bvm.Id = bi.Id;
                 });
 
-            SubscribeRemoved(boardsChanges, boardsLocker,
-                async bvm =>
+            SubscribeRemoved(boardsChanges,
+                bvm =>
                 {
                     mon.LogicVerbose($"Box.Boards.Remove {bvm.Id}::{bvm.Name}");
 
-                    await repo.DeleteBoard(bvm.Id);
+                    repo.DeleteBoard(bvm.Id).Wait();
                 });
 
             boardsChanges.Connect();
@@ -100,33 +98,32 @@ namespace Kamban.ViewModels.Core
             ////////////////////
             // Columns AutoSaver
             ////////////////////
-            var columnsLocker = new SemaphoreSlim(1, 1);
             var columnsChanges = Columns.Connect().Publish();
-            SubscribeChanged(columnsChanges, columnsLocker,
-                async cvm =>
+            SubscribeChanged(columnsChanges,
+                cvm =>
                 {
                     mon.LogicVerbose($"Box.Columns.ItemChanged {cvm.Id}::{cvm.Name}::{cvm.Order}");
                     var ci = mapper.Map<ColumnViewModel, Column>(cvm);
-                    await repo.CreateOrUpdateColumn(ci);
+                    repo.CreateOrUpdateColumn(ci).Wait();
                 });
 
-            SubscribeAdded(columnsChanges, columnsLocker,
-                async cvm =>
+            SubscribeAdded(columnsChanges,
+                cvm =>
                 {
                     mon.LogicVerbose($"Box.Columns.Add {cvm.Id}::{cvm.Name}::{cvm.Order}");
 
                     var ci = mapper.Map<ColumnViewModel, Column>(cvm);
-                    ci = await repo.CreateOrUpdateColumn(ci);
+                    ci = repo.CreateOrUpdateColumn(ci).Result;
 
                     cvm.Id = ci.Id;
                 });
 
-            SubscribeRemoved(columnsChanges, columnsLocker,
-                async cvm =>
+            SubscribeRemoved(columnsChanges,
+                cvm =>
                 {
                     mon.LogicVerbose($"Box.Columns.Remove {cvm.Id}::{cvm.Name}::{cvm.Order}");
 
-                    await repo.DeleteColumn(cvm.Id);
+                    repo.DeleteColumn(cvm.Id).Wait();
                 });
 
 
@@ -135,33 +132,32 @@ namespace Kamban.ViewModels.Core
             /////////////////
             // Rows AutoSaver
             /////////////////
-            var rowsLocker = new SemaphoreSlim(1, 1);
             var rowsChanges = Rows.Connect().Publish();
-            SubscribeChanged(rowsChanges, rowsLocker,
-                async rvm =>
+            SubscribeChanged(rowsChanges,
+                rvm =>
                 {
                     mon.LogicVerbose($"Box.Rows.ItemChanged {rvm.Id}::{rvm.Name}::{rvm.Order}");
                     var row = mapper.Map<RowViewModel, Row>(rvm);
-                    await repo.CreateOrUpdateRow(row);
+                    repo.CreateOrUpdateRow(row).Wait();
                 });
 
-            SubscribeAdded(rowsChanges, rowsLocker,
-                async rvm =>
+            SubscribeAdded(rowsChanges,
+                rvm =>
                 {
                     mon.LogicVerbose($"Box.Rows.Add {rvm.Id}::{rvm.Name}::{rvm.Order}");
 
                     var ri = mapper.Map<RowViewModel, Row>(rvm);
-                    ri = await repo.CreateOrUpdateRow(ri);
+                    ri = repo.CreateOrUpdateRow(ri).Result;
 
                     rvm.Id = ri.Id;
                 });
 
-            SubscribeRemoved(rowsChanges, rowsLocker,
-                async rvm =>
+            SubscribeRemoved(rowsChanges,
+                rvm =>
                 {
                     mon.LogicVerbose($"Box.Rows.Remove {rvm.Id}::{rvm.Name}::{rvm.Order}");
 
-                    await repo.DeleteRow(rvm.Id);
+                    repo.DeleteRow(rvm.Id).Wait();
                 });
 
             rowsChanges.Connect();
@@ -169,32 +165,31 @@ namespace Kamban.ViewModels.Core
             //////////////////
             // Cards AutoSaver
             //////////////////
-            var cardsLocker = new SemaphoreSlim(1, 1);
             var cardsChanges = Cards.Connect().Publish();
-            SubscribeChanged(cardsChanges, cardsLocker,
-                async cvm =>
+            SubscribeChanged(cardsChanges,
+                cvm =>
                 {
                     mon.LogicVerbose($"Box.Cards.ItemChanged {cvm.Id}::{cvm.Header}");
                     var iss = mapper.Map<CardViewModel, Card>(cvm);
-                    await repo.CreateOrUpdateCard(iss);
+                    repo.CreateOrUpdateCard(iss).Wait();
                 });
 
-            SubscribeAdded(cardsChanges, cardsLocker,
-                async cvm =>
+            SubscribeAdded(cardsChanges,
+                cvm =>
                 {
                     mon.LogicVerbose($"Box.Cards.Add {cvm.Id}::{cvm.Header}");
                     var ci = mapper.Map<CardViewModel, Card>(cvm);
-                    ci = await repo.CreateOrUpdateCard(ci);
+                    ci = repo.CreateOrUpdateCard(ci).Result;
 
                     cvm.Id = ci.Id;
                 });
 
-            SubscribeRemoved(cardsChanges, cardsLocker,
-                async cvm =>
+            SubscribeRemoved(cardsChanges,
+                cvm =>
                 {
                     mon.LogicVerbose($"Box.Cards.Remove {cvm.Id}::{cvm.Header}");
 
-                    await repo.DeleteCard(cvm.Id);
+                    repo.DeleteCard(cvm.Id).Wait();
                 });
 
             cardsChanges.Connect();
@@ -215,77 +210,45 @@ namespace Kamban.ViewModels.Core
             Loaded = true;
         }
 
-        private static IDisposable SubscribeChanged<T>(IObservable<IChangeSet<T>> x, SemaphoreSlim s,
-            Func<T, Task> a)
+        private static IDisposable SubscribeChanged<T>(IObservable<IChangeSet<T>> x,
+            Action<T> a)
             where T : INotifyPropertyChanged
         {
             return x.WhenAnyAutoSavePropertyChanged()
-                .Select(cvm => Observable.FromAsync(async () =>
-                {
-                    await s.WaitAsync();
-                    try
-                    {
-                        await a(cvm);
-                    }
-                    finally
-                    {
-                        s.Release();
-                    }
-                }))
-                .Concat()
-                .Subscribe();
+                .Subscribe(a);
         }
 
-        private static IDisposable SubscribeAdded<T>(IObservable<IChangeSet<T>> x, SemaphoreSlim s, Func<T, Task> a)
+        private static IDisposable SubscribeAdded<T>(IObservable<IChangeSet<T>> x,
+            Action<T> a)
             where T : INotifyPropertyChanged
         {
             return x.WhereReasonsAre(ListChangeReason.Add, ListChangeReason.AddRange)
-                .Select(c => Observable.FromAsync(async () =>
+                .Subscribe(c =>
                 {
-                    await s.WaitAsync();
-                    try
+                    var vms = c.SelectMany(q =>
                     {
-                        var vms = c.SelectMany(q =>
-                        {
-                            var list = new List<T>();
-                            if (q.Range != null)
-                                list.AddRange(q.Range);
-                            if (q.Item.Current != null)
-                                list.Add(q.Item.Current);
-                            return list;
-                        });
+                        var list = new List<T>();
+                        if (q.Range != null)
+                            list.AddRange(q.Range);
+                        if (q.Item.Current != null)
+                            list.Add(q.Item.Current);
+                        return list;
+                    });
 
-                        foreach (var cvm in vms)
-                            await a(cvm);
-                    }
-                    finally
-                    {
-                        s.Release();
-                    }
-                }))
-                .Concat()
-                .Subscribe();
+                    foreach (var cvm in vms)
+                        a(cvm);
+                });
         }
 
-        private static IDisposable SubscribeRemoved<T>(IObservable<IChangeSet<T>> x, SemaphoreSlim s, Func<T, Task> a)
+        private static IDisposable SubscribeRemoved<T>(IObservable<IChangeSet<T>> x,
+            Action<T> a)
             where T : INotifyPropertyChanged
         {
             return x.WhereReasonsAre(ListChangeReason.Remove)
                 .Subscribe(c => c
                     .Select(q => q.Item.Current)
                     .ToList()
-                    .ForEach(async cvm =>
-                    {
-                        await s.WaitAsync();
-                        try
-                        {
-                            await a(cvm);
-                        }
-                        finally
-                        {
-                            s.Release();
-                        }
-                    }));
+                    .ForEach(a));
         }
     }
 }

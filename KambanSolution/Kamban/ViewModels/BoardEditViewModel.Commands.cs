@@ -11,12 +11,9 @@ namespace Kamban.ViewModels
     {
         private async Task HeadRenameCommandExecute(IDim head)
         {
-            var headTxt = head is ColumnViewModel ? "column" : "row";
-            headTxt += $" {head.Name}";
-
             var ts = await dialCoord
-                .ShowInputAsync(this, "Warning", $"Enter new name for {headTxt}",
-                    new MetroDialogSettings()
+                .ShowInputAsync(this, "Warning", $"Enter new name for {head.FullName}",
+                    new MetroDialogSettings
                     {
                         AffirmativeButtonText = "OK",
                         NegativeButtonText = "Cancel",
@@ -39,46 +36,54 @@ namespace Kamban.ViewModels
 
         private async Task HeadDeleteCommandExecute(IDim head)
         {
-            var column = head as ColumnViewModel;
-            var row = head as RowViewModel;
-
-            var headTxt = head is ColumnViewModel ? "column" : "row";
-            headTxt += $" '{head.Name}'";
-
-            if (column != null && Columns.Count <= 1) return;
-            if (row != null && Rows.Count <= 1) return;
+            switch (head)
+            {
+                case ColumnViewModel _ when Box.Columns.Count <= 1:
+                case RowViewModel _ when Box.Rows.Count <= 1:
+                    await dialCoord.ShowMessageAsync(this, "Warning", $"Cannot remove {head.FullName}");
+                    return;
+            }
 
             var ts = await dialCoord.ShowMessageAsync(this, "Warning",
-                $"Are you shure to delete {headTxt}?"
+                $"Are you sure to delete {head.FullName}?"
                 , MessageDialogStyle.AffirmativeAndNegative);
 
             if (ts == MessageDialogResult.Negative)
                 return;
 
-            this.EnableMatrix = false;
+            EnableMatrix = false;
 
             // delete head and move cards from deleted cells to first head
-            if (column != null)
+            switch (head)
             {
-                // Shift cards
-                var firstColumn = Columns.OrderBy(x => x.Order).First();
-                foreach (var it in cardList.Where(x => (int) x.ColumnDeterminant == column.Id).ToList())
-                    it.ColumnDeterminant = firstColumn.Id;
+                case ColumnViewModel column:
+                {
+                    // Shift cards
+                    var firstColumn = Columns
+                        .OrderBy(x => x.Order)
+                        .First(x => x.Id != column.Id);
+                    foreach (var it in cardList.Where(x => x.ColumnDeterminant == column.Id).ToList())
+                        it.ColumnDeterminant = firstColumn.Id;
 
-                Box.Columns.Remove(column);
-            }
-            else
-            {
-                // Shift cards
-                var firstRow = Rows.OrderBy(x => x.Order).First();
-                foreach (var it in cardList.Where(x => (int) x.RowDeterminant == row.Id).ToList())
-                    it.RowDeterminant = firstRow.Id;
+                    Box.Columns.Remove(column);
+                }
+                    break;
+                case RowViewModel row:
+                {
+                    // Shift cards
+                    var firstRow = Rows
+                        .OrderBy(x => x.Order)
+                        .First(x => x.Id != row.Id);
+                    foreach (var it in cardList.Where(x => x.RowDeterminant == row.Id).ToList())
+                        it.RowDeterminant = firstRow.Id;
 
-                Box.Rows.Remove(row);
+                    Box.Rows.Remove(row);
+                }
+                    break;
             }
 
             // Rebuild Matrix
-            this.EnableMatrix = true;
+            EnableMatrix = true;
 
             NormalizeGridCommand
                 .Execute()
@@ -87,37 +92,30 @@ namespace Kamban.ViewModels
 
         private async Task HeadDeleteCardsCommandExecute(IDim head)
         {
-            
-            var column = head as ColumnViewModel;
-            var row = head as RowViewModel;
-
-            var headTxt = head is ColumnViewModel ? "column" : "row";
-            headTxt += $" '{head.Name}'";
-
-            if (column != null && Columns.Count <= 1) return;
-            if (row != null && Rows.Count <= 1) return;
-
             var ts = await dialCoord.ShowMessageAsync(this, "Warning",
-                $"Are you sure to delete all Cards in {headTxt}?"
+                $"Are you sure to delete all Cards in {head.FullName}?"
                 , MessageDialogStyle.AffirmativeAndNegative);
 
             if (ts == MessageDialogResult.Negative)
                 return;
 
-            if (column != null)
+            switch (head)
             {
-                // Remove Cards
-                foreach (CardViewModel it in cardList.Where(x => (int)x.ColumnDeterminant == column.Id).ToList())
-                    Box.Cards.Remove(it);
+                case ColumnViewModel column:
+                {
+                    // Remove Cards
+                    foreach (var it in cardList.Where(x => x.ColumnDeterminant == column.Id).ToList())
+                        Box.Cards.Remove(it);
+                }
+                    break;
+                case RowViewModel row:
+                {
+                    // Remove Cards
+                    foreach (var it in cardList.Where(x => x.RowDeterminant == row.Id).ToList())
+                        Box.Cards.Remove(it);
+                }
+                    break;
             }
-            else
-            {
-                // Remove Cards
-                foreach (CardViewModel it in cardList.Where(x => (int)x.RowDeterminant == row.Id).ToList())
-                    Box.Cards.Remove(it);
-            }
-
-
         }
 
         private async Task InsertHeadBeforeCommandExecute(IDim head)
@@ -133,8 +131,8 @@ namespace Kamban.ViewModels
         private async Task InsertHead(IDim head, int after)
         {
             var ts = await dialCoord
-                .ShowInputAsync(this, "Info", $"Enter new name",
-                    new MetroDialogSettings()
+                .ShowInputAsync(this, "Info", "Enter new name",
+                    new MetroDialogSettings
                     {
                         AffirmativeButtonText = "OK",
                         NegativeButtonText = "Cancel",
@@ -151,7 +149,7 @@ namespace Kamban.ViewModels
                 case ColumnViewModel column:
                 {
                     var tempColumns = Columns.ToList();
-                    var indx = tempColumns.IndexOf(head) + after;
+                    var index = tempColumns.IndexOf(head) + after;
 
                     var cvm = new ColumnViewModel
                     {
@@ -159,7 +157,7 @@ namespace Kamban.ViewModels
                         BoardId = column.BoardId
                     };
 
-                    tempColumns.Insert(indx, cvm);
+                    tempColumns.Insert(index, cvm);
                     Box.Columns.Add(cvm);
 
                     var i = 0;
@@ -173,7 +171,7 @@ namespace Kamban.ViewModels
                 case RowViewModel row:
                 {
                     var tempRows = Rows.ToList();
-                    var indx = tempRows.IndexOf(head) + after;
+                    var index = tempRows.IndexOf(head) + after;
 
                     var rvm = new RowViewModel
                     {
@@ -181,7 +179,7 @@ namespace Kamban.ViewModels
                         BoardId = row.BoardId
                     };
 
-                    tempRows.Insert(indx, rvm);
+                    tempRows.Insert(index, rvm);
                     Box.Rows.Add(rvm);
 
                     var i = 0;
@@ -208,7 +206,7 @@ namespace Kamban.ViewModels
             var str = $"Enter new board name for \"{oldName}\"";
             var newName = await dialCoord
                 .ShowInputAsync(this, "Board rename", str,
-                    new MetroDialogSettings()
+                    new MetroDialogSettings
                     {
                         AffirmativeButtonText = "OK",
                         NegativeButtonText = "Cancel",

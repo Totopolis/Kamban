@@ -62,7 +62,7 @@ namespace Kamban
                 .As<IDialogCoordinator>()
                 .SingleInstance();
 
-            builder.RegisterInstance(new MonikConsole())
+            builder.RegisterInstance(new MonikFile("kamban.log"))
                 .As<IMonik>()
                 .SingleInstance();
 

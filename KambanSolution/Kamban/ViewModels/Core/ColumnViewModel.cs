@@ -6,11 +6,10 @@ namespace Kamban.ViewModels.Core
 {
     public class ColumnViewModel : ReactiveObject, IDim
     {
-        public ColumnViewModel() { }
-
         [Reactive] public int Id { get; set; }
         [AutoSave, Reactive] public int BoardId { get; set; }
         [AutoSave, Reactive] public string Name { get; set; }
+        public string FullName => $"column '{Name}'";
         [AutoSave, Reactive] public int Size { get; set; }
         [AutoSave, Reactive] public int Order { get; set; }
         [Reactive] public int CurNumberOfCards { get; set; }
