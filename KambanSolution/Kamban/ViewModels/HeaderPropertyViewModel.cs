@@ -148,6 +148,7 @@ namespace Kamban.ViewModels
             this.RaisePropertyChanged("HeaderLimitSet");
             this.RaisePropertyChanged("HeaderMaxNumber");
 
+            IsOpened = true;
 
 
         }

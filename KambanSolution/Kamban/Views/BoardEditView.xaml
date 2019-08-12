@@ -118,5 +118,21 @@
                     Width="600"
                     />
 
+        <mah:Flyout Header="112233"
+                    BorderThickness="5" 
+                    BorderBrush="{DynamicResource AccentBaseColorBrush}"
+                    Position="Top"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="4"
+                    CloseButtonVisibility="Hidden"
+                    TitleVisibility="Hidden"
+                    IsOpen="{Binding HeaderPropertyFlyout.IsOpened}"
+                    Theme="Adapt"
+                    IsModal="True"
+                    Content="{Binding HeaderPropertyFlyout}"
+                    AnimateOpacity="True"
+                    Width="600"
+                    />
+
     </Grid>
 </UserControl>
