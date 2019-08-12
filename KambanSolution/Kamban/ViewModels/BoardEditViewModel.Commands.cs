@@ -85,6 +85,41 @@ namespace Kamban.ViewModels
                 .Subscribe();
         }
 
+        private async Task HeadDeleteCardsCommandExecute(IDim head)
+        {
+            
+            var column = head as ColumnViewModel;
+            var row = head as RowViewModel;
+
+            var headTxt = head is ColumnViewModel ? "column" : "row";
+            headTxt += $" '{head.Name}'";
+
+            if (column != null && Columns.Count <= 1) return;
+            if (row != null && Rows.Count <= 1) return;
+
+            var ts = await dialCoord.ShowMessageAsync(this, "Warning",
+                $"Are you sure to delete all Cards in {headTxt}?"
+                , MessageDialogStyle.AffirmativeAndNegative);
+
+            if (ts == MessageDialogResult.Negative)
+                return;
+
+            if (column != null)
+            {
+                // Remove Cards
+                foreach (CardViewModel it in cardList.Where(x => (int)x.ColumnDeterminant == column.Id).ToList())
+                    Box.Cards.Remove(it);
+            }
+            else
+            {
+                // Remove Cards
+                foreach (CardViewModel it in cardList.Where(x => (int)x.RowDeterminant == row.Id).ToList())
+                    Box.Cards.Remove(it);
+            }
+
+
+        }
+
         private async Task InsertHeadBeforeCommandExecute(IDim head)
         {
             await InsertHead(head, 0);

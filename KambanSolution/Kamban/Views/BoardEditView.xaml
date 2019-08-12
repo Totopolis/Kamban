@@ -72,6 +72,11 @@
                         Header="Delete"
                         CommandParameter="{Binding HeadOfContextMenu}"
                         Command="{Binding HeadDeleteCommand}"/>
+                    <Separator/>
+                    <MenuItem
+                        Header="Delete all Cards"
+                        CommandParameter="{Binding HeadOfContextMenu}"
+                        Command="{Binding HeadDeleteCardsCommand}"/>
                 </ContextMenu>
             </mykanban:Matrix.HeadContextMenu>
 
