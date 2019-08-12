@@ -32,7 +32,7 @@ namespace Kamban.ViewModels
 
      //   public event PropertyChangedEventHandler PropertyChanged;
 
-        private BoxViewModel db;
+        private BoxViewModel Box;
         private BoardViewModel board;
         IDim Header { get; set; }
 
@@ -130,7 +130,7 @@ namespace Kamban.ViewModels
                 return;
 
             Header = request.Header;
-            db = request.Db;
+            Box = request.Box;
             board = request.Board;
 
             if (Header == null)
