@@ -50,12 +50,14 @@ namespace Kamban.ViewModels
 
         public ReactiveCommand<ICard, Unit> CardClickCommand { get; set; }
         public ReactiveCommand<Unit, Unit> NormalizeGridCommand { get; set; }
+        public ReactiveCommand<IDim, Unit> HeaderPropertyChanged { get; set; }
 
         public ReactiveCommand<ICard, Unit> MoveCardCommand { get; set; }
         public ReactiveCommand<ICard, Unit> DeleteCardCommand { get; set; }
 
         [Reactive] public CardEditViewModel CardEditFlyout { get; set; }
         [Reactive] public CardMoveViewModel CardMoveFlyout { get; set; }
+        [Reactive] public HeaderPropertyViewModel HeaderPropertyFlyout { get; set; }
 
         [Reactive] public object HeadOfContextMenu { get; set; }
 
@@ -102,6 +104,21 @@ namespace Kamban.ViewModels
             BoardsInFile = null;
             CardEditFlyout = new CardEditViewModel();
             CardMoveFlyout = new CardMoveViewModel(mapper);
+            HeaderPropertyFlyout = new HeaderPropertyViewModel();
+
+            HeaderPropertyChanged = ReactiveCommand.Create<IDim>(c =>
+            {
+                HeaderPropertyFlyout.Initialize(new HeaderPropertyViewRequest
+                {
+                    Header = c,
+                    Db = this.Box,
+                    BoardVM = this,
+                    Board = CurrentBoard
+
+                }); ;
+                ;
+                ;
+            });
 
             ToggleShowCardIdsCommand = ReactiveCommand.Create(() => { ShowCardIds = !ShowCardIds; });
 

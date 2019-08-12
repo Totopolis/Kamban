@@ -56,4 +56,8 @@
     <DataTemplate DataType="{x:Type viewModels:CardMoveViewModel}">
         <views:CardMoveView />
     </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewModels:HeaderPropertyViewModel }">
+        <views:HeaderPropertyView/>
+    </DataTemplate>
 </ResourceDictionary>

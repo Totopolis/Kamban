@@ -15,6 +15,6 @@ namespace Kamban.ViewModels.Core
         [AutoSave, Reactive] public int Order { get; set; }
         [Reactive] public int CurNumberOfCards { get; set; }
         [AutoSave, Reactive] public bool LimitSet { get; set; } = true;
-        [AutoSave, Reactive] public int MaxNumberOfCards { get; set; } = 2;
+        [AutoSave, Reactive] public int MaxNumberOfCards { get; set; } = 8;
     }
 }

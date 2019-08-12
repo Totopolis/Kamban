@@ -8,5 +8,7 @@
         public int BoardId { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
+        public bool LimitSet { get; set; }
+        public int MaxNumberOfCards { get; set; }
     }
 }

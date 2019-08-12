@@ -56,10 +56,14 @@
 
             <mykanban:Matrix.HeadContextMenu>
                 <ContextMenu>
-                    <MenuItem 
+                    <!-- MenuItem 
                         Header="Rename"
                         CommandParameter="{Binding HeadOfContextMenu}"
-                        Command="{Binding HeadRenameCommand}"/>
+                        Command="{Binding HeadRenameCommand}"/ -->
+                    <MenuItem 
+                        Header="Edit Properties"
+                        CommandParameter="{Binding HeadOfContextMenu}"
+                        Command="{Binding HeaderPropertyChanged}"/>
                     <MenuItem
                         Header="Insert Before"
                         CommandParameter="{Binding HeadOfContextMenu}"
