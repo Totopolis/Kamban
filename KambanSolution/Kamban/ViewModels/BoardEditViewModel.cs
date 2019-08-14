@@ -50,8 +50,7 @@ namespace Kamban.ViewModels
 
         public ReactiveCommand<ICard, Unit> CardClickCommand { get; set; }
         public ReactiveCommand<Unit, Unit> NormalizeGridCommand { get; set; }
-        public ReactiveCommand<IDim, Unit> HeaderPropertyChanged { get; set; }
-
+        
         public ReactiveCommand<ICard, Unit> MoveCardCommand { get; set; }
         public ReactiveCommand<ICard, Unit> DeleteCardCommand { get; set; }
 
@@ -61,6 +60,7 @@ namespace Kamban.ViewModels
 
         [Reactive] public object HeadOfContextMenu { get; set; }
 
+        public ReactiveCommand<IDim, Unit> HeaderPropertyChanged { get; set; }
         public ReactiveCommand<IDim, Unit> HeadDeleteCommand { get; set; }
         public ReactiveCommand<IDim, Unit> HeadDeleteCardsCommand { get; set; }
         public ReactiveCommand<IDim, Unit> InsertHeadBeforeCommand { get; set; }
