@@ -12,5 +12,8 @@ namespace Kamban.ViewModels.Core
         public string FullName => $"column '{Name}'";
         [AutoSave, Reactive] public int Size { get; set; }
         [AutoSave, Reactive] public int Order { get; set; }
+        [Reactive] public int CurNumberOfCards { get; set; }
+        [AutoSave, Reactive] public bool LimitSet { get; set; } 
+        [AutoSave, Reactive] public int MaxNumberOfCards { get; set; } = 8;
     }
 }
