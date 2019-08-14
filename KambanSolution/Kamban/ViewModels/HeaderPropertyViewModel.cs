@@ -18,10 +18,6 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
-using Brush = System.Windows.Media.Brush;
-using ColorConverter = System.Windows.Media.ColorConverter;
-using WpfColor = System.Windows.Media.Color;
-using System.Windows;
 using System.ComponentModel;
 using Kamban.ViewModels.Core;
 
@@ -29,23 +25,17 @@ namespace Kamban.ViewModels
 {
     public class HeaderPropertyViewModel : ViewModelBase, IInitializableViewModel ,INotifyPropertyChanged
     {
-
-     //   public event PropertyChangedEventHandler PropertyChanged;
-
         private BoxViewModel Box;
         private BoardViewModel board;
         IDim Header { get; set; }
-
        
         public String TitleText { get; set;  }
-
 
         private String OldName;
         private int OldMaxNumberOfCards;
         private bool OldLimitSet;
 
         [Reactive] public CardViewModel Card { get; set; }
-
         
         public string HeaderName
         {
@@ -81,20 +71,15 @@ namespace Kamban.ViewModels
             }
         }
 
-
         public ReactiveCommand<Unit, Unit> HeaderCancelCommand { get; set; }
         public ReactiveCommand<Unit, Unit> HeaderSaveCommand { get; set; }
-        //public ReactiveCommand<Unit, Unit> EnterCommand { get; set; }
 
         [Reactive] public bool IsOpened { get; set; } = false;
-
-        
 
         public HeaderPropertyViewModel()
         {
             HeaderSaveCommand = ReactiveCommand.Create(HeaderSaveCommandExecute );
             HeaderCancelCommand = ReactiveCommand.Create(HeaderCancelCommandExecute);
-            //HeaderEnterCommand = ReactiveCommand.Create(HeaderEnterCommandExecute);
         }
 
         private void EnterCommandExecute()
@@ -109,16 +94,12 @@ namespace Kamban.ViewModels
             HeaderMaxNumber = OldMaxNumberOfCards;
             Header.Name = OldName;
 
-
             IsOpened = false;
-            
         }
 
         private void HeaderSaveCommandExecute()
         {
-            
             IsOpened = false;
-            
         }
 
 
@@ -141,7 +122,6 @@ namespace Kamban.ViewModels
             OldName = Header.Name;
 
             TitleText = Header is ColumnViewModel ? "Column Properties" : "Row Properties";
-            
 
             this.RaisePropertyChanged("TitleText");
             this.RaisePropertyChanged("HeaderName");
@@ -149,8 +129,6 @@ namespace Kamban.ViewModels
             this.RaisePropertyChanged("HeaderMaxNumber");
 
             IsOpened = true;
-
-
         }
     }
 }

@@ -18,7 +18,6 @@ namespace Kamban.MatrixControl
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             if (values.Length != 3) return false;
-
             return ((Int32)values[0] > (Int32)values[1]) & ((bool)values[2]);
         }
 
@@ -26,8 +25,6 @@ namespace Kamban.MatrixControl
         {
             throw new NotImplementedException();
         }
-
-
     }
 
     public partial class Matrix
@@ -169,8 +166,6 @@ namespace Kamban.MatrixControl
 
             Monik?.ApplicationVerbose("Matrix.RebuildGrid finished");
         }
-
-       
 
         private int GetHashValue(object a, object b)
         {
