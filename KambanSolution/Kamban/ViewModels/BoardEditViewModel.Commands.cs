@@ -9,31 +9,6 @@ namespace Kamban.ViewModels
 {
     public partial class BoardEditViewModel
     {
-        private async Task HeadRenameCommandExecute(IDim head)
-        {
-            var ts = await dialCoord
-                .ShowInputAsync(this, "Warning", $"Enter new name for {head.FullName}",
-                    new MetroDialogSettings
-                    {
-                        AffirmativeButtonText = "OK",
-                        NegativeButtonText = "Cancel",
-                        DefaultText = head.Name
-                    });
-
-            if (string.IsNullOrEmpty(ts))
-                return;
-
-            switch (head)
-            {
-                case ColumnViewModel column:
-                    column.Name = ts;
-                    break;
-                case RowViewModel row:
-                    row.Name = ts;
-                    break;
-            }
-        }
-
         private async Task HeadDeleteCommandExecute(IDim head)
         {
             switch (head)
