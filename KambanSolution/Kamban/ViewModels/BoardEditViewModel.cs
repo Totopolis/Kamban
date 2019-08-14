@@ -114,7 +114,6 @@ namespace Kamban.ViewModels
                     Box = this.Box,
                     BoardVM = this,
                     Board = CurrentBoard
-
                 }); 
             });
 
