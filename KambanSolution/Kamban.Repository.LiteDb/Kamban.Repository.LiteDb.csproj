@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DynamicData" Version="6.12.13" />
     <PackageReference Include="LiteDB" Version="4.1.4" />
   </ItemGroup>
 
