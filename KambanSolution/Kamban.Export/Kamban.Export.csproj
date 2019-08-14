@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DynamicData" Version="6.12.13" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="kenjiuno.PdfSharp-WPF" Version="1.31.5253" />
     <PackageReference Include="kenjiuno.PdfSharp.Xps" Version="1.1.3" />

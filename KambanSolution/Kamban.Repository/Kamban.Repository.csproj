@@ -4,8 +4,4 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="DynamicData" Version="6.12.13" />
-  </ItemGroup>
-
 </Project>

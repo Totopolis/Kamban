@@ -21,6 +21,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>SquirrelAwareVersion</_Parameter1>
+      <_Parameter2>1</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="ReachFramework" />
     <Reference Include="System.Printing" />
     <Reference Include="PresentationCore" />
@@ -34,10 +41,6 @@
     <Compile Update="Properties\Resources.Designer.cs" DesignTime="True" AutoGen="True" DependentUpon="Resources.resx" />
 
     <None Update="Properties\Settings.settings" Generator="SettingsSingleFileGenerator" LastGenOutput="Settings.Designer.cs" />
-
-    <None Update="Views\HeaderPropertyView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
     <Compile Update="Properties\Settings.Designer.cs" DesignTime="True" AutoGen="True" DependentUpon="Settings.settings" />
 
 
