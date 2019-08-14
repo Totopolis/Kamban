@@ -25,8 +25,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="34" />
             <RowDefinition Height="Auto" MinHeight="20"/>
-            <RowDefinition Height="Auto" MinHeight="20"/>
-            <RowDefinition Height="Auto" MinHeight="200"/>
+            <RowDefinition  Height="Auto" MinHeight="20"/>
+            <RowDefinition  Height="Auto" MinHeight="200" MaxHeight="400" x:Name="row3"/>
             <RowDefinition Height="Auto" MinHeight="40"/>
         </Grid.RowDefinitions>
 
@@ -113,6 +113,10 @@
             BorderThickness="0">Description</Label>
 
         <wpfresources:SelectionBindingTextBox 
+            x:Name="BodyTextBox"
+            VerticalAlignment="Stretch"
+            MaxHeight="{Binding ElementName=row3, Path=MaxHeight}"
+            VerticalScrollBarVisibility="Visible"
             BorderThickness="0"
             FontSize="16"
             TabIndex="2"
