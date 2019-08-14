@@ -36,13 +36,9 @@
         <CheckBox Grid.Row="3" Grid.Column="2" x:Name="CB_CardLimit" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="{Binding Path=HeaderLimitSet}"/>
 
         <Label Grid.Row="4" Grid.Column="1" Content="Max Cards" HorizontalAlignment="Right" IsEnabled="{Binding ElementName=CB_CardLimit, Path=IsChecked}" VerticalAlignment="Center" BorderThickness="0"/>
-        <!-- TextBox Grid.Row="4" Grid.Column="2" Width="80" Text ="{Binding Path=HeaderMaxNumber}" IsEnabled="{Binding ElementName=CB_CardLimit, Path=IsChecked}"  PreviewTextInput="NumberValidationTextBox" HorizontalAlignment="Left" VerticalAlignment="Center"/ -->
+        <Controls:NumericUpDown Grid.Row="4" Grid.Column="2"  Minimum="0" Maximum="2147483647" Interval="1" StringFormat="" HasDecimals="False" Value="{Binding Path=HeaderMaxNumber}"  IsEnabled="{Binding ElementName=CB_CardLimit, Path=IsChecked}"/>
 
-        <Controls:NumericUpDown Grid.Row="4" Grid.Column="2"  Minimum="0" Maximum="{Binding Int.MaxValue}" Interval="1" StringFormat="" HasDecimals="False" Value="{Binding Path=HeaderMaxNumber}"  IsEnabled="{Binding ElementName=CB_CardLimit, Path=IsChecked}"/>
-
-
-
-            <StackPanel Grid.Row="5"
+        <StackPanel Grid.Row="5"
                     Grid.Column="0"
                     Grid.ColumnSpan="3"
                     Orientation="Horizontal"

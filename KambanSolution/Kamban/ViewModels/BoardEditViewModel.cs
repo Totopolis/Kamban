@@ -61,7 +61,6 @@ namespace Kamban.ViewModels
 
         [Reactive] public object HeadOfContextMenu { get; set; }
 
-        public ReactiveCommand<IDim, Unit> HeadRenameCommand { get; set; }
         public ReactiveCommand<IDim, Unit> HeadDeleteCommand { get; set; }
         public ReactiveCommand<IDim, Unit> HeadDeleteCardsCommand { get; set; }
         public ReactiveCommand<IDim, Unit> InsertHeadBeforeCommand { get; set; }
@@ -126,9 +125,6 @@ namespace Kamban.ViewModels
 
             DeleteCardCommand = ReactiveCommand
                 .Create<ICard>(async card => await DeleteCardCommandExecuteAsync(card));
-
-            HeadRenameCommand = ReactiveCommand
-                .Create<IDim>(async head => await HeadRenameCommandExecute(head));
 
             HeadDeleteCommand = ReactiveCommand
                 .Create<IDim>(async head => await HeadDeleteCommandExecute(head));
