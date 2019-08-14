@@ -115,9 +115,7 @@ namespace Kamban.ViewModels
                     BoardVM = this,
                     Board = CurrentBoard
 
-                }); ;
-                ;
-                ;
+                }); 
             });
 
             ToggleShowCardIdsCommand = ReactiveCommand.Create(() => { ShowCardIds = !ShowCardIds; });
