@@ -98,7 +98,6 @@ namespace Kamban.Repository.Redmine
 
         public async Task<List<Row>> LoadSchemeRows(int[] boardIds = null)
         {
-            var nvc = new NameValueCollection();
             if (boardIds == null)
             {
                 _issues = await _rm.GetObjectsAsync<Issue>(new NameValueCollection());
@@ -114,7 +113,6 @@ namespace Kamban.Repository.Redmine
                     .ToList();
             }
 
-            _issues = await _rm.GetObjectsAsync<Issue>(nvc);
             _users = _issues.Select(x => x.AssignedTo).Where(x => x != null).Distinct().ToList();
             _users.Add(NoneUser);
 
