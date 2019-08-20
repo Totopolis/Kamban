@@ -45,6 +45,27 @@ namespace Kamban.Repository.LiteDb
             };
         }
 
+        public Task<List<Board>> LoadSchemeBoards()
+        {
+            return db.GetAllAsync<Board>();
+        }
+
+        public async Task<List<Column>> LoadSchemeColumns(int[] boardIds = null)
+        {
+            var columns = await db.GetAllAsync<Column>();
+            return columns
+                .Where(x => boardIds?.Contains(x.BoardId) ?? true)
+                .ToList();
+        }
+
+        public async Task<List<Row>> LoadSchemeRows(int[] boardIds = null)
+        {
+            var rows = await db.GetAllAsync<Row>();
+            return rows
+                .Where(x => boardIds?.Contains(x.BoardId) ?? true)
+                .ToList();
+        }
+
         public async Task<List<Card>> LoadCards(CardFilter filter)
         {
             var cards = await db.GetAllAsync<Card>();

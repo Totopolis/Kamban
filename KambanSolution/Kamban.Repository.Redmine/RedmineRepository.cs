@@ -13,7 +13,7 @@ namespace Kamban.Repository.Redmine
     {
         private RedmineManager _rm;
 
-        private bool _redmineDataLoaded;
+        private BoxScheme _scheme = new BoxScheme();
         private List<Issue> _issues;
         private List<IdentifiableName> _users;
         private List<IssueStatus> _statuses;
@@ -52,51 +52,87 @@ namespace Kamban.Repository.Redmine
 
         public async Task<BoxScheme> LoadScheme()
         {
-            var scheme = new BoxScheme();
+            await EnsureSchemeLoaded();
+            return _scheme;
+        }
 
-            await LoadRedmineData();
+        public async Task<List<Board>> LoadSchemeBoards()
+        {
+            _projects = await _rm.GetObjectsAsync<Project>(new NameValueCollection());
+            var boards = _projects
+                .Select(project => new Board
+                {
+                    Id = project.Id,
+                    Name = project.Name,
+                    Created = project.CreatedOn.GetValueOrDefault()
+                })
+                .ToList();
 
-            var boards = new List<Board>(_projects.Count);
-            foreach (var project in _projects)
+            _scheme.Boards = boards;
+            _scheme.Rows = null;
+
+            return boards;
+        }
+
+        public async Task<List<Column>> LoadSchemeColumns(int[] boardIds = null)
+        {
+            _statuses = await _rm.GetObjectsAsync<IssueStatus>(new NameValueCollection());
+            var columns = _projects
+                .Where(project => boardIds?.Contains(project.Id) ?? true)
+                .SelectMany(project =>
+                    _statuses
+                        .Select((s, i) =>
+                            new Column
+                            {
+                                Id = s.Id + _statuses.Count * project.Id,
+                                BoardId = project.Id,
+                                Name = s.Name,
+                                Order = i
+                            }))
+                .ToList();
+
+            _scheme.Columns = columns;
+
+            return columns;
+        }
+
+        public async Task<List<Row>> LoadSchemeRows(int[] boardIds = null)
+        {
+            var nvc = new NameValueCollection();
+            if (boardIds != null)
             {
-                scheme.Rows.AddRange(_users
-                    .Select((t, i) =>
-                        new Row
-                        {
-                            Id = t.Id + _users.Count * project.Id,
-                            BoardId = project.Id,
-                            Name = t.Name,
-                            Order = i
-                        })
-                );
-                scheme.Columns.AddRange(_statuses
-                    .Select((s, i) =>
-                        new Column
-                        {
-                            Id = s.Id + _statuses.Count * project.Id,
-                            BoardId = project.Id,
-                            Name = s.Name,
-                            Order = i
-                        })
-                );
-                boards.Add(
-                    new Board
-                    {
-                        Id = project.Id,
-                        Name = project.Name,
-                        Created = project.CreatedOn.GetValueOrDefault()
-                    }
-                );
+                foreach (var id in boardIds)
+                {
+                    nvc.Add(RedmineKeys.PROJECT_ID, id.ToString());
+                }
             }
 
-            scheme.Boards = boards;
+            _issues = await _rm.GetObjectsAsync<Issue>(nvc);
+            _users = _issues.Select(x => x.AssignedTo).Where(x => x != null).Distinct().ToList();
+            _users.Add(NoneUser);
 
-            return scheme;
+            var rows = _projects
+                .Where(project => boardIds?.Contains(project.Id) ?? true)
+                .SelectMany(project =>
+                    _users
+                        .Select((t, i) =>
+                            new Row
+                            {
+                                Id = t.Id + _users.Count * project.Id,
+                                BoardId = project.Id,
+                                Name = t.Name,
+                                Order = i
+                            }))
+                .ToList();
+
+            _scheme.Rows = rows;
+
+            return rows;
         }
 
         public async Task<List<Card>> LoadCards(CardFilter filter)
         {
-            await LoadRedmineData();
+            await EnsureSchemeLoaded();
 
             return _issues
                 .Where(x => (filter.BoardIds == null ||
@@ -115,26 +151,27 @@ namespace Kamban.Repository.Redmine
                         Head = x.Subject,
                         Body = x.Description,
                         Created = x.CreatedOn.GetValueOrDefault(),
-                    }).ToList();
+                    })
+                .ToList();
         }
 
 
-        private async Task LoadRedmineData()
+        private async Task EnsureSchemeLoaded()
         {
-            if (_redmineDataLoaded)
-                return;
+            if (_scheme.Boards == null)
+            {
+                await LoadSchemeBoards();
+            }
 
-            _redmineDataLoaded = true;
+            if (_scheme.Columns == null)
+            {
+                await LoadSchemeColumns();
+            }
 
-            var issuesTask = _rm.GetObjectsAsync<Issue>(new NameValueCollection());
-            var statusesTask = _rm.GetObjectsAsync<IssueStatus>(new NameValueCollection());
-            var projectsTask = _rm.GetObjectsAsync<Project>(new NameValueCollection());
-
-            _issues = await issuesTask;
-            _users = _issues.Select(x => x.AssignedTo).Where(x => x != null).Distinct().ToList();
-            _users.Add(NoneUser);
-            _statuses = await statusesTask;
-            _projects = await projectsTask;
+            if (_scheme.Rows == null)
+            {
+                await LoadSchemeRows();
+            }
         }
 
         private static readonly IdentifiableName NoneUser = new IdentifiableName {Id = int.MaxValue / 2, Name = "None"};
