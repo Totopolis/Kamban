@@ -8,5 +8,6 @@ namespace Kamban.ViewModels.ImportScheme
         [Reactive] public int Id { get; set; }
         [Reactive] public string Name { get; set; }
         [Reactive] public bool IsSelected { get; set; }
+        [Reactive] public bool IsEnabled { get; set; }
     }
 }

@@ -30,7 +30,9 @@ namespace Kamban.ViewModels
         private ILoadRepository _repository;
         private BoxScheme _scheme;
         private bool _loaded;
-        
+
+        public bool LoadAll { get; set; }
+        [Reactive] public bool CanReloadPart { get; set; }
         public BoxImportSchemeViewModel Scheme { get; set; }
 
         [Reactive] public string FileName { get; set; }
@@ -38,6 +40,7 @@ namespace Kamban.ViewModels
 
         public ReactiveCommand<Unit, Unit> ImportCommand { get; set; }
         public ReactiveCommand<Unit, Unit> ReloadCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> ReloadPartCommand { get; set; }
         public ReactiveCommand<Unit, Unit> SelectFolderCommand { get; set; }
 
         public ImportSchemeViewModel(IShell shell, IDialogCoordinator dialogCoordinator, IAppModel appModel, IAppConfig appConfig)
@@ -55,6 +58,8 @@ namespace Kamban.ViewModels
                     _loaded = true;
                 }
             });
+            ReloadPartCommand = ReactiveCommand.CreateFromTask(ReloadSchemePart,
+                this.WhenAnyValue(x => x.CanReloadPart));
 
             FolderName = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             FileName = $"_tmp_{DateTime.UtcNow.Ticks}.kam";
@@ -146,8 +151,21 @@ namespace Kamban.ViewModels
             {
                 dialogController = await _dialogCoordinator.ShowProgressAsync(this, "Scheme Loading", "Loading...");
                 dialogController.SetIndeterminate();
-                _scheme = await _repository.LoadScheme();
-                Scheme.Reload(_scheme);
+
+                if (LoadAll)
+                {
+                    _scheme = await _repository.LoadScheme();
+                }
+                else
+                {
+                    CanReloadPart = true;
+                    _scheme = new BoxScheme
+                    {
+                        Boards = await _repository.LoadSchemeBoards()
+                    };
+                }
+
+                Scheme.Update(_scheme);
                 await dialogController.CloseAsync();
             }
             catch (Exception e)
@@ -160,6 +178,50 @@ namespace Kamban.ViewModels
                 await _dialogCoordinator.ShowMessageAsync(this, "Error", e.Message);
 
                 Close();
+            }
+        }
+
+        private async Task ReloadSchemePart()
+        {
+            if (!CanReloadPart)
+                return;
+
+            if (!Scheme.Boards.Any(x => x.IsSelected))
+            {
+                await _dialogCoordinator.ShowMessageAsync(this, "Nothing to load", "Boards are empty");
+                return;
+            }
+
+            ProgressDialogController dialogController = null;
+            try
+            {
+                dialogController = await _dialogCoordinator.ShowProgressAsync(this, "Scheme Loading", "Loading...");
+                dialogController.SetIndeterminate();
+
+                var boardIds = Scheme.Boards.Where(x => x.IsSelected).Select(x => x.Id).ToArray();
+                foreach (var board in Scheme.Boards)
+                    board.IsEnabled = board.IsSelected;
+
+                var columnsTask = _repository.LoadSchemeColumns(boardIds);
+                var rowsTask = _repository.LoadSchemeRows(boardIds);
+                _scheme.Columns = await columnsTask;
+                _scheme.Rows = await rowsTask;
+
+                Scheme.UpdateColumns(_scheme.Columns);
+                Scheme.UpdateRows(_scheme.Rows);
+
+                CanReloadPart = false;
+
+                await dialogController.CloseAsync();
+            }
+            catch (Exception e)
+            {
+                if (dialogController != null)
+                {
+                    await dialogController.CloseAsync();
+                }
+
+                await _dialogCoordinator.ShowMessageAsync(this, "Error", e.Message);
             }
         }
     }
