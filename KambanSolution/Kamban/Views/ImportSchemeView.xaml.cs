@@ -10,9 +10,10 @@ namespace Kamban.Views
     /// </summary>
     public partial class ImportSchemeView : IView
     {
-        public ImportSchemeView(ImportSchemeViewModel vm)
+        public ImportSchemeView(ImportSchemeViewModel vm, bool loadAll = true)
         {
             InitializeComponent();
+            vm.LoadAll = loadAll;
             ViewModel = vm;
             DataContext = ViewModel;
         }

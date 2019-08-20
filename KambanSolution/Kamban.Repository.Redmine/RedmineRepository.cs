@@ -99,12 +99,19 @@ namespace Kamban.Repository.Redmine
         public async Task<List<Row>> LoadSchemeRows(int[] boardIds = null)
         {
             var nvc = new NameValueCollection();
-            if (boardIds != null)
+            if (boardIds == null)
             {
-                foreach (var id in boardIds)
-                {
-                    nvc.Add(RedmineKeys.PROJECT_ID, id.ToString());
-                }
+                _issues = await _rm.GetObjectsAsync<Issue>(new NameValueCollection());
+            }
+            else
+            {
+                var issuesTasks = boardIds
+                    .Select(x => new NameValueCollection {{RedmineKeys.PROJECT_ID, x.ToString()}})
+                    .Select(x => _rm.GetObjectsAsync<Issue>(x));
+                var result = await Task.WhenAll(issuesTasks);
+                _issues = result
+                    .SelectMany(x => x)
+                    .ToList();
             }
 
             _issues = await _rm.GetObjectsAsync<Issue>(nvc);
@@ -152,7 +159,7 @@ namespace Kamban.Repository.Redmine
                         Body = x.Description,
                         Created = x.CreatedOn.GetValueOrDefault(),
                     })
-                .ToList();
+                    .ToList();
         }
 
 

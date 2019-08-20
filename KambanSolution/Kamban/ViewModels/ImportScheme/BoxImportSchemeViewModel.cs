@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
+using DynamicData.Aggregation;
 using Kamban.Repository.Models;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -13,12 +14,15 @@ namespace Kamban.ViewModels.ImportScheme
 {
     public class BoxImportSchemeViewModel : ReactiveObject
     {
+        [Reactive] public bool HasBoards { get; set; }
         [Reactive] public bool? IsAllBoardsSelected { get; set; }
         public ReactiveCommand<bool?, Unit> AllBoardsSelectionCommand { get; set; }
 
+        [Reactive] public bool HasColumns { get; set; }
         [Reactive] public bool? IsAllColumnsSelected { get; set; }
         public ReactiveCommand<bool?, Unit> AllColumnsSelectionCommand { get; set; }
 
+        [Reactive] public bool HasRows { get; set; }
         [Reactive] public bool? IsAllRowsSelected { get; set; }
         public ReactiveCommand<bool?, Unit> AllRowsSelectionCommand { get; set; }
 
@@ -47,6 +51,9 @@ namespace Kamban.ViewModels.ImportScheme
                 .ObserveOnDispatcher()
                 .Publish();
             boardsPublish
+                .Count()
+                .Subscribe(x => HasBoards = x > 0);
+            boardsPublish
                 .Bind(out _boards)
                 .Subscribe();
             boardsPublish
@@ -66,6 +73,9 @@ namespace Kamban.ViewModels.ImportScheme
                 .ObserveOnDispatcher()
                 .Publish();
             columnsPublish
+                .Count()
+                .Subscribe(x => HasColumns = x > 0);
+            columnsPublish
                 .Bind(out _columns)
                 .Subscribe();
             columnsPublish
@@ -82,6 +92,9 @@ namespace Kamban.ViewModels.ImportScheme
                 .Filter(selectedBoardChanged.Select(CreateRowPredicate))
                 .ObserveOnDispatcher()
                 .Publish();
+            rowsPublish
+                .Count()
+                .Subscribe(x => HasRows = x > 0);
             rowsPublish
                 .Bind(out _rows)
                 .Subscribe();
@@ -100,7 +113,7 @@ namespace Kamban.ViewModels.ImportScheme
             AllBoardsSelectionCommand = ReactiveCommand.Create<bool?>(x =>
             {
                 foreach (var board in _boards)
-                    board.IsSelected = x.HasValue && x.Value;
+                    board.IsSelected = board.IsEnabled && x.HasValue && x.Value;
             });
             AllColumnsSelectionCommand = ReactiveCommand.Create<bool?>(x =>
             {
@@ -130,28 +143,52 @@ namespace Kamban.ViewModels.ImportScheme
             return x => x.BoardId == selectedBoard.Id;
         }
 
-        public void Reload(BoxScheme scheme)
+        public void Update(BoxScheme scheme)
+        {
+            UpdateBoards(scheme.Boards);
+            UpdateColumns(scheme.Columns);
+            UpdateRows(scheme.Rows);
+        }
+
+        public void UpdateBoards(List<Board> boards)
         {
             _boardsSource.Edit(x =>
             {
                 x.Clear();
-                x.AddRange(scheme.Boards.Select(y => new BoardImportSchemeViewModel
-                    {Id = y.Id, Name = y.Name, IsSelected = true}));
-            });
-            _columnsSource.Edit(x =>
-            {
-                x.Clear();
-                x.AddRange(scheme.Columns.Select(y => new ColumnImportSchemeViewModel
-                    {Id = y.Id, BoardId = y.BoardId, Name = y.Name, IsSelected = true}));
-            });
-            _rowsSource.Edit(x =>
-            {
-                x.Clear();
-                x.AddRange(scheme.Rows.Select(y => new RowImportSchemeViewModel
-                    {Id = y.Id, BoardId = y.BoardId, Name = y.Name, IsSelected = true}));
+                if (boards != null)
+                {
+                    x.AddRange(boards.Select(y => new BoardImportSchemeViewModel
+                        { Id = y.Id, Name = y.Name, IsSelected = true, IsEnabled = true }));
+                }
             });
 
             SelectedBoard = _boardsSource.Items.FirstOrDefault();
+        }
+
+        public void UpdateColumns(List<Column> columns)
+        {
+            _columnsSource.Edit(x =>
+            {
+                x.Clear();
+                if (columns != null)
+                {
+                    x.AddRange(columns.Select(y => new ColumnImportSchemeViewModel
+                        { Id = y.Id, BoardId = y.BoardId, Name = y.Name, IsSelected = true }));
+                }
+            });
+        }
+
+        public void UpdateRows(List<Row> rows)
+        {
+            _rowsSource.Edit(x =>
+            {
+                x.Clear();
+                if (rows != null)
+                {
+                    x.AddRange(rows.Select(y => new RowImportSchemeViewModel
+                        { Id = y.Id, BoardId = y.BoardId, Name = y.Name, IsSelected = true }));
+                }
+            });
         }
 
         public CardFilter GetCardFilter()
