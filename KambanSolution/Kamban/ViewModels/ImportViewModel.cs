@@ -2,12 +2,14 @@
 using System.Reactive;
 using System.Threading.Tasks;
 using System.Windows;
+using Autofac;
 using Kamban.Repository.Redmine;
 using Kamban.ViewRequests;
 using Kamban.Views;
 using Kamban.Views.Dialogs;
 using MahApps.Metro.Controls.Dialogs;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ShowOptions;
 using Ui.Wpf.Common.ViewModels;
@@ -19,6 +21,7 @@ namespace Kamban.ViewModels
         private IShell _shell;
         private IDialogCoordinator _dialogCoordinator;
 
+        [Reactive] public bool LoadFullScheme { get; set; }
         public ReactiveCommand<Unit, Unit> ImportRedmineCommand { get; set; }
 
         public ImportViewModel(IShell shell, IDialogCoordinator dialogCoordinator)
@@ -33,11 +36,12 @@ namespace Kamban.ViewModels
             var loginData = await LoginToRedmine();
             if (loginData == null)
                 return;
-            
+
             try
             {
                 var repo = new RedmineRepository(loginData.Host, loginData.Username, loginData.Password);
-                _shell.ShowView<ImportSchemeView>(
+                _shell.ShowView(
+                    scope => scope.Resolve<ImportSchemeView>(new NamedParameter("loadAll", LoadFullScheme)),
                     new ImportSchemeViewRequest
                     {
                         ViewId = $"{loginData.Host}?u={loginData.Username}&p={loginData.SecurePassword.GetHashCode()}",
@@ -67,12 +71,11 @@ namespace Kamban.ViewModels
                 RememberCheckBoxVisibility = Visibility.Collapsed
             };
 
-            var loginDialog = new LoginWithUrlDialog(null, settings) { Title = "Login to Redmine" };
+            var loginDialog = new LoginWithUrlDialog(null, settings) {Title = "Login to Redmine"};
             await _dialogCoordinator.ShowMetroDialogAsync(this, loginDialog);
             var result = await loginDialog.WaitForButtonPressAsync();
             await _dialogCoordinator.HideMetroDialogAsync(this, loginDialog);
             return result;
         }
-
     }
 }

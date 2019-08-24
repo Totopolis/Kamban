@@ -1,8 +1,5 @@
-﻿using Kamban.ViewModels;
-using Kamban.ViewModels.Core;
+﻿using Kamban.ViewModels.Core;
 using Ui.Wpf.Common;
-
-
 
 namespace Kamban.ViewModels
 {

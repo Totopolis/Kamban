@@ -1,8 +1,8 @@
-﻿using Kamban.Repository.Models;
-using LiteDB;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Kamban.Repository.Models;
+using LiteDB;
 
 namespace Kamban.Repository.LiteDb
 {
@@ -43,6 +43,27 @@ namespace Kamban.Repository.LiteDb
                 Columns = await columns,
                 Rows = await rows
             };
+        }
+
+        public Task<List<Board>> LoadSchemeBoards()
+        {
+            return db.GetAllAsync<Board>();
+        }
+
+        public async Task<List<Column>> LoadSchemeColumns(int[] boardIds = null)
+        {
+            var columns = await db.GetAllAsync<Column>();
+            return columns
+                .Where(x => boardIds?.Contains(x.BoardId) ?? true)
+                .ToList();
+        }
+
+        public async Task<List<Row>> LoadSchemeRows(int[] boardIds = null)
+        {
+            var rows = await db.GetAllAsync<Row>();
+            return rows
+                .Where(x => boardIds?.Contains(x.BoardId) ?? true)
+                .ToList();
         }
 
         public async Task<List<Card>> LoadCards(CardFilter filter)
