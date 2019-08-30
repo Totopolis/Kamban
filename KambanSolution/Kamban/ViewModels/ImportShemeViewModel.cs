@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive;
@@ -38,6 +39,9 @@ namespace Kamban.ViewModels
 
         [Reactive] public string FileName { get; set; }
         [Reactive] public string FolderName { get; set; }
+
+        [Reactive] public bool DontImportUnusedRows { get; set; }
+        [Reactive] public bool DontImportUnusedColumns { get; set; }
 
         public ReactiveCommand<Unit, Unit> ImportCommand { get; set; }
         public ReactiveCommand<Unit, Unit> ReloadCommand { get; set; }
@@ -105,7 +109,7 @@ namespace Kamban.ViewModels
                     await _dialogCoordinator.ShowMessageAsync(this, "Error", "File already exists");
                     return;
                 }
-                
+
                 if (!Scheme.IsSchemeValid())
                 {
                     await _dialogCoordinator.ShowMessageAsync(this, "Error",
@@ -121,12 +125,20 @@ namespace Kamban.ViewModels
 
                 cards.ForEach(x => x.Color = DefaultColorItems.LemonChiffon.SystemName);
 
+                var columns = _scheme.Columns.Where(x => filter.BoardIds.Contains(x.BoardId) && filter.ColumnIds.Contains(x.Id));
+                if (DontImportUnusedColumns)
+                    columns = columns.Where(x => cards.Exists(y => y.ColumnId == x.Id));
+
+                var rows = _scheme.Rows.Where(x => filter.BoardIds.Contains(x.BoardId) && filter.RowIds.Contains(x.Id));
+                if (DontImportUnusedRows)
+                    rows = rows.Where(x => cards.Exists(y => y.RowId == x.Id));
+
                 var boxViewModel = await _appModel.Create(uri);
                 boxViewModel.Load(new Box
                 {
                     Boards = _scheme.Boards.Where(x => filter.BoardIds.Contains(x.Id)).ToList(),
-                    Columns = _scheme.Columns.Where(x => filter.BoardIds.Contains(x.BoardId) && filter.ColumnIds.Contains(x.Id)).ToList(),
-                    Rows = _scheme.Rows.Where(x => filter.BoardIds.Contains(x.BoardId) && filter.RowIds.Contains(x.Id)).ToList(),
+                    Columns = columns.ToList(),
+                    Rows = rows.ToList(),
                     Cards = cards
                 });
 
