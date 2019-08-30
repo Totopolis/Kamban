@@ -3,6 +3,7 @@ using System.Reactive;
 using System.Threading.Tasks;
 using System.Windows;
 using Autofac;
+using Kamban.Core;
 using Kamban.Repository.Redmine;
 using Kamban.ViewRequests;
 using Kamban.Views;
@@ -20,14 +21,18 @@ namespace Kamban.ViewModels
     {
         private IShell _shell;
         private IDialogCoordinator _dialogCoordinator;
+        private readonly IAppConfig _appConfig;
 
         [Reactive] public bool LoadFullScheme { get; set; }
         public ReactiveCommand<Unit, Unit> ImportRedmineCommand { get; set; }
 
-        public ImportViewModel(IShell shell, IDialogCoordinator dialogCoordinator)
+        public ImportViewModel(IShell shell, IDialogCoordinator dialogCoordinator,
+            IAppConfig appCfg)
         {
             _shell = shell;
             _dialogCoordinator = dialogCoordinator;
+            _appConfig = appCfg;
+
             ImportRedmineCommand = ReactiveCommand.CreateFromTask(ShowRedmineImport);
         }
 
@@ -62,6 +67,8 @@ namespace Kamban.ViewModels
         {
             var settings = new LoginWithUrlDialogSettings
             {
+                InitialHost = _appConfig.LastRedmineUrl ?? LoginWithUrlDialogSettings.DefaultHostWatermark,
+                InitialUsername = _appConfig.LastRedmineUser ?? LoginWithUrlDialogSettings.DefaultUsernameWatermark,
                 AnimateShow = true,
                 AnimateHide = true,
                 AffirmativeButtonText = "Login",
@@ -71,10 +78,17 @@ namespace Kamban.ViewModels
                 RememberCheckBoxVisibility = Visibility.Collapsed
             };
 
-            var loginDialog = new LoginWithUrlDialog(null, settings) {Title = "Login to Redmine"};
+            var loginDialog = new LoginWithUrlDialog(null, settings) { Title = "Login to Redmine" };
             await _dialogCoordinator.ShowMetroDialogAsync(this, loginDialog);
             var result = await loginDialog.WaitForButtonPressAsync();
             await _dialogCoordinator.HideMetroDialogAsync(this, loginDialog);
+
+            if (result != null)
+            {
+                _appConfig.LastRedmineUrl = result.Host;
+                _appConfig.LastRedmineUser = result.Username;
+            }
+
             return result;
         }
     }

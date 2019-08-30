@@ -29,6 +29,9 @@ namespace Kamban.Core
         IObservable<string> Basement { get; }
 
         Task LoadOnlineContentAsync();
+
+        string LastRedmineUrl { get; set; }
+        string LastRedmineUser { get; set; }
     }
 
     public class AppConfig : ReactiveObject, IAppConfig
@@ -108,6 +111,26 @@ namespace Kamban.Core
             set
             {
                 appConfig.ArchiveFolder = value;
+                SaveConfig();
+            }
+        }
+
+        public string LastRedmineUrl
+        {
+            get => appConfig.LastRedmineUrl;
+            set
+            {
+                appConfig.LastRedmineUrl = value;
+                SaveConfig();
+            }
+        }
+
+        public string LastRedmineUser
+        {
+            get => appConfig.LastRedmineUser;
+            set
+            {
+                appConfig.LastRedmineUser = value;
                 SaveConfig();
             }
         }

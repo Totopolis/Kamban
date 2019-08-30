@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Kamban.Common;
 using Kamban.Core;
 using Kamban.Repository;
 using Kamban.Repository.Models;
@@ -117,6 +118,9 @@ namespace Kamban.ViewModels
 
                 var filter = Scheme.GetCardFilter();
                 var cards = await _repository.LoadCards(filter);
+
+                cards.ForEach(x => x.Color = DefaultColorItems.LemonChiffon.SystemName);
+
                 var boxViewModel = await _appModel.Create(uri);
                 boxViewModel.Load(new Box
                 {

@@ -41,5 +41,8 @@ namespace Kamban.Core
 
         public VersionJson Version { get; set; } = new VersionJson();
         public StartupConfigJson Startup { get; set; } = null;
+
+        public string LastRedmineUrl { get; set; } = "";
+        public string LastRedmineUser { get; set; } = "";
     }
 }
