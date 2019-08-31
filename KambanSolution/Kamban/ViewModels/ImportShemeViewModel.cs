@@ -125,6 +125,16 @@ namespace Kamban.ViewModels
 
                 cards.ForEach(x => x.Color = DefaultColorItems.LemonChiffon.SystemName);
 
+                // Fill order numbers inside each cell
+                cards
+                    .GroupBy(x => new { x.RowId, x.ColumnId })
+                    .ToList()
+                    .ForEach(cell =>
+                    {
+                        int i = -10;
+                        cell.ToList().ForEach(y => y.Order = i += 10);
+                    });
+
                 var columns = _scheme.Columns.Where(x => filter.BoardIds.Contains(x.BoardId) && filter.ColumnIds.Contains(x.Id));
                 if (DontImportUnusedColumns)
                     columns = columns.Where(x => cards.Exists(y => y.ColumnId == x.Id));
