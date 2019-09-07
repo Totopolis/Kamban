@@ -32,6 +32,17 @@ namespace Kamban.MatrixControl
                 typeof(Matrix),
                 new PropertyMetadata(false));
 
+        public bool SwimLaneView
+        {
+            get => (bool)GetValue(SwimLaneViewProperty);
+            set => SetValue(SwimLaneViewProperty, value);
+        }
+
+        public static readonly DependencyProperty SwimLaneViewProperty =
+            DependencyProperty.Register("SwimLaneView",
+                typeof(bool),
+                typeof(Matrix),
+                new PropertyMetadata(false));
 
         public bool EnableWork
         {

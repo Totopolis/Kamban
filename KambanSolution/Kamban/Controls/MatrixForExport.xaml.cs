@@ -26,6 +26,19 @@ namespace Kamban.MatrixControl
                 typeof(MatrixForExport),
                 new PropertyMetadata(false));
 
+        public bool SwimLaneView
+        {
+            get => (bool)GetValue(SwimLaneViewProperty);
+            set => SetValue(SwimLaneViewProperty, value);
+        }
+
+        public static readonly DependencyProperty SwimLaneViewProperty =
+            DependencyProperty.Register("SwimLaneView",
+                typeof(bool),
+                typeof(MatrixForExport),
+                new PropertyMetadata(false));
+
+
         public static void OnEnableWorkPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
             var mx = (MatrixForExport)obj;

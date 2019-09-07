@@ -32,7 +32,6 @@
         <ListView
             Name="mainListView"
             Margin="0"
-            BorderThickness="0"
             dd:DragDrop.IsDragSource="True"
             dd:DragDrop.IsDropTarget="True"
             dd:DragDrop.DropHandler="{Binding}"
@@ -42,6 +41,19 @@
             ItemsSource="{Binding Path=SelfCards, 
                                 RelativeSource={RelativeSource Mode=FindAncestor,
                                 AncestorType={x:Type UserControl}}}">
+            <ListView.Style>
+                <Style TargetType="ListView">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding SwimLaneView}" Value="True">
+                            <Setter Property="Border.BorderThickness" Value="0,32,0,0" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding SwimLaneView}" Value="False">
+                            <Setter Property="Border.BorderThickness" Value="0,0,0,0" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style> 
+                
+            </ListView.Style>
 
             <!--ListView.ContextMenu>
                 <ContextMenu FontSize="12">

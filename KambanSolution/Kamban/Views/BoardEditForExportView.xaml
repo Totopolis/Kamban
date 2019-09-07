@@ -22,6 +22,7 @@
 
         <mykanban:MatrixForExport x:Name="Matrix"
                                   ShowCardIds="{Binding ShowCardIds}"
+                                  SwimLaneView="{Binding SwimLaneView}"
                                   Columns="{Binding Columns}"
                                   Rows="{Binding Rows}"
                                   Cards="{Binding Cards}"

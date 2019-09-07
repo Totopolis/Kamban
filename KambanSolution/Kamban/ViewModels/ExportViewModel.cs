@@ -61,6 +61,7 @@ namespace Kamban.ViewModels
         [Reactive] public bool DatePostfix { get; set; }
         [Reactive] public bool SplitBoardsToFiles { get; set; }
         [Reactive] public bool ShowCardIds { get; set; }
+        [Reactive] public bool SwimLaneView { get; set; }
 
         public ReactiveCommand<Unit, Unit> SelectTargetFolderCommand { get; set; }
         public ReactiveCommand<Unit, Unit> ExportCommand { get; set; }
@@ -219,6 +220,7 @@ namespace Kamban.ViewModels
                             {
                                 ViewId = SelectedBox.Uri,
                                 ShowCardIds = ShowCardIds,
+                                SwimLaneView = SwimLaneView,
                                 Box = SelectedBox,
                                 Board = x
                             })

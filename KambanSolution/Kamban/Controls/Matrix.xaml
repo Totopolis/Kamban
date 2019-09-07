@@ -3,9 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:viewModels="clr-namespace:Kamban.ViewModels"
              xmlns:local="clr-namespace:Kamban.MatrixControl"
+             xmlns:matrixControl="clr-namespace:Kamban.MatrixControl"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance matrixControl:Matrix}">
 
     <UserControl.Resources>
         <DataTemplate x:Key="DefaultHorizontalHeaderTemplate">
@@ -64,7 +67,7 @@
                                         </Setter.Value>
                                     </Setter>
                                 </DataTrigger>
-                                <DataTrigger  Binding="{Binding LimitSet}"  Value="True">
+                                <DataTrigger  Binding="{Binding Path=LimitSet}"  Value="True">
                                     <Setter Property="TextBlock.Text">
                                         <Setter.Value>
                                             <MultiBinding StringFormat=" {0} ({1}/{2})">
@@ -92,6 +95,7 @@
                 <Border.Style>
                     <Style TargetType="Border">
                         <Style.Triggers>
+                            <!-- Formatting Background. Soft Limti Exceeded? -->
                             <DataTrigger Value="True">
                                 <DataTrigger.Binding>
                                     <MultiBinding>
@@ -124,12 +128,13 @@
         
             <TextBlock 
                 Margin="6" 
-                FontSize="14"
+      
                 FontWeight="Bold"
-                VerticalAlignment="Center">
+                VerticalAlignment="Center"><!--   FontSize="14" -->
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Style.Triggers>
+                                <!-- Formatting Background. Show Card Limit? -->
                                 <DataTrigger  Binding="{Binding LimitSet}"  Value="False">
                                     <Setter Property="TextBlock.Text">
                                         <Setter.Value>
@@ -151,13 +156,31 @@
                                         </Setter.Value>
                                     </Setter>
                                 </DataTrigger>
+                                <!-- SwimLaneView?-->
+                                <DataTrigger Binding="{Binding Path=DataContext.SwimLaneView}" Value="True">
+                                    <Setter Property="LayoutTransform">
+                                        <Setter.Value>
+                                            <RotateTransform Angle="0"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="FontSize" Value="14"/>
+
+
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Path=DataContext.SwimLaneView}" Value="False">
+                                    <Setter Property="LayoutTransform">
+                                        <Setter.Value>
+                                            <RotateTransform Angle="270"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="FontSize" Value="999"/>
+                                </DataTrigger>
 
                             </Style.Triggers>
                         </Style>
-                    </TextBlock.Style>    
-                    <TextBlock.LayoutTransform>
-                        <RotateTransform Angle="270"/>
-                    </TextBlock.LayoutTransform>
+                    </TextBlock.Style>
+ 
+              
                 </TextBlock>
             </Border>
         </DataTemplate>

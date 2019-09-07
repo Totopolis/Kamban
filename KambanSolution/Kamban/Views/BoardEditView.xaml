@@ -27,6 +27,7 @@
         <mykanban:Matrix x:Name="Matrix"
             Monik="{Binding Monik}"
             ShowCardIds="{Binding ShowCardIds}"
+            SwimLaneView="{Binding SwimLaneView}"             
             Columns="{Binding Columns}"
             Rows="{Binding Rows}"
             CardsObservable="{Binding CardsObservable}"
