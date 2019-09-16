@@ -7,8 +7,7 @@
              xmlns:local="clr-namespace:Kamban.MatrixControl"
              xmlns:matrixControl="clr-namespace:Kamban.MatrixControl"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800"
-             d:DataContext="{d:DesignInstance matrixControl:Matrix}">
+             d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
         <DataTemplate x:Key="DefaultHorizontalHeaderTemplate">
