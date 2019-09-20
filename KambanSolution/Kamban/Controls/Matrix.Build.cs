@@ -74,6 +74,9 @@ namespace Kamban.MatrixControl
                 cc.MouseMove += Head_MouseMove;
                 cc.ContextMenu = HeadContextMenu;
                 cc.ContentTemplate = (DataTemplate)this.Resources["DefaultHorizontalHeaderTemplate"];
+               
+                
+
                 MainGrid.Children.Add(cc);
 
                 // Update number of Cards in Column
@@ -88,6 +91,9 @@ namespace Kamban.MatrixControl
 
                 Grid.SetColumn(cc, i + 1);
                 Grid.SetRow(cc, 0);
+
+                
+
             }
 
             ///////////////
@@ -117,6 +123,7 @@ namespace Kamban.MatrixControl
                 cc.MouseMove += Head_MouseMove;
                 cc.ContextMenu = HeadContextMenu;
                 cc.ContentTemplate = (DataTemplate)this.Resources["DefaulVerticalHeaderTemplate"];
+                
                 MainGrid.Children.Add(cc);
 
                 // Update number of Cards in Row
@@ -129,8 +136,14 @@ namespace Kamban.MatrixControl
                 if (i < rowCount - 1)
                     MainGrid.Children.Add(BuildHorizontalSpliter(i, columnCount));
 
+           
                 Grid.SetColumn(cc, 0);
                 Grid.SetRow(cc, i + 1);
+
+                Canvas.SetZIndex(cc, System.Int32.MaxValue);
+
+
+
             }
 
             ////////////////////////
@@ -165,6 +178,23 @@ namespace Kamban.MatrixControl
                 }
 
             Monik?.ApplicationVerbose("Matrix.RebuildGrid finished");
+        }
+
+        private void SwimLanePropertyChanged(object sender, EventArgs e)
+        {
+           if (this.SwimLaneView)
+            {
+                MessageBox.Show("Swimlane");
+            }
+            else {
+                MessageBox.Show("Grid");
+            }
+            
+            
+            // listen for when the mouse is released
+       //     columnWidthChanging = sender as ColumnDefinition;
+         //   if (sender != null)
+           //     Mouse.AddPreviewMouseUpHandler(this, ColumnResize_MouseLeftButtonUp);
         }
 
         private int GetHashValue(object a, object b)

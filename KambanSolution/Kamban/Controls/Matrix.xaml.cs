@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Reactive;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,6 +19,9 @@ namespace Kamban.MatrixControl
         public Matrix()
         {
             InitializeComponent();
+
+            PropertyDescriptor pdSL = DependencyPropertyDescriptor.FromProperty(Matrix.SwimLaneViewProperty, typeof(Matrix));
+            pdSL.AddValueChanged(this, new System.EventHandler(SwimLanePropertyChanged) );
         }
 
         public bool ShowCardIds
