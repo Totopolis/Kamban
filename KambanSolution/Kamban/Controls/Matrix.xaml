@@ -16,8 +16,7 @@
             BorderBrush="#E1E1E1"
             BorderThickness="1"
             Margin="0, -1, 0, 0">
-                   <Border.Style>
-                   
+                   <Border.Style>                   
                     <Style TargetType="Border">
                         <Style.Triggers>
                             <DataTrigger Value="True">
@@ -47,12 +46,9 @@
                                 <Setter Property="Border.Background" Value="#F4F4F4" />
                             </DataTrigger>
                         </Style.Triggers>
-                        <Setter Property="Grid.ColumnSpan" Value="2"/>
                     </Style>
-                     
-
-                </Border.Style>
-                
+                    
+                </Border.Style>               
                 <TextBlock 
                 Margin="6" 
                 HorizontalAlignment="Center"
@@ -72,7 +68,7 @@
                                         </Setter.Value>
                                     </Setter>
                                 </DataTrigger>
-                                <DataTrigger  Binding="{Binding Path=LimitSet}"  Value="True">
+                                <DataTrigger  Binding="{Binding LimitSet}"  Value="True">
                                     <Setter Property="TextBlock.Text">
                                         <Setter.Value>
                                             <MultiBinding StringFormat=" {0} ({1}/{2})">
@@ -84,11 +80,8 @@
                                     </Setter>
                                 </DataTrigger>
 
-                            </Style.Triggers>
-                            
-                        </Style>
-                     
-                        
+                            </Style.Triggers>                            
+                        </Style>                        
                     </TextBlock.Style>
 
                 </TextBlock >
@@ -103,7 +96,7 @@
                <Border.Style>
                     <Style TargetType="Border">
                         <Style.Triggers>
-                            <!-- Formatting Background. Soft Limti Exceeded? -->
+                            <!-- Formatting Background. Soft Limit Exceeded? -->
                             <DataTrigger Value="True">
                                 <DataTrigger.Binding>
                                     <MultiBinding>
@@ -151,7 +144,6 @@
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
-
                 <TextBlock 
                 Margin="6" 
                 FontSize="14"
@@ -189,20 +181,14 @@
                                 <DataTrigger Binding="{Binding Path=SwimLaneView, RelativeSource={RelativeSource AncestorType={x:Type local:Matrix}}}" Value="False">
                                     <Setter Property="HorizontalAlignment" Value="Center"/>
                                 </DataTrigger>
-
                             </Style.Triggers>
                         </Style>
-                    </TextBlock.Style>
- 
-              
-                </TextBlock>
-
-                
+                    </TextBlock.Style>              
+                </TextBlock>                
             </Border>
         </DataTemplate>
     </UserControl.Resources>
     
-    <Grid Name="MainGrid">
-        
+    <Grid Name="MainGrid">        
     </Grid>
 </UserControl>
