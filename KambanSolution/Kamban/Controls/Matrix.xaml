@@ -97,13 +97,10 @@
 
         <DataTemplate x:Key="DefaulVerticalHeaderTemplate">
             <Border
-            Grid.ColumnSpan="3"   
             BorderBrush="#E1E1E1"
             BorderThickness="1"
             Margin="0, -1, 0, 0">
-               
-   
-                <Border.Style>
+               <Border.Style>
                     <Style TargetType="Border">
                         <Style.Triggers>
                             <!-- Formatting Background. Soft Limti Exceeded? -->
@@ -139,13 +136,10 @@
                                     <Setter.Value>
                                         <RotateTransform Angle="0"/>
                                     </Setter.Value>
-                               </Setter>
-                                <Setter Property="Grid.ColumnSpan" Value="3"/>
+                                </Setter>
+                                <Setter Property="Height" Value="32"/>
                                 <Setter Property="VerticalAlignment" Value="Top"/>
-                                <Setter Property="Height" Value="50"/>
-                                <Setter Property="Canvas.ZIndex" Value="2147483647"/>
-                                <Setter Property="CornerRadius" Value="5"/>
-
+                                
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Path=SwimLaneView, RelativeSource={RelativeSource AncestorType={x:Type local:Matrix}}}" Value="False">
                                 <Setter Property="LayoutTransform">
@@ -153,17 +147,10 @@
                                         <RotateTransform Angle="270"/>
                                     </Setter.Value>
                                 </Setter>
-                                <Setter Property="Grid.ColumnSpan" Value="1"/>
-                                <Setter Property="VerticalAlignment" Value="Stretch"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
-
-               
-                  
-                
-
 
                 <TextBlock 
                 Margin="6" 
@@ -195,7 +182,14 @@
                                         </Setter.Value>
                                     </Setter>
                                 </DataTrigger>
-                               
+                                <!-- SwimLaneView?-->
+                                <DataTrigger Binding="{Binding Path=SwimLaneView, RelativeSource={RelativeSource AncestorType={x:Type local:Matrix}}}" Value="True">
+                                    <Setter Property="HorizontalAlignment" Value="Left"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Path=SwimLaneView, RelativeSource={RelativeSource AncestorType={x:Type local:Matrix}}}" Value="False">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                </DataTrigger>
+
                             </Style.Triggers>
                         </Style>
                     </TextBlock.Style>
@@ -209,5 +203,6 @@
     </UserControl.Resources>
     
     <Grid Name="MainGrid">
+        
     </Grid>
 </UserControl>

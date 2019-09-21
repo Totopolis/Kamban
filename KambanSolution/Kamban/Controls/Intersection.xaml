@@ -45,7 +45,8 @@
                 <Style TargetType="ListView">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding SwimLaneView}" Value="True">
-                            <Setter Property="Border.BorderThickness" Value="0,32,0,0" />
+                            <Setter Property="Border.BorderThickness" Value="0,32,0,8" />
+                            <Setter Property="Border.BorderBrush" Value="White" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding SwimLaneView}" Value="False">
                             <Setter Property="Border.BorderThickness" Value="0,0,0,0" />
@@ -54,17 +55,6 @@
                 </Style> 
                 
             </ListView.Style>
-
-            <!--ListView.ContextMenu>
-                <ContextMenu FontSize="12">
-                    <MenuItem Header="Move"/>
-                    <MenuItem
-                        Header="Delete"
-                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu},
-                              Path=PlacementTarget.Parent.Parent.SelectedCard}"
-                        Command="{Binding NeedDeleteCardCommand}"/>
-                </ContextMenu>
-            </ListView.ContextMenu-->
 
             <ListView.ItemTemplate>
                 <DataTemplate>

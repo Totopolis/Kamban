@@ -71,6 +71,7 @@ namespace Kamban.MatrixControl
         private RowDefinition rowHeightChanging = null;
         private void RowWidthPropertyChanged(object sender, EventArgs e)
         {
+            if (SwimLaneView) return;   // Don't update Row.Size Values in SwimLaneView;
             // listen for when the mouse is released
             rowHeightChanging = sender as RowDefinition;
             if (sender != null)
@@ -79,6 +80,7 @@ namespace Kamban.MatrixControl
 
         void RowResize_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+            if (SwimLaneView) return;   // Don't update Row.Size Values in SwimLaneView;
             if (rowHeightChanging != null)
             {
                 var rows = Rows.ToList();

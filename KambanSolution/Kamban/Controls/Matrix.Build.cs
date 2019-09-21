@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
@@ -75,8 +76,6 @@ namespace Kamban.MatrixControl
                 cc.ContextMenu = HeadContextMenu;
                 cc.ContentTemplate = (DataTemplate)this.Resources["DefaultHorizontalHeaderTemplate"];
                
-                
-
                 MainGrid.Children.Add(cc);
 
                 // Update number of Cards in Column
@@ -91,8 +90,7 @@ namespace Kamban.MatrixControl
 
                 Grid.SetColumn(cc, i + 1);
                 Grid.SetRow(cc, 0);
-
-                
+                               
 
             }
 
@@ -105,6 +103,7 @@ namespace Kamban.MatrixControl
                 new RowDefinition { Height = new GridLength(30, GridUnitType.Pixel) });
 
             // rows
+            VerticalHeaders.Clear();
             for (int i = 0; i < rowCount; i++)
             {
                 var it = rows[i];
@@ -119,6 +118,8 @@ namespace Kamban.MatrixControl
                 pd.AddValueChanged(rd, new EventHandler(RowWidthPropertyChanged));
 
                 ContentControl cc = new ContentControl();
+                VerticalHeaders.Add(cc);
+
                 cc.Content = it;
                 cc.MouseMove += Head_MouseMove;
                 cc.ContextMenu = HeadContextMenu;
@@ -176,25 +177,43 @@ namespace Kamban.MatrixControl
                     Grid.SetRow(cell, j + 1);
                     Grid.SetRowSpan(cell, 1);
                 }
-
+            SwimLanePropertyChanged(this, null);
             Monik?.ApplicationVerbose("Matrix.RebuildGrid finished");
         }
 
+        private List<ContentControl> VerticalHeaders = new List<ContentControl>();
+
         private void SwimLanePropertyChanged(object sender, EventArgs e)
         {
-           if (this.SwimLaneView)
+            if (Rows == null || Columns == null || MainGrid == null ||
+                 Rows.Count == 0 || Columns.Count == 0)
             {
-                MessageBox.Show("Swimlane");
+                return;
             }
-            else {
-                MessageBox.Show("Grid");
+
+            
+            var rows = Rows.ToList();
+
+            
+            // Set Column Span for Vertical Headers
+            Int32 span = SwimLaneView ? Int32.MaxValue : 1; 
+            foreach (ContentControl cc in VerticalHeaders)
+            {
+                Grid.SetColumnSpan(cc, span);
             }
-            
-            
-            // listen for when the mouse is released
-       //     columnWidthChanging = sender as ColumnDefinition;
-         //   if (sender != null)
-           //     Mouse.AddPreviewMouseUpHandler(this, ColumnResize_MouseLeftButtonUp);
+
+            // Set Width of first Column
+            MainGrid.ColumnDefinitions.ElementAt(0).Width = new GridLength(SwimLaneView ? 0 : 30, GridUnitType.Pixel);
+
+            //set Row Heights
+            GridUnitType gut = SwimLaneView ? GridUnitType.Auto : GridUnitType.Star;
+            MainGrid.VerticalAlignment = SwimLaneView ? VerticalAlignment.Top : VerticalAlignment.Stretch;
+                       
+            for (int i = 0; i< Rows.Count(); i++ )
+            {
+                MainGrid.RowDefinitions.ElementAt(i+1).Height = new GridLength(rows[i].Size / 10.0, gut); ;
+            }
+
         }
 
         private int GetHashValue(object a, object b)
