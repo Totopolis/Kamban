@@ -6,8 +6,8 @@ namespace Kamban.Views.Dialogs
 {
     public class LoginWithUrlDialogSettings : MetroDialogSettings
     {
-        private const string DefaultHostWatermark = "Host...";
-        private const string DefaultUsernameWatermark = "Username...";
+        public const string DefaultHostWatermark = "Host...";
+        public const string DefaultUsernameWatermark = "Username...";
         private const string DefaultPasswordWatermark = "Password...";
         private const string DefaultRememberCheckBoxText = "Remember";
 

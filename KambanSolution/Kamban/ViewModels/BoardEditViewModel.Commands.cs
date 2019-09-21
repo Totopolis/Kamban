@@ -27,33 +27,83 @@ namespace Kamban.ViewModels
                 return;
 
             EnableMatrix = false;
+            bool needDeleteCards = false;
 
-            // delete head and move cards from deleted cells to first head
+            // delete head and move cards from deleted cells to first head if needed
             switch (head)
             {
                 case ColumnViewModel column:
-                {
-                    // Shift cards
-                    var firstColumn = Columns
-                        .OrderBy(x => x.Order)
-                        .First(x => x.Id != column.Id);
-                    foreach (var it in cardList.Where(x => x.ColumnDeterminant == column.Id).ToList())
-                        it.ColumnDeterminant = firstColumn.Id;
+                    {
+                        if (column.CurNumberOfCards > 0)
+                        {
+                            ts = await dialCoord.ShowMessageAsync(this, "Warning",
+                                "Do you need move cards to the first column? (otherwise they will be deleted)"
+                                , MessageDialogStyle.AffirmativeAndNegative);
 
-                    Box.Columns.Remove(column);
-                }
+                            needDeleteCards = ts == MessageDialogResult.Negative;
+                        }
+
+                        var cardsTo = cardList.Where(x => x.ColumnDeterminant == column.Id).ToList();
+
+                        if (needDeleteCards)
+                            Box.Cards.RemoveMany(cardsTo);
+                        else
+                        {
+                            // Move cards to the first column, but not to the deleted column
+                            var firstColumn = Columns
+                                .OrderBy(x => x.Order)
+                                .First(x => x.Id != column.Id);
+                            
+                            var maxOrderNum = cardList
+                                .Where(x => x.ColumnDeterminant == firstColumn.Id)
+                                .Max(x => x.Order);
+
+                            foreach (var it in cardsTo)
+                            {
+                                it.ColumnDeterminant = firstColumn.Id;
+                                it.Order = maxOrderNum += 10;
+                            }
+                        }
+
+                        Box.Columns.Remove(column);
+                    }
                     break;
-                case RowViewModel row:
-                {
-                    // Shift cards
-                    var firstRow = Rows
-                        .OrderBy(x => x.Order)
-                        .First(x => x.Id != row.Id);
-                    foreach (var it in cardList.Where(x => x.RowDeterminant == row.Id).ToList())
-                        it.RowDeterminant = firstRow.Id;
 
-                    Box.Rows.Remove(row);
-                }
+                case RowViewModel row:
+                    {
+                        if (row.CurNumberOfCards > 0)
+                        {
+                            ts = await dialCoord.ShowMessageAsync(this, "Warning",
+                                "Do you need move cards to the first row? (otherwise they will be deleted)"
+                                , MessageDialogStyle.AffirmativeAndNegative);
+
+                            needDeleteCards = ts == MessageDialogResult.Negative;
+                        }
+
+                        var cardsTo = cardList.Where(x => x.RowDeterminant == row.Id).ToList();
+
+                        if (needDeleteCards)
+                            Box.Cards.RemoveMany(cardsTo);
+                        else
+                        {
+                            // Move cards to the first row, ...
+                            var firstRow = Rows
+                                .OrderBy(x => x.Order)
+                                .First(x => x.Id != row.Id);
+
+                            var maxOrderNum = cardList
+                                .Where(x => x.RowDeterminant == firstRow.Id)
+                                .Max(x => x.Order);
+
+                            foreach (var it in cardsTo)
+                            {
+                                it.RowDeterminant = firstRow.Id;
+                                it.Order = maxOrderNum += 10;
+                            }
+                        }
+
+                        Box.Rows.Remove(row);
+                    }
                     break;
             }
 

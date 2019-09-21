@@ -6,41 +6,53 @@
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:viewModels="clr-namespace:Kamban.ViewModels"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mah:DialogParticipation.Register="{Binding}"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance viewModels:ImportSchemeViewModel}"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="800" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolCvt" />
+    </UserControl.Resources>
+
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
             <i:InvokeCommandAction Command="{Binding ReloadCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
+
     <Grid>
         <ScrollViewer>
             <StackPanel Orientation="Vertical" Margin="20" MaxWidth="600">
 
                 <Button Command="{Binding ImportCommand}">Import</Button>
 
-                <Separator Margin="0, 10, 0, 5" />
+                <Separator Margin="0,10,0,10" />
 
                 <TextBlock FontWeight="DemiBold">File name</TextBlock>
-                <TextBox Text="{Binding FileName}"/>
+                <TextBox Text="{Binding FileName}" />
 
-                <TextBlock FontWeight="DemiBold">Folder name</TextBlock>
+                <TextBlock FontWeight="DemiBold" Margin="0,10,0,0">Folder name</TextBlock>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock MinWidth="100"
-                               Margin="0,0,5,0" 
+                               Margin="0,0,5,0"
                                VerticalAlignment="Center"
-                               Text="{Binding FolderName}"/>
+                               Text="{Binding FolderName}" />
                     <Button Command="{Binding SelectFolderCommand}">...</Button>
                 </StackPanel>
 
-                <Separator Margin="0, 10, 0, 5" />
+                <Separator Margin="0,10,0,10" />
+
+                <CheckBox Margin="0,0,0,3" IsChecked="{Binding DontImportUnusedRows}" Content="Dont import unused Rows"/>
+                <CheckBox Margin="0,0,0,3" IsChecked="{Binding DontImportUnusedColumns}" Content="Dont import unused Columns"/>
+                
+                <Separator Margin="0,10,0,10" />
 
                 <Grid DataContext="{Binding Scheme}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="40" />
-                        <RowDefinition Height="400" />
+                        <RowDefinition Height="300" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
@@ -50,7 +62,8 @@
                     </Grid.ColumnDefinitions>
                     <DockPanel Grid.Row="0"
                                Grid.Column="0">
-                        <CheckBox IsChecked="{Binding IsAllBoardsSelected, Mode=OneWay}"
+                        <CheckBox IsEnabled="{Binding HasBoards}"
+                                  IsChecked="{Binding IsAllBoardsSelected, Mode=OneWay}"
                                   Command="{Binding AllBoardsSelectionCommand}"
                                   CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"
                                   IsThreeState="True"
@@ -70,7 +83,8 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" />
+                                    <CheckBox IsEnabled="{Binding IsEnabled}"
+                                              IsChecked="{Binding IsSelected, Mode=TwoWay}" />
                                     <TextBlock Text="{Binding Path=Name}" />
                                 </StackPanel>
                             </DataTemplate>
@@ -88,7 +102,8 @@
 
                     <DockPanel Grid.Row="0"
                                Grid.Column="2">
-                        <CheckBox IsChecked="{Binding IsAllColumnsSelected, Mode=OneWay}"
+                        <CheckBox IsEnabled="{Binding HasColumns}"
+                                  IsChecked="{Binding IsAllColumnsSelected, Mode=OneWay}"
                                   Command="{Binding AllColumnsSelectionCommand}"
                                   CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"
                                   IsThreeState="True"
@@ -120,11 +135,12 @@
 
                     <DockPanel Grid.Row="0"
                                Grid.Column="3">
-                        <CheckBox IsChecked="{Binding IsAllRowsSelected, Mode=OneWay}"
+                        <CheckBox IsEnabled="{Binding HasRows}"
+                                  IsChecked="{Binding IsAllRowsSelected, Mode=OneWay}"
                                   Command="{Binding AllRowsSelectionCommand}"
                                   CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"
                                   IsThreeState="True"
-                                  Margin="5"/>
+                                  Margin="5" />
                         <TextBlock HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
                                    FontWeight="DemiBold">
@@ -149,6 +165,25 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
+
+                    <Grid Grid.Row="1"
+                          Grid.Column="2"
+                          Grid.ColumnSpan="2">
+                        <Button Width="64"
+                                Height="64"
+                                Command="{Binding Path=DataContext.ReloadPartCommand,
+                                    RelativeSource={RelativeSource Mode=FindAncestor,
+                                    AncestorType={x:Type UserControl}}}"
+                                Visibility="{Binding Path=DataContext.CanReloadPart,
+                                    RelativeSource={RelativeSource Mode=FindAncestor,
+                                    AncestorType={x:Type UserControl}},
+                                    Converter={StaticResource BoolCvt}}"
+                                Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}">
+                            <iconPacks:PackIconOcticons Width="32"
+                                                        Height="32"
+                                                        Kind="Sync" />
+                        </Button>
+                    </Grid>
                 </Grid>
 
                 <Separator Margin="0, 5, 0, 10" />

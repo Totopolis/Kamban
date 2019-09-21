@@ -1,25 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-
-using System.Collections.ObjectModel;
-
+using System.ComponentModel;
 using System.Reactive;
-using System.Reactive.Linq;
-
-using System.Windows.Media;
-using AutoMapper;
-using DynamicData;
-using Kamban.MatrixControl;
+using Kamban.ViewModels.Core;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
-using System.ComponentModel;
-using Kamban.ViewModels.Core;
 
 namespace Kamban.ViewModels
 {
