@@ -10,7 +10,6 @@ using Monik.Common;
 using Newtonsoft.Json;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Squirrel;
 
 namespace Kamban.Core
 {
@@ -239,19 +238,6 @@ namespace Kamban.Core
                     appConfig.StartNumber = 1;
                     SaveConfig();
                 }
-            }
-
-            try
-            {
-                using (var mgr = new UpdateManager("http://topols.io/kamban/releases"))
-                {
-                    var release = await mgr.UpdateApp();
-                    //release.Version.Version
-                }
-            }
-            catch (Exception ex)
-            {
-                mon.ApplicationError($"AppConfig.LoadOnlineContentAsync UpdateManager: {ex.Message}");
             }
         } //LoadOnlineContentAsync
 
