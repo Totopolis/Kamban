@@ -8,9 +8,14 @@
     <AssemblyTitle>Kamban</AssemblyTitle>
     <AssemblyProduct>Kamban</AssemblyProduct>
     <AssemblyCopyright>Copyright © 2018</AssemblyCopyright>
-    <Version>0.6</Version>
+    <Version>0.7</Version>
     <StartupObject />
     <ApplicationIcon>Tree-256.ico</ApplicationIcon>
+    <Company>Topols</Company>
+    <Authors>Topols</Authors>
+    <PackageProjectUrl>http://topols.io</PackageProjectUrl>
+    <PackageIcon>Tree-256.ico</PackageIcon>
+    <PackageIconUrl />
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -48,6 +53,12 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+
+
+    <None Include="Tree-256.ico">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
     <Page Include="**\*.xaml" SubType="Designer" Generator="MSBuild:UpdateDesignTimeXaml" Exclude="App.xaml" />
     <Compile Update="**\*.xaml.cs" SubType="Code" DependentUpon="%(Filename)" />
 
