@@ -15,7 +15,7 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_0C0AC2B02BF94CF5A2FD3567392B2D47"
+        "MsmKey" = "8:_5E63E778AA474A26979A8B15ED72644F"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -112,7 +112,7 @@
                 {
                 "Name" = "8:.NET Framework"
                 "Message" = "8:[VSDNETMSG]"
-                "FrameworkVersion" = "8:.NETFramework,Version=v4.6.1"
+                "FrameworkVersion" = "8:.NETFramework,Version=v4.6.2"
                 "AllowLaterVersions" = "11:FALSE"
                 "InstallUrl" = "8:http://go.microsoft.com/fwlink/?LinkId=671728"
                 }
@@ -208,7 +208,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Kamban"
         "ProductCode" = "8:{6F1E889F-D108-4F07-A448-FF4687C9AAE1}"
-        "PackageCode" = "8:{101606A6-E252-4FA8-8D89-6B3B597B50BE}"
+        "PackageCode" = "8:{FF3A6DCD-712B-49BD-9AC7-F0767112DB55}"
         "UpgradeCode" = "8:{86F28F0F-34AE-43EF-A97C-2A1D62D5E8B5}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -328,7 +328,7 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_AD2B06851C0F452D9C3B0364F17EC9CB"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_39FCDE83BD544BAF888A1CDB9D572055"
             {
             "Name" = "8:Kamban"
             "Arguments" = "8:"
@@ -336,13 +336,13 @@
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_0C0AC2B02BF94CF5A2FD3567392B2D47"
-            "Folder" = "8:_9581B0A6EBCD447F8D0D266881954E5F"
+            "Target" = "8:_5E63E778AA474A26979A8B15ED72644F"
+            "Folder" = "8:_880DB265D2E24A939EC07E52BD59D064"
             "WorkingFolder" = "8:_BB281FC2CA094EE18DE40233DC28421E"
             "Icon" = "8:"
             "Feature" = "8:"
             }
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_F7EBE7A05C974B5F8D47A73B6E9FF474"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_D9EDE44C550647FD9E6147F383081632"
             {
             "Name" = "8:Kamban"
             "Arguments" = "8:"
@@ -350,8 +350,8 @@
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_0C0AC2B02BF94CF5A2FD3567392B2D47"
-            "Folder" = "8:_880DB265D2E24A939EC07E52BD59D064"
+            "Target" = "8:_5E63E778AA474A26979A8B15ED72644F"
+            "Folder" = "8:_9581B0A6EBCD447F8D0D266881954E5F"
             "WorkingFolder" = "8:_BB281FC2CA094EE18DE40233DC28421E"
             "Icon" = "8:"
             "Feature" = "8:"
@@ -755,7 +755,7 @@
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_0C0AC2B02BF94CF5A2FD3567392B2D47"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_5E63E778AA474A26979A8B15ED72644F"
             {
             "SourcePath" = "8:..\\Kamban\\obj\\Release\\net462\\Kamban.exe"
             "TargetName" = "8:"
@@ -777,6 +777,34 @@
             "ProjectOutputGroupRegister" = "3:1"
             "OutputConfiguration" = "8:"
             "OutputGroupCanonicalName" = "8:Built"
+            "OutputProjectGuid" = "8:{674D4998-BE6E-46DC-AA12-30373D83CB2B}"
+            "ShowKeyOutput" = "11:TRUE"
+                "ExcludeFilters"
+                {
+                }
+            }
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_7F9E6F0FBC74480085924072FA5D9990"
+            {
+            "SourcePath" = "8:"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_BB281FC2CA094EE18DE40233DC28421E"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            "ProjectOutputGroupRegister" = "3:1"
+            "OutputConfiguration" = "8:"
+            "OutputGroupCanonicalName" = "8:ReferenceCopyLocalPathsOutputGroup"
             "OutputProjectGuid" = "8:{674D4998-BE6E-46DC-AA12-30373D83CB2B}"
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"
