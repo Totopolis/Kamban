@@ -133,11 +133,13 @@ namespace Kamban.MatrixControl
 
         private void Head_MouseMove(object sender, MouseEventArgs e)
         {
+            if (sender == null) return;
             var ic = sender as ContentControl;
             if (ic == null) return;
             var point = e.GetPosition(ic);
+            if (point == null) return;
             HitTestResult result = VisualTreeHelper.HitTest(ic, point);
-
+            if (result == null) return;
             var border = result.VisualHit as Border;
             if (border == null) return;
             HeadOfContextMenu = border.DataContext;
