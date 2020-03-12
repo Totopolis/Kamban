@@ -179,6 +179,6 @@ namespace Kamban.Repository.Redmine
             }
         }
 
-        private static readonly IdentifiableName NoneUser = new IdentifiableName {Id = int.MaxValue / 2, Name = "None"};
+        private static readonly IdentifiableName NoneUser = new IdentifiableName(); // { Id = int.MaxValue / 2, Name = "None" };
     }
 }

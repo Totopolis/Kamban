@@ -107,7 +107,7 @@ namespace Kamban.Repository.LiteDb
             return Task.Run(() =>
             {
                 var rows = db.GetCollectionByType<Row>();
-                rows.Delete(x => x.Id == rowId);
+                rows.DeleteMany(x => x.Id == rowId);
             });
         }
 
@@ -116,7 +116,7 @@ namespace Kamban.Repository.LiteDb
             return Task.Run(() =>
             {
                 var columns = db.GetCollectionByType<Column>();
-                columns.Delete(x => x.Id == columnId);
+                columns.DeleteMany(x => x.Id == columnId);
             });
         }
 
@@ -125,7 +125,7 @@ namespace Kamban.Repository.LiteDb
             return Task.Run(() =>
             {
                 var cards = db.GetCollectionByType<Card>();
-                cards.Delete(x => x.Id == cardId);
+                cards.DeleteMany(x => x.Id == cardId);
             });
         }
 
@@ -134,7 +134,7 @@ namespace Kamban.Repository.LiteDb
             return Task.Run(() =>
             {
                 var boards = db.GetCollectionByType<Board>();
-                boards.Delete(x => x.Id == boardId);
+                boards.DeleteMany(x => x.Id == boardId);
             });
         }
 

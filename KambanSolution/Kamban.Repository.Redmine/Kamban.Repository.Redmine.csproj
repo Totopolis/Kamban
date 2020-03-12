@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="redmine-api" Version="3.0.6" />
+    <PackageReference Include="redmine-api" Version="3.0.6.1" />
   </ItemGroup>
 
   <ItemGroup>
