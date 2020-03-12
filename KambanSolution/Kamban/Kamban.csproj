@@ -69,7 +69,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="9.0.0" />
-    <PackageReference Include="DynamicData" Version="6.14.3" />
+    <PackageReference Include="DynamicData" Version="6.14.8" />
     <PackageReference Include="gong-wpf-dragdrop" Version="2.2.0" />
     <PackageReference Include="MahApps.Metro.IconPacks" Version="2.3.0" />
     <PackageReference Include="Monik.Common" Version="1.0.4" />

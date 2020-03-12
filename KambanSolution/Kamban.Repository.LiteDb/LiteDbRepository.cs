@@ -12,7 +12,13 @@ namespace Kamban.Repository.LiteDb
 
         public LiteDbRepository(string uri)
         {
-            db = new LiteDatabase(uri);
+            var connStr = new ConnectionString()
+            {
+                Filename = uri,
+                Upgrade = true
+            };
+
+            db = new LiteDatabase(connStr);
         }
 
         public async Task<Box> Load()
