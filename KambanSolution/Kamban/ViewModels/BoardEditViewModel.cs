@@ -35,6 +35,7 @@ namespace Kamban.ViewModels
         public BoxViewModel Box { get; set; }
 
         [Reactive] public bool ShowCardIds { get; set; }
+        [Reactive] public bool SwimLaneView { get; set; }
 
         [Reactive] public bool EnableMatrix { get; set; }
         [Reactive] public IMonik Monik { get; set; }
@@ -82,6 +83,8 @@ namespace Kamban.ViewModels
         public ReactiveCommand<object, Unit> SelectBoardCommand { get; set; }
 
         public ReactiveCommand<Unit, Unit> ToggleShowCardIdsCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> ToggleSwimLaneViewCommand { get; set; }
+       
 
         public BoardEditViewModel(IShell shell, IDialogCoordinator dc, IMonik m, IMapper mp)
         {
@@ -117,6 +120,8 @@ namespace Kamban.ViewModels
             });
 
             ToggleShowCardIdsCommand = ReactiveCommand.Create(() => { ShowCardIds = !ShowCardIds; });
+
+            ToggleSwimLaneViewCommand = ReactiveCommand.Create(() => { SwimLaneView = !SwimLaneView; });
 
             CardClickCommand = ReactiveCommand.Create<ICard>(c => ShowFlyout(CardEditFlyout, c));
             NormalizeGridCommand = ReactiveCommand.Create(() => { });
@@ -290,6 +295,9 @@ namespace Kamban.ViewModels
 
             shell.AddVMCommand("View", "Toggle Card Ids", nameof(ToggleShowCardIdsCommand), this)
                 .SetHotKey(ModifierKeys.Control, Key.H);
+
+            shell.AddVMCommand("View", "Toggle SwimLane View", nameof(ToggleSwimLaneViewCommand), this)
+                .SetHotKey(ModifierKeys.Control, Key.L);
 
             var request = (BoardViewRequest) viewRequest;
 

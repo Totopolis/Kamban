@@ -3,17 +3,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:viewModels="clr-namespace:Kamban.ViewModels"
              xmlns:local="clr-namespace:Kamban.MatrixControl"
+             xmlns:matrixControl="clr-namespace:Kamban.MatrixControl"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
         <DataTemplate x:Key="DefaultHorizontalHeaderTemplate">
+                      
             <Border
             BorderBrush="#E1E1E1"
             BorderThickness="1"
             Margin="0, -1, 0, 0">
-                <Border.Style>
+                   <Border.Style>                   
                     <Style TargetType="Border">
                         <Style.Triggers>
                             <DataTrigger Value="True">
@@ -44,7 +47,8 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </Border.Style>
+                    
+                </Border.Style>               
                 <TextBlock 
                 Margin="6" 
                 HorizontalAlignment="Center"
@@ -76,8 +80,8 @@
                                     </Setter>
                                 </DataTrigger>
 
-                            </Style.Triggers>
-                        </Style>
+                            </Style.Triggers>                            
+                        </Style>                        
                     </TextBlock.Style>
 
                 </TextBlock >
@@ -89,9 +93,10 @@
             BorderBrush="#E1E1E1"
             BorderThickness="1"
             Margin="0, -1, 0, 0">
-                <Border.Style>
+               <Border.Style>
                     <Style TargetType="Border">
                         <Style.Triggers>
+                            <!-- Formatting Background. Soft Limit Exceeded? -->
                             <DataTrigger Value="True">
                                 <DataTrigger.Binding>
                                     <MultiBinding>
@@ -117,12 +122,29 @@
                                     </MultiBinding>
                                 </DataTrigger.Binding>
                                 <Setter Property="Border.Background" Value="#F4F4F4" />
+                         </DataTrigger>
+                            <!-- SwimLaneView?-->
+                            <DataTrigger Binding="{Binding Path=SwimLaneView, RelativeSource={RelativeSource AncestorType={x:Type local:Matrix}}}" Value="True">
+                                <Setter Property="LayoutTransform">
+                                    <Setter.Value>
+                                        <RotateTransform Angle="0"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="Height" Value="32"/>
+                                <Setter Property="VerticalAlignment" Value="Top"/>
+                                
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=SwimLaneView, RelativeSource={RelativeSource AncestorType={x:Type local:Matrix}}}" Value="False">
+                                <Setter Property="LayoutTransform">
+                                    <Setter.Value>
+                                        <RotateTransform Angle="270"/>
+                                    </Setter.Value>
+                                </Setter>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
-        
-            <TextBlock 
+                <TextBlock 
                 Margin="6" 
                 FontSize="14"
                 FontWeight="Bold"
@@ -130,6 +152,7 @@
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Style.Triggers>
+                                <!-- Formatting Background. Show Card Limit? -->
                                 <DataTrigger  Binding="{Binding LimitSet}"  Value="False">
                                     <Setter Property="TextBlock.Text">
                                         <Setter.Value>
@@ -151,18 +174,21 @@
                                         </Setter.Value>
                                     </Setter>
                                 </DataTrigger>
-
+                                <!-- SwimLaneView?-->
+                                <DataTrigger Binding="{Binding Path=SwimLaneView, RelativeSource={RelativeSource AncestorType={x:Type local:Matrix}}}" Value="True">
+                                    <Setter Property="HorizontalAlignment" Value="Left"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Path=SwimLaneView, RelativeSource={RelativeSource AncestorType={x:Type local:Matrix}}}" Value="False">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </TextBlock.Style>    
-                    <TextBlock.LayoutTransform>
-                        <RotateTransform Angle="270"/>
-                    </TextBlock.LayoutTransform>
-                </TextBlock>
+                    </TextBlock.Style>              
+                </TextBlock>                
             </Border>
         </DataTemplate>
     </UserControl.Resources>
     
-    <Grid Name="MainGrid">
+    <Grid Name="MainGrid">        
     </Grid>
 </UserControl>

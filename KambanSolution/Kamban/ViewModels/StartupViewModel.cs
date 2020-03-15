@@ -285,6 +285,7 @@ namespace Kamban.ViewModels
                             {
                                 ViewId = bvm.Box.Uri,
                                 ShowCardIds = bvm.ShowCardIds,
+                                SwimLaneView = bvm.SwimLaneView,
                                 Box = bvm.Box,
                                 Board = x
                             })

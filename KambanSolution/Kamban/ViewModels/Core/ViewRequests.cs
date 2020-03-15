@@ -10,6 +10,7 @@ namespace Kamban.ViewModels.Core
     public class BoardViewRequest : ViewRequest
     {
         public bool ShowCardIds { get; set; }
+        public bool SwimLaneView { get; set; }
         public BoxViewModel Box { get; set; }
         public BoardViewModel Board { get; set; }
     }

@@ -16,6 +16,19 @@
         <ResourceDictionary Source="WpfResources/TemplatesDictionary.xaml"/>
     </UserControl.Resources>
 
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalAlignment="Stretch">
+        <ScrollViewer.Style>
+            <Style>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding SwimLaneView}" Value="True">
+                        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>                        
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding SwimLaneView}" Value="False">
+                        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </ScrollViewer.Style>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="30*"/>
@@ -24,9 +37,10 @@
             <ColumnDefinition Width="30*"/>
         </Grid.ColumnDefinitions>
 
-        <mykanban:Matrix x:Name="Matrix"
+        <mykanban:Matrix x:Name="Matrix"                         
             Monik="{Binding Monik}"
             ShowCardIds="{Binding ShowCardIds}"
+            SwimLaneView="{Binding SwimLaneView}"             
             Columns="{Binding Columns}"
             Rows="{Binding Rows}"
             CardsObservable="{Binding CardsObservable}"
@@ -131,4 +145,5 @@
                     />
 
     </Grid>
+    </ScrollViewer>
 </UserControl>

@@ -11,6 +11,7 @@ namespace Kamban.ViewModels
         public BoxViewModel Box { get; set; }
 
         [Reactive] public bool ShowCardIds { get; set; }
+        [Reactive] public bool SwimLaneView { get; set; }
         [Reactive] public bool EnableMatrix { get; set; }
 
         public ColumnViewModel[] Columns { get; set; }
@@ -39,6 +40,7 @@ namespace Kamban.ViewModels
                 .ToArray();
 
             ShowCardIds = request.ShowCardIds;
+            SwimLaneView = request.SwimLaneView;
             EnableMatrix = true;
         }
     }//end of class
