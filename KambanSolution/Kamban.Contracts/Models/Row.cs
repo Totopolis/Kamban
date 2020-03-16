@@ -1,6 +1,6 @@
-﻿namespace Kamban.Repository.Models
+﻿namespace Kamban.Contracts
 {
-    public class Column
+    public class Row
     {
         public int Id { get; set; }
         public string Name { get; set; }

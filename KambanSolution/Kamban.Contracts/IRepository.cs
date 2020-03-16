@@ -1,4 +1,4 @@
-﻿namespace Kamban.Repository
+﻿namespace Kamban.Contracts
 {
     public interface IRepository : ILoadRepository, ISaveRepository
     {

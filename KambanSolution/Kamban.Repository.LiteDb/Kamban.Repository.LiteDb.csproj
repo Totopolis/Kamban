@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Kamban.Repository\Kamban.Repository.csproj" />
+    <ProjectReference Include="..\Kamban.Contracts\Kamban.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

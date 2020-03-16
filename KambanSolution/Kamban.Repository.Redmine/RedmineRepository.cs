@@ -2,7 +2,7 @@
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
-using Kamban.Repository.Models;
+using Kamban.Contracts;
 using Redmine.Net.Api;
 using Redmine.Net.Api.Async;
 using Redmine.Net.Api.Types;

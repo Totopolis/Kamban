@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using AutoMapper;
+using Kamban.Contracts;
 using Kamban.Core;
 using Kamban.Export;
 using Kamban.Templates;
@@ -40,8 +41,20 @@ namespace Kamban
                 .As<IDockWindow>();
 
             builder
-                .RegisterType<ExportService>()
-                .As<IExportService>();
+                .RegisterType<ExportJsonService>()
+                .Named<IExportService>("json");
+
+            builder
+                .RegisterType<ExportKambanService>()
+                .Named<IExportService>("kamban");
+
+            builder
+                .RegisterType<ExportXlsxService>()
+                .Named<IExportService>("xlsx");
+
+            builder
+                .RegisterType<ExportXlsxService>()
+                .Named<IExportService>("pdf");
 
             builder
                 .RegisterType<StaticTemplates>()

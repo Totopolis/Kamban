@@ -14,7 +14,7 @@ using DynamicData;
 using Kamban.Core;
 using Kamban.Export;
 using Kamban.Export.Options;
-using Kamban.Repository.Models;
+using Kamban.Contracts;
 using Kamban.ViewModels.Core;
 using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
@@ -23,6 +23,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
+using Autofac;
 
 namespace Kamban.ViewModels
 {
@@ -38,7 +39,6 @@ namespace Kamban.ViewModels
         private readonly IAppModel appModel;
         private readonly IDialogCoordinator dialCoord;
         private readonly IMapper mapper;
-        private readonly IExportService export;
         private SourceList<BoardToExport> boards;
 
         [Reactive] public ReadOnlyObservableCollection<BoxViewModel> AvailableBoxes { get; set; }
@@ -67,14 +67,13 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> ExportCommand { get; set; }
         public ReactiveCommand<Unit, Unit> CancelCommand { get; set; }
 
-        public ExportViewModel(IShell sh, IAppModel am, IDialogCoordinator dc, IAppConfig cfg, IMapper mapper,
-            IExportService ex)
+        public ExportViewModel(IShell sh, IAppModel am, IDialogCoordinator dc, 
+            IAppConfig cfg, IMapper mapper)
         {
             shell = sh;
             appModel = am;
             dialCoord = dc;
             this.mapper = mapper;
-            export = ex;
 
             AvailableBoxes = appModel.Boxes;
 
@@ -200,13 +199,22 @@ namespace Kamban.ViewModels
         {
             var tasks = new List<Task>();
             if (ExportJson)
-                tasks.Add(export.ToJson(box, fileName));
+            {
+                var export = shell.Container.ResolveNamed<IExportService>("json");
+                tasks.Add(export.DoExport(box, fileName, null));
+            }
 
             if (ExportKamban)
-                tasks.Add(export.ToKamban(box, fileName));
+            {
+                var export = shell.Container.ResolveNamed<IExportService>("kamban");
+                tasks.Add(export.DoExport(box, fileName, null));
+            }
 
             if (ExportXlsx)
-                tasks.Add(export.ToXlsx(box, fileName));
+            {
+                var export = shell.Container.ResolveNamed<IExportService>("xlsx");
+                tasks.Add(export.DoExport(box, fileName, null));
+            }
 
             if (ExportPdf)
             {
@@ -229,7 +237,10 @@ namespace Kamban.ViewModels
                         size, PdfOptions.ScaleOptions);
                 }
 
-                tasks.Add(export.ToPdf(box, RenderToXps, fileName, PdfOptions));
+                var export = shell.Container.ResolveNamed<IExportService>("pdf");
+
+                //tasks.Add(export.ToPdf(box, RenderToXps, fileName, PdfOptions));
+                tasks.Add(export.DoExport(box, fileName, null));
             }
 
             if (tasks.Any())

@@ -8,7 +8,7 @@ using AutoMapper;
 using DynamicData;
 using Kamban.Extensions;
 using Kamban.Repository;
-using Kamban.Repository.Models;
+using Kamban.Contracts;
 using Monik.Common;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;

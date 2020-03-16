@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Kamban.Repository.Models;
+using Kamban.Contracts;
 using LiteDB;
 
 namespace Kamban.Repository.LiteDb

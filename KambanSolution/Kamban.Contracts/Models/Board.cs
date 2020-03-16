@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Kamban.Repository.Models
+namespace Kamban.Contracts
 {
     public class Board
     {

@@ -6,7 +6,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
 using DynamicData.Aggregation;
-using Kamban.Repository.Models;
+using Kamban.Contracts;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 

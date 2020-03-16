@@ -1,4 +1,4 @@
-﻿namespace Kamban.Repository.Models
+﻿namespace Kamban.Contracts
 {
     public class CardFilter
     {

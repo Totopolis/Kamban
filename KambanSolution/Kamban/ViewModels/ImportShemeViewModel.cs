@@ -8,7 +8,7 @@ using System.Windows.Forms;
 using Kamban.Common;
 using Kamban.Core;
 using Kamban.Repository;
-using Kamban.Repository.Models;
+using Kamban.Contracts;
 using Kamban.ViewModels.Core;
 using Kamban.ViewModels.ImportScheme;
 using Kamban.ViewRequests;

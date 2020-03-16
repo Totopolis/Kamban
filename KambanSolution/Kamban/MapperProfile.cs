@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Kamban.Repository.Models;
+using Kamban.Contracts;
 using Kamban.ViewModels.Core;
 
 namespace Kamban

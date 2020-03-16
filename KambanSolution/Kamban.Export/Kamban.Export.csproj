@@ -21,7 +21,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Kamban.Common\Kamban.Common.csproj" />
     <ProjectReference Include="..\Kamban.Repository.LiteDb\Kamban.Repository.LiteDb.csproj" />
-    <ProjectReference Include="..\Kamban.Repository\Kamban.Repository.csproj" />
   </ItemGroup>
 
 </Project>

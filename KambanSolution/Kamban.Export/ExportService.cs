@@ -9,14 +9,38 @@ using System.Windows.Xps.Packaging;
 using Kamban.Common;
 using Kamban.Export.Options;
 using Kamban.Repository.LiteDb;
-using Kamban.Repository.Models;
+using Kamban.Contracts;
 using Newtonsoft.Json;
 using OfficeOpenXml;
 using PdfSharp.Pdf;
 
 namespace Kamban.Export
 {
-    public class ExportService : IExportService
+    public class ExportKambanService : IExportService
+    {
+        public Task DoExport(Box box, string fileName, object options)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ExportXlsxService : IExportService
+    {
+        public Task DoExport(Box box, string fileName, object options)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ExportPdfService : IExportService
+    {
+        public Task DoExport(Box box, string fileName, object options)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class ExportJsonService : IExportService
     {
         public const string EXT_XPS = ".xps";
         public const string EXT_PDF = ".pdf";
@@ -26,6 +50,10 @@ namespace Kamban.Export
 
         private const int WPF_DPI = 96; // default dpi
 
+        public Task DoExport(Box box, string fileName, object options)
+        {
+            throw new NotImplementedException();
+        }
 
         public Task ToJson(Box box, string fileName)
         {

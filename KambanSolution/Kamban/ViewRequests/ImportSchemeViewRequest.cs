@@ -1,4 +1,4 @@
-﻿using Kamban.Repository;
+﻿using Kamban.Contracts;
 using Ui.Wpf.Common;
 
 namespace Kamban.ViewRequests

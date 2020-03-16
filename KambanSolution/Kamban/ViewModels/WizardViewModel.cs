@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using DynamicData;
 using Kamban.Core;
-using Kamban.Repository.Models;
+using Kamban.Contracts;
 using Kamban.Templates;
 using Kamban.ViewModels.Core;
 using Kamban.Views;

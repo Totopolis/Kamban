@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Kamban.Repository.Models;
 
-namespace Kamban.Repository
+namespace Kamban.Contracts
 {
     public interface ISaveRepository : IDisposable
     {
