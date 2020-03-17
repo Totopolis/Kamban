@@ -221,7 +221,7 @@ namespace Kamban.ViewModels
                 FixedDocument RenderToXps(Size size)
                 {
                     var selectedBoardIds = new HashSet<int>(box.Boards.Select(x => x.Id));
-                    return ((ShellEx) shell).ViewsToDocument<BoardEditForExportView>(
+                    return ((ShellEx)shell).ViewsToDocument<BoardEditForExportView>(
                         SelectedBox.Boards.Items
                             .Where(x => selectedBoardIds.Contains(x.Id))
                             .Select(x => new BoardViewRequest
@@ -239,8 +239,9 @@ namespace Kamban.ViewModels
 
                 var export = shell.Container.ResolveNamed<IExportService>("pdf");
 
-                //tasks.Add(export.ToPdf(box, RenderToXps, fileName, PdfOptions));
-                tasks.Add(export.DoExport(box, fileName, null));
+                var opts = new Tuple<Func<Size, FixedDocument>, PdfOptions>(RenderToXps, PdfOptions);
+
+                tasks.Add(export.DoExport(box, fileName, opts));
             }
 
             if (tasks.Any())
