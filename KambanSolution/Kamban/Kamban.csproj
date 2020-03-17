@@ -78,6 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Kamban.Common\Kamban.Common.csproj" />
+    <ProjectReference Include="..\Kamban.Export.Data\Kamban.Export.Data.csproj" />
     <ProjectReference Include="..\Kamban.Export\Kamban.Export.csproj" />
     <ProjectReference Include="..\Kamban.Repository.LiteDb\Kamban.Repository.LiteDb.csproj" />
     <ProjectReference Include="..\Kamban.Repository.Redmine\Kamban.Repository.Redmine.csproj" />
