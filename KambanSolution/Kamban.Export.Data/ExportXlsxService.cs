@@ -1,5 +1,4 @@
-﻿using Kamban.Common;
-using Kamban.Contracts;
+﻿using Kamban.Contracts;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
@@ -65,7 +64,8 @@ namespace Kamban.Export
                                 card.Info.Head,
                                 card.RowInfo.Name,
                                 card.ColInfo.Name,
-                                ColorItem.ToColorName(card.Info.Color),
+                                //ColorItem.ToColorName(card.Info.Color),
+                                card.Info.Color,
                                 card.Info.Body,
                                 card.Info.Created,
                                 card.Info.Modified
