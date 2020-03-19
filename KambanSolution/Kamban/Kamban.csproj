@@ -77,7 +77,6 @@
     <PackageReference Include="Ui.Wpf.Common" Version="1.0.34" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Kamban.Common\Kamban.Common.csproj" />
     <ProjectReference Include="..\Kamban.Export.Data\Kamban.Export.Data.csproj" />
     <ProjectReference Include="..\Kamban.Export\Kamban.Export.csproj" />
     <ProjectReference Include="..\Kamban.Repository.LiteDb\Kamban.Repository.LiteDb.csproj" />

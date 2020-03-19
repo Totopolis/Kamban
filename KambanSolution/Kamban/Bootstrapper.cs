@@ -53,7 +53,7 @@ namespace Kamban
                 .Named<IExportService>("xlsx");
 
             builder
-                .RegisterType<ExportXlsxService>()
+                .RegisterType<ExportPdfService>()
                 .Named<IExportService>("pdf");
 
             builder
