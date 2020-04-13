@@ -49,9 +49,10 @@ namespace Kamban.Views.WpfResources
             var savePermission = false;
             var saveBlock = false;
 
-            if (!Directory.Exists(path)) return true;
+            var directory = new DirectoryInfo(path);
+            if (!directory.Exists) return true;
 
-            var accessControlList = Directory.GetAccessControl(path);
+            var accessControlList = directory.GetAccessControl();
             if (accessControlList == null)
                 return false;
 
