@@ -1,0 +1,13 @@
+name: Build and Test
+on:
+  push:
+    branches:
+      - "*"
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@master
+    - run: dotnet build KambanSolution/KambanSolution.sln
+    - run: dotnet test KambanSolution/KambanSolution.sln
