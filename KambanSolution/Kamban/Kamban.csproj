@@ -3,9 +3,6 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
     <OutputType>WinExe</OutputType>
-    <Company>Topols</Company>
-    <Authors>Topols</Authors>
-    <Copyright>Copyright © 2018</Copyright>
     <ApplicationIcon>Tree-256.ico</ApplicationIcon>
   </PropertyGroup>
 
