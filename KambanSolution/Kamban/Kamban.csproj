@@ -19,6 +19,10 @@
     <PackageReference Include="Monik.Common" Version="1.0.4" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Ui.Wpf.Common" Version="1.0.34" />
+
+    <!-- ToDo: Remove after packages update -->
+    <PackageReference Include="System.Management" Version="4.7.0" />
+
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Kamban.Export.Data\Kamban.Export.Data.csproj" />
