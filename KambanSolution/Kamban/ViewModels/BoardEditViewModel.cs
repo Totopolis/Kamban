@@ -19,6 +19,7 @@ using ReactiveUI.Fody.Helpers;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
 using CardsObservableType = System.IObservable<DynamicData.IChangeSet<Kamban.ViewModels.Core.ICard>>;
+using IActivatableViewModel = Ui.Wpf.Common.ViewModels.IActivatableViewModel;
 
 namespace Kamban.ViewModels
 {

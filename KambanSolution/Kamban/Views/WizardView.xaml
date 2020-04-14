@@ -5,12 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
         dialogs:DialogParticipation.Register="{Binding}"
-        xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
-        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
-        xmlns:resources="clr-namespace:Kamban.Views.WpfResources"
-        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         d:DesignHeight="400"
         d:DesignWidth="400">
     <Grid>

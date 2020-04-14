@@ -7,6 +7,7 @@
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:viewModels="clr-namespace:Kamban.ViewModels"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              mah:DialogParticipation.Register="{Binding}"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance viewModels:ImportSchemeViewModel}"
@@ -16,11 +17,11 @@
         <BooleanToVisibilityConverter x:Key="BoolCvt" />
     </UserControl.Resources>
 
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="Loaded">
-            <i:InvokeCommandAction Command="{Binding ReloadCommand}" />
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="Loaded">
+            <b:InvokeCommandAction Command="{Binding ReloadCommand}" />
+        </b:EventTrigger>
+    </b:Interaction.Triggers>
 
     <Grid>
         <ScrollViewer>

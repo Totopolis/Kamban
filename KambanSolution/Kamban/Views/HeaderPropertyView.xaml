@@ -3,13 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Kamban.Views"
-        xmlns:wpfresources="clr-namespace:Kamban.Views.WpfResources"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d">
-
-
-
 
     <Grid Margin="10,0,10,10">
         <Grid.RowDefinitions>
@@ -36,7 +31,7 @@
         <CheckBox Grid.Row="3" Grid.Column="2" x:Name="CB_CardLimit" HorizontalAlignment="Left" VerticalAlignment="Center" IsChecked="{Binding Path=HeaderLimitSet}"/>
 
         <Label Grid.Row="4" Grid.Column="1" Content="Max Cards" HorizontalAlignment="Right" IsEnabled="{Binding ElementName=CB_CardLimit, Path=IsChecked}" VerticalAlignment="Center" BorderThickness="0"/>
-        <Controls:NumericUpDown Grid.Row="4" Grid.Column="2"  Minimum="0" Maximum="2147483647" Interval="1" StringFormat="" HasDecimals="False" Value="{Binding Path=HeaderMaxNumber}"  IsEnabled="{Binding ElementName=CB_CardLimit, Path=IsChecked}"/>
+        <Controls:NumericUpDown Grid.Row="4" Grid.Column="2"  Minimum="0" Maximum="2147483647" Interval="1" StringFormat="" NumericInputMode="Numbers" Value="{Binding Path=HeaderMaxNumber}"  IsEnabled="{Binding ElementName=CB_CardLimit, Path=IsChecked}"/>
 
         <StackPanel Grid.Row="5"
                     Grid.Column="0"
