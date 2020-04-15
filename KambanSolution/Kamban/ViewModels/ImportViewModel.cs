@@ -67,8 +67,8 @@ namespace Kamban.ViewModels
         {
             var settings = new LoginWithUrlDialogSettings
             {
-                InitialHost = _appConfig.LastRedmineUrl ?? LoginWithUrlDialogSettings.DefaultHostWatermark,
-                InitialUsername = _appConfig.LastRedmineUser ?? LoginWithUrlDialogSettings.DefaultUsernameWatermark,
+                InitialHost = _appConfig.LastRedmineUrl,
+                InitialUsername = _appConfig.LastRedmineUser,
                 AnimateShow = true,
                 AnimateHide = true,
                 AffirmativeButtonText = "Login",

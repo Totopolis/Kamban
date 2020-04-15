@@ -169,7 +169,7 @@ namespace Kamban.Views.Dialogs
         {
             if (this.DialogSettings is LoginWithUrlDialogSettings settings && settings.EnablePasswordPreview)
             {
-                if (this.FindResource("Win8MetroPasswordBox") is Style win8MetroPasswordStyle)
+                if (this.FindResource("MahApps.Styles.PasswordBox.Win8") is Style win8MetroPasswordStyle)
                 {
                     this.PART_TextBox2.Style = win8MetroPasswordStyle;
                     // apply template again to fire the loaded event which is necessary for revealed password
