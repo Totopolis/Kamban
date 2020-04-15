@@ -232,7 +232,9 @@ namespace Kamban.MatrixControl
             var newSpliter = new GridSplitter
             {
                 ResizeDirection = GridResizeDirection.Columns,
-                Width = 1
+                Width = 1,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Stretch
             };
 
             Panel.SetZIndex(newSpliter, int.MaxValue);
