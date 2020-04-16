@@ -179,7 +179,7 @@
                                     RelativeSource={RelativeSource Mode=FindAncestor,
                                     AncestorType={x:Type UserControl}},
                                     Converter={StaticResource BoolCvt}}"
-                                Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}">
+                                Style="{DynamicResource MahApps.Styles.Button.Circle}">
                             <iconPacks:PackIconOcticons Width="32"
                                                         Height="32"
                                                         Kind="Sync" />

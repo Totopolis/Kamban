@@ -98,7 +98,7 @@
 
         <mah:Flyout Header="112233"
                     BorderThickness="5" 
-                    BorderBrush="{DynamicResource AccentBaseColorBrush}"
+                    BorderBrush="{DynamicResource MahApps.Brushes.AccentBase}"
                     Position="Top"
                     Grid.Column="0"
                     Grid.ColumnSpan="4"
@@ -114,7 +114,7 @@
         
         <mah:Flyout Header="445566"
                     BorderThickness="5" 
-                    BorderBrush="{DynamicResource AccentBaseColorBrush}"
+                    BorderBrush="{DynamicResource MahApps.Brushes.AccentBase}"
                     Position="Top"
                     Grid.Column="0"
                     Grid.ColumnSpan="4"
@@ -130,7 +130,7 @@
 
         <mah:Flyout Header="112233"
                     BorderThickness="5" 
-                    BorderBrush="{DynamicResource AccentBaseColorBrush}"
+                    BorderBrush="{DynamicResource MahApps.Brushes.AccentBase}"
                     Position="Top"
                     Grid.Column="0"
                     Grid.ColumnSpan="4"

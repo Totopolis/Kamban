@@ -47,13 +47,13 @@
                       ItemsSource="{Binding AvailableColumns}"
                       SelectedItem="{Binding SelectedColumn}"
                       BorderThickness="0"
-                      BorderBrush="{DynamicResource AccentBaseColorBrush}"
+                      BorderBrush="{DynamicResource MahApps.Brushes.AccentBase}"
                       DisplayMemberPath="Name"/>
             
             <ComboBox Foreground="Gray"
                       BorderThickness="0"
                       Background="{Binding Background}"
-                      BorderBrush="{DynamicResource AccentBaseColorBrush}"
+                      BorderBrush="{DynamicResource MahApps.Brushes.AccentBase}"
                       ItemsSource="{Binding AvailableRows}"
                       DisplayMemberPath="Name"
                       SelectedItem="{Binding SelectedRow}"
