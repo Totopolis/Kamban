@@ -151,7 +151,7 @@ namespace Kamban.ViewModels
 
             var ver = Assembly.GetExecutingAssembly().GetName();
             appConfig.Basement
-                .Subscribe(x => Basement = x + $"v{ver.Version.Major}.{ver.Version.Minor}");
+                .Subscribe(x => Basement = x + $"v{ver.Version.Major}.{ver.Version.Minor}.{ver.Version.Build}");
         } //ctor
 
         public async Task OpenPublicBoardCommandExecute(PublicBoardJson obj)

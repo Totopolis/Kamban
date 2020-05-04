@@ -6,15 +6,4 @@
     <!-- <TreatWarningsAsErrors>True</TreatWarningsAsErrors> -->
     <!-- <Nullable>enable</Nullable> -->
   </PropertyGroup>
-
-  <PropertyGroup>
-    <Company>Topols</Company>
-    <Product>Kamban</Product>
-    <Authors>Topols</Authors>
-    <Copyright>Copyright © 2018 - $([System.DateTime]::Today.ToString(yyyy)) Topols</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>http://topols.io</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/Totopolis/Kamban.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-  </PropertyGroup>
 </Project>
