@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using System;
+using Autofac;
 using AutoMapper;
 using Kamban.Contracts;
 using Kamban.Core;
@@ -75,7 +76,7 @@ namespace Kamban
                 .As<IDialogCoordinator>()
                 .SingleInstance();
 
-            builder.RegisterInstance(new MonikFile("kamban.log"))
+            builder.RegisterInstance(new MonikFile(AppConfig.GetRomaingPath("kamban.log")))
                 .As<IMonik>()
                 .SingleInstance();
 

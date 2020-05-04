@@ -43,6 +43,10 @@ namespace Kamban.Core
 
         public string ServerName { get; } = "http://topols.io/kamban/";
 
+        // C:\Users\myuser\AppData\Roaming (travel with user profile)
+        public static string GetRomaingPath(string fileName) =>
+            $@"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\Kamban\{fileName}";
+
         [Reactive] private string GetStartedValue { get; set; }
         [Reactive] private string BasementValue { get; set; }
 
@@ -50,10 +54,7 @@ namespace Kamban.Core
         {
             mon = m;
 
-            // C:\Users\myuser\AppData\Roaming (travel with user profile)
-            appConfigPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            appConfigPath += @"\Kamban\kamban.config";
-
+            appConfigPath = GetRomaingPath("kamban.config");
             FileInfo file = new FileInfo(appConfigPath);
             file.Directory.Create();
 
