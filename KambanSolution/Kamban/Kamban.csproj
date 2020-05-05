@@ -5,11 +5,13 @@
     <UseWindowsForms>true</UseWindowsForms>
     <OutputType>WinExe</OutputType>
     <ApplicationIcon>Tree-256.ico</ApplicationIcon>
+    <!--Values will be replace at deploing process-->
     <Version>1.2.3</Version>
     <PackageId>kamban</PackageId>
     <Authors>Community</Authors>
     <Company>OpenSource</Company>
     <Product>Kamban</Product>
+    <AssemblyName>Kamban</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
