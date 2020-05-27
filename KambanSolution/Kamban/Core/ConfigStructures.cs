@@ -17,6 +17,9 @@ namespace Kamban.Core
         public string Url { get; set; }
     }
 
+    /// <summary>
+    /// Downloaded from github
+    /// </summary>
     public class StartupConfigJson
     {
         public string FirstStart { get; set; }
@@ -25,21 +28,27 @@ namespace Kamban.Core
         public List<PublicBoardJson> PublicBoards { get; set; } = new List<PublicBoardJson>();
     }
 
-    public class VersionJson
+    public class CommonJson
     {
-        public int StartUpVersion { get; set; }
-        public int TemplatesVersion { get; set; }
+        public List<string> Languages { get; set; }
+        public string ProductionVersion { get; set; }
+        public string DevelopVersion { get; set; }
     }
 
+    /// <summary>
+    /// Strored at app roaming folder
+    /// </summary>
     public class AppConfigJson
     {
+        public string Language { get; set; } = "en";
+
         public List<RecentJson> Feed { get; set; } = new List<RecentJson>();
         public string Caption { get; set; } = "KAMBAN";
         public string ArchiveFolder { get; set; } = null;
 
         public int StartNumber { get; set; } = 0;
 
-        public VersionJson Version { get; set; } = new VersionJson();
+        public CommonJson Common { get; set; } = new CommonJson();
         public StartupConfigJson Startup { get; set; } = null;
 
         public string LastRedmineUrl { get; set; } = "";

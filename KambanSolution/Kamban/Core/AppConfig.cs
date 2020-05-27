@@ -13,26 +13,6 @@ using ReactiveUI.Fody.Helpers;
 
 namespace Kamban.Core
 {
-    public interface IAppConfig
-    {
-        string ServerName { get; }
-        string Caption { get; set; }
-        string ArchiveFolder { get; set; }
-
-        void UpdateRecent(string uri, bool pinned);
-        void RemoveRecent(string uri);
-
-        IObservable<IChangeSet<RecentViewModel>> RecentObservable { get; }
-        ReadOnlyObservableCollection<PublicBoardJson> PublicBoards { get; }
-        IObservable<string> GetStarted { get; }
-        IObservable<string> Basement { get; }
-
-        Task LoadOnlineContentAsync();
-
-        string LastRedmineUrl { get; set; }
-        string LastRedmineUser { get; set; }
-    }
-
     public class AppConfig : ReactiveObject, IAppConfig
     {
         private readonly IMonik mon;
@@ -41,7 +21,7 @@ namespace Kamban.Core
         private readonly SourceList<RecentViewModel> recentList;
         private readonly SourceList<PublicBoardJson> publicBoards;
 
-        public string ServerName { get; } = "http://topols.io/kamban/";
+        public string ServerName { get; } = "https://raw.githubusercontent.com/Totopolis/Kamban.Public/master/";
 
         // C:\Users\myuser\AppData\Roaming (travel with user profile)
         public static string GetRomaingPath(string fileName) =>
@@ -199,15 +179,13 @@ namespace Kamban.Core
         {
             try
             {
-                var ver = await DownloadAndDeserialize<VersionJson>("ver.json");
-                if (ver.StartUpVersion > appConfig.Version.StartUpVersion)
-                {
-                    var startup = await DownloadAndDeserialize<StartupConfigJson>("startup.json");
-                    appConfig.Startup = startup;
-                    appConfig.Version = ver;
+                var common = await DownloadAndDeserialize<CommonJson>("common.json");
 
-                    SaveConfig();
-                }
+                var startup = await DownloadAndDeserialize<StartupConfigJson>($"{appConfig.Language}/startup.json");
+                appConfig.Startup = startup;
+                appConfig.Common = common;
+
+                SaveConfig();
             }
             catch (Exception ex)
             {
