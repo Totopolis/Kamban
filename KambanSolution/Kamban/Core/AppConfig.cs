@@ -42,9 +42,15 @@ namespace Kamban.Core
             {
                 string data = File.ReadAllText(appConfigPath);
                 appConfig = JsonConvert.DeserializeObject<AppConfigJson>(data);
+
+                if (string.IsNullOrEmpty(appConfig.AppGuid))
+                    appConfig.AppGuid = Guid.NewGuid().ToString();
             }
             else
+            {
                 appConfig = new AppConfigJson();
+                appConfig.AppGuid = Guid.NewGuid().ToString();
+            }
 
             appConfig.StartNumber++;
             SaveConfig();
@@ -114,6 +120,8 @@ namespace Kamban.Core
                 SaveConfig();
             }
         }
+
+        public string AppGuid => appConfig.AppGuid;
 
         public void UpdateRecent(string uri, bool pinned)
         {

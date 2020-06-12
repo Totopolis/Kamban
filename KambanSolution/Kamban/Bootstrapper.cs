@@ -33,6 +33,10 @@ namespace Kamban
         {
             var builder = new ContainerBuilder();
 
+            builder.RegisterType<Ga>()
+                .As<IGa>()
+                .SingleInstance();
+
             builder.RegisterType<ShellEx>()
                 .As<IShell>()
                 .SingleInstance();

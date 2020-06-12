@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Autofac;
 using Kamban.ViewModels;
 using Kamban.Views;
 using Ui.Wpf.Common;
@@ -21,6 +22,25 @@ namespace Kamban
                 {
                     Title = "Kamban"
                 });
+
+            shell.DockingManager.ActiveContentChanged += (s, e) =>
+            {
+                var ga = shell.Container.Resolve<IGa>();
+                var view = shell.SelectedView;
+                if (view == null)
+                    return;
+
+                if (view is StartupView)
+                    ga.TrackPage("startup");
+                else if (view is BoardView)
+                    ga.TrackPage("board");
+                else if (view is ExportView)
+                    ga.TrackPage("export");
+                else if (view is ImportView)
+                    ga.TrackPage("import");
+                else if (view is WizardView)
+                    ga.TrackPage("create");
+            };
 
             shell.ShowView<StartupView>(
                 viewRequest: new ViewRequest { ViewId = StartupViewModel.StartupViewId },

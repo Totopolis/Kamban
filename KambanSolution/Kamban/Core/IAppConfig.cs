@@ -26,5 +26,7 @@ namespace Kamban.Core
 
         string LastRedmineUrl { get; set; }
         string LastRedmineUser { get; set; }
+
+        string AppGuid { get; }
     }
 }
