@@ -1,20 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using DynamicData;
+using Kamban.ViewModels;
 using Kamban.ViewModels.Core;
+using Kamban.Views;
 using Monik.Common;
 using Newtonsoft.Json;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Ui.Wpf.Common;
 
 namespace Kamban.Core
 {
     public partial class AppConfig : ReactiveObject, IAppConfig
     {
+        private readonly IShell shell;
         private readonly IMonik mon;
         private readonly AppConfigJson appConfig;
         private readonly string appConfigPath;
@@ -30,8 +35,9 @@ namespace Kamban.Core
         [Reactive] private string GetStartedValue { get; set; }
         [Reactive] private string BasementValue { get; set; }
 
-        public AppConfig(IMonik m)
+        public AppConfig(IShell sh, IMonik m)
         {
+            shell = sh;
             mon = m;
 
             appConfigPath = GetRomaingPath("kamban.config");
@@ -76,6 +82,31 @@ namespace Kamban.Core
             Basement = this.WhenAnyValue(x => x.BasementValue);
             OpenLatestAtStartupObservable = this.WhenAnyValue(x => x.OpenLatestAtStartupValue);
             ShowFileNameInTabObservable = this.WhenAnyValue(x => x.ShowFileNameInTabValue);
+
+            // Manage current opened boards for raise on next startup
+
+            shell.DockingManager.ActiveContentChanged += (s, e) =>
+            {
+                var view = shell.DockingManager.ActiveContent as BoardView;
+                if (view == null)
+                    return;
+
+                var vm = view.ViewModel as BoardEditViewModel;
+                if (!appConfig.LatestOpenedAtStartup.Contains(vm.Box.Uri))
+                    appConfig.LatestOpenedAtStartup.Add(vm.Box.Uri);
+                SaveConfig();
+            };
+
+            shell.DockingManager.DocumentClosed += (s, e) =>
+            {
+                var view = e.Document.Content as BoardView;
+                if (view == null)
+                    return;
+
+                var vm = view.ViewModel as BoardEditViewModel;
+                appConfig.LatestOpenedAtStartup.Remove(vm.Box.Uri);
+                SaveConfig();
+            };
         }
 
         public IObservable<IChangeSet<RecentViewModel>> RecentObservable { get; private set; }
@@ -127,6 +158,8 @@ namespace Kamban.Core
         }
 
         public string AppGuid => appConfig.AppGuid;
+
+        public IEnumerable<string> LastOpenedAtStartup => appConfig.LatestOpenedAtStartup;
 
         public void UpdateRecent(string uri, bool pinned)
         {

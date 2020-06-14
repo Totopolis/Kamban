@@ -125,6 +125,12 @@
                             FontWeight="Light"
                             FontSize="16"
                             FontFamily="Segoe UI">Open Project</Button>
+                        <Button
+                            Command="{Binding SettingsCommand}"
+                            Margin="0,10,0,0"
+                            FontWeight="Light"
+                            FontSize="16"
+                            FontFamily="Segoe UI">Settings</Button>
 
                         <TextBlock 
                             Margin="0,50,0,0"

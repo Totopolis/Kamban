@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Threading;
 using AutoMapper;
 using DynamicData;
 using Kamban.Core;
@@ -150,7 +151,7 @@ namespace Kamban.ViewModels
                 .Filter(x => !x.LastAccess.IsToday() && !x.LastAccess.IsYesterday() && !x.LastAccess.IsThisMonth());
 
             // TODO: move autosaver to AppConfig
-            
+
             appConfig.RecentObservable
                 .WhenAnyPropertyChanged("Pinned")
                 .Subscribe(x => appConfig.UpdateRecent(x.Uri, x.Pinned));
@@ -160,6 +161,10 @@ namespace Kamban.ViewModels
             var ver = Assembly.GetExecutingAssembly().GetName();
             appConfig.Basement
                 .Subscribe(x => Basement = x + $"v{ver.Version.Major}.{ver.Version.Minor}.{ver.Version.Build}");
+
+            if (appConfig.OpenLatestAtStartup)
+                foreach (var uri in appConfig.LastOpenedAtStartup)
+                    Dispatcher.CurrentDispatcher.InvokeAsync(() => OpenBoardView(uri));
         } //ctor
 
         public async Task OpenPublicBoardCommandExecute(PublicBoardJson obj)

@@ -42,6 +42,7 @@ namespace Kamban.Core
     {
         public string Language { get; set; } = "en";
 
+        public List<string> LatestOpenedAtStartup { get; set; } = new List<string>();
         public List<RecentJson> Feed { get; set; } = new List<RecentJson>();
         public string Caption { get; set; } = "KAMBAN";
         public string ArchiveFolder { get; set; } = null;

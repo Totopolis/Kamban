@@ -29,6 +29,8 @@ namespace Kamban.Core
 
         string AppGuid { get; }
 
+        IEnumerable<string> LastOpenedAtStartup { get; }
+
         IObservable<bool> OpenLatestAtStartupObservable { get; }
         IObservable<bool> ShowFileNameInTabObservable { get; }
         bool OpenLatestAtStartup { get; set; }
