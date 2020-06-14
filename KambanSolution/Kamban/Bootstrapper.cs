@@ -93,6 +93,7 @@ namespace Kamban
             builder.RegisterType<BoxViewModel>();
 
             ConfigureSingleView<StartupViewModel, StartupView>(builder);
+            ConfigureSingleView<SettingsViewModel, SettingsView>(builder);
             ConfigureView<WizardViewModel, WizardView>(builder);
             ConfigureView<BoardEditViewModel, BoardView>(builder);
             ConfigureView<BoardEditForExportViewModel, BoardEditForExportView>(builder);

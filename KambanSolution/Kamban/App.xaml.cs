@@ -32,6 +32,8 @@ namespace Kamban
 
                 if (view is StartupView)
                     ga.TrackPage("startup");
+                else if (view is SettingsView)
+                    ga.TrackPage("settings");
                 else if (view is BoardView)
                     ga.TrackPage("board");
                 else if (view is ExportView)

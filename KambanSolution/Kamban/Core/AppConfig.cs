@@ -13,7 +13,7 @@ using ReactiveUI.Fody.Helpers;
 
 namespace Kamban.Core
 {
-    public class AppConfig : ReactiveObject, IAppConfig
+    public partial class AppConfig : ReactiveObject, IAppConfig
     {
         private readonly IMonik mon;
         private readonly AppConfigJson appConfig;
@@ -52,12 +52,15 @@ namespace Kamban.Core
                 appConfig.AppGuid = Guid.NewGuid().ToString();
             }
 
+            OpenLatestAtStartupValue = appConfig.OpenLatestAtStartup;
+            ShowFileNameInTabValue = appConfig.ShowFileNameInTab;
+
             appConfig.StartNumber++;
             SaveConfig();
 
             recentList = new SourceList<RecentViewModel>();
             recentList.AddRange(appConfig.Feed.Select(x => new RecentViewModel
-                {Uri = x.Uri, LastAccess = x.LastAccess, Pinned = x.Pinned}));
+            { Uri = x.Uri, LastAccess = x.LastAccess, Pinned = x.Pinned }));
 
             RecentObservable = recentList.Connect().AutoRefresh();
 
@@ -71,6 +74,8 @@ namespace Kamban.Core
 
             GetStarted = this.WhenAnyValue(x => x.GetStartedValue);
             Basement = this.WhenAnyValue(x => x.BasementValue);
+            OpenLatestAtStartupObservable = this.WhenAnyValue(x => x.OpenLatestAtStartupValue);
+            ShowFileNameInTabObservable = this.WhenAnyValue(x => x.ShowFileNameInTabValue);
         }
 
         public IObservable<IChangeSet<RecentViewModel>> RecentObservable { get; private set; }
@@ -206,11 +211,9 @@ namespace Kamban.Core
 
                 BasementValue = appConfig.Startup.Basement;
 
-                int tipCount = appConfig.Startup.Tips.Count;
+                int tipsCount = appConfig.Startup.Tips.Count;
 
-                // TODO: fix rotator
-
-                if (tipCount == 0 || appConfig.StartNumber == 1)
+                if (tipsCount == 0 || appConfig.StartNumber == 1)
                 {
                     GetStartedValue = appConfig.Startup.FirstStart;
                     return;
@@ -218,9 +221,13 @@ namespace Kamban.Core
 
                 // tips rotate
                 int indx = appConfig.StartNumber - 2;
+                // preserve of out-of-range
+                if (indx >= tipsCount)
+                    indx = 1;
+
                 GetStartedValue = appConfig.Startup.Tips[indx];
 
-                if (indx == appConfig.Startup.Tips.Count - 1)
+                if (indx == tipsCount - 1)
                 {
                     appConfig.StartNumber = 1;
                     SaveConfig();

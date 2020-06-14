@@ -49,6 +49,7 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> ExportCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> PrintCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> ShowStartupCommand { get; private set; }
+        public ReactiveCommand<Unit, Unit> SettingsCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> ExitCommand { get; private set; }
 
         [Reactive] public string GetStarted { get; set; }
@@ -119,6 +120,13 @@ namespace Kamban.ViewModels
                 shell.ShowView<StartupView>(
                     viewRequest: new ViewRequest { ViewId = StartupViewModel.StartupViewId },
                     options: new UiShowOptions { Title = "Start Page", CanClose = false });
+            });
+
+            SettingsCommand = ReactiveCommand.Create(() =>
+            {
+                shell.ShowView<SettingsView>(
+                    viewRequest: new ViewRequest { ViewId = SettingsViewModel.StartupViewId },
+                    options: new UiShowOptions { Title = "Settings", CanClose = true });
             });
 
             ExitCommand = ReactiveCommand.Create(() => App.Current.Shutdown());
@@ -247,10 +255,12 @@ namespace Kamban.ViewModels
             shell.AddGlobalCommand("File", "Export", nameof(ExportCommand), this)
                 .SetHotKey(ModifierKeys.Control, Key.U);
 
-            shell.AddGlobalCommand("File", "Print", nameof(PrintCommand), this)
+            shell.AddGlobalCommand("File", "Print", nameof(PrintCommand), this, true)
                 .SetHotKey(ModifierKeys.Control, Key.P);
 
-            shell.AddGlobalCommand("File", "Show Startup", nameof(ShowStartupCommand), this, true);
+            shell.AddGlobalCommand("File", "Show Startup", nameof(ShowStartupCommand), this);
+
+            shell.AddGlobalCommand("File", "Settings", nameof(SettingsCommand), this, true);
 
             shell.AddGlobalCommand("File", "Exit", nameof(ExitCommand), this);
 

@@ -28,5 +28,10 @@ namespace Kamban.Core
         string LastRedmineUser { get; set; }
 
         string AppGuid { get; }
+
+        IObservable<bool> OpenLatestAtStartupObservable { get; }
+        IObservable<bool> ShowFileNameInTabObservable { get; }
+        bool OpenLatestAtStartup { get; set; }
+        bool ShowFileNameInTab { get; set; }
     }
 }

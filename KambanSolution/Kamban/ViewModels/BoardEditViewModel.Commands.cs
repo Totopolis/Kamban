@@ -240,9 +240,9 @@ namespace Kamban.ViewModels
 
             if (string.IsNullOrEmpty(newName))
                 return;
-
+            
             CurrentBoard.Name = newName;
-            Title = newName;
+            UpdateTitle();
         }
 
         private async Task DeleteBoardCommandExecute()

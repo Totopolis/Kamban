@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -9,6 +10,7 @@ using AutoMapper;
 using DynamicData;
 using DynamicData.Aggregation;
 using DynamicData.Binding;
+using Kamban.Core;
 using Kamban.ViewModels.Core;
 using Kamban.ViewRequests;
 using Kamban.Views;
@@ -27,6 +29,7 @@ namespace Kamban.ViewModels
         IInitializableViewModel, IActivatableViewModel
     {
         private readonly IShell shell;
+        private readonly IAppConfig appConfig;
         private readonly IDialogCoordinator dialCoord;
         private readonly IMonik mon;
         private readonly IMapper mapper;
@@ -86,10 +89,10 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> ToggleShowCardIdsCommand { get; set; }
         public ReactiveCommand<Unit, Unit> ToggleSwimLaneViewCommand { get; set; }
        
-
-        public BoardEditViewModel(IShell shell, IDialogCoordinator dc, IMonik m, IMapper mp)
+        public BoardEditViewModel(IShell shell, IAppConfig ac, IDialogCoordinator dc, IMonik m, IMapper mp)
         {
             this.shell = shell;
+            appConfig = ac;
             dialCoord = dc;
             mon = m;
             mapper = mp;
@@ -198,7 +201,26 @@ namespace Kamban.ViewModels
                     Box.Cards.Add(card);
                 });
 
+            appConfig.ShowFileNameInTabObservable
+                .Subscribe(x => UpdateTitle());
+
             mon.LogicVerbose($"{nameof(BoardEditViewModel)}.ctor finished");
+        }
+
+        private void UpdateTitle()
+        {
+            if (Box == null || CurrentBoard == null)
+                return;
+
+            string prefix = "";
+            if (appConfig.ShowFileNameInTab)
+            {
+                var fi = new FileInfo(Box.Uri);
+                prefix = fi.Exists ? Path.GetFileNameWithoutExtension(Box.Uri) + ": " : "";
+            }
+
+            Title = prefix + CurrentBoard.Name;
+            FullTitle = Box.Uri;
         }
 
         private void OnBoardChanged()
@@ -231,8 +253,7 @@ namespace Kamban.ViewModels
 
             Rows = temp4;
 
-            Title = CurrentBoard.Name;
-            FullTitle = Box.Uri;
+            UpdateTitle();
 
             CardsObservable = Box.Cards
                 .Connect()

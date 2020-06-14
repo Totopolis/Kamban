@@ -55,5 +55,8 @@ namespace Kamban.Core
         public string LastRedmineUser { get; set; } = "";
 
         public string AppGuid { get; set; } = "";
+
+        public bool OpenLatestAtStartup { get; set; }
+        public bool ShowFileNameInTab { get; set; }
     }
 }
