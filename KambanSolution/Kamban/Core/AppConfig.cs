@@ -42,7 +42,6 @@ namespace Kamban.Core
 
             appConfigPath = GetRomaingPath("kamban.config");
             FileInfo file = new FileInfo(appConfigPath);
-            file.Directory.Create();
 
             if (file.Exists)
             {

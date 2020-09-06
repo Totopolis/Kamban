@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Autofac;
 using AutoMapper;
 using Kamban.Contracts;
@@ -19,6 +20,11 @@ namespace Kamban
     {
         public IShell Init()
         {
+            var appConfigPath = AppConfig.GetRomaingPath("stub");
+            FileInfo file = new FileInfo(appConfigPath);
+            if (!file.Directory.Exists)
+                file.Directory.Create();
+
             var container = ConfigureContainer();
             var shell = container.Resolve<IShell>();
             shell.Container = container;
