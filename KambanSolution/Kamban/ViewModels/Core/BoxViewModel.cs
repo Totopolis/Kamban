@@ -9,9 +9,9 @@ using DynamicData;
 using Kamban.Extensions;
 using Kamban.Repository;
 using Kamban.Contracts;
-using Monik.Common;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Serilog;
 
 namespace Kamban.ViewModels.Core
 {
@@ -30,12 +30,12 @@ namespace Kamban.ViewModels.Core
 
         [Reactive] public SourceList<CardViewModel> Cards { get; set; }
 
-        private readonly IMonik mon;
+        private readonly ILogger log;
         private readonly IMapper mapper;
 
-        public BoxViewModel(IMonik monik, IMapper mapper)
+        public BoxViewModel(ILogger l, IMapper mapper)
         {
-            this.mon = monik;
+            this.log = l;
             this.mapper = mapper;
 
             Columns = new SourceList<ColumnViewModel>();
@@ -69,7 +69,7 @@ namespace Kamban.ViewModels.Core
             SubscribeChanged(boardsChanges,
                 bvm =>
                 {
-                    mon.LogicVerbose($"Box.Boards.ItemChanged {bvm.Id}::{bvm.Name}::{bvm.Modified}");
+                    log.Verbose($"Box.Boards.ItemChanged {bvm.Id}::{bvm.Name}::{bvm.Modified}");
                     var bi = mapper.Map<BoardViewModel, Board>(bvm);
                     repo.CreateOrUpdateBoard(bi).Wait();
                 });
@@ -77,7 +77,7 @@ namespace Kamban.ViewModels.Core
             SubscribeAdded(boardsChanges,
                 bvm =>
                 {
-                    mon.LogicVerbose($"Box.Boards.Add {bvm.Id}::{bvm.Name}");
+                    log.Verbose($"Box.Boards.Add {bvm.Id}::{bvm.Name}");
 
                     var bi = mapper.Map<BoardViewModel, Board>(bvm);
                     bi = repo.CreateOrUpdateBoard(bi).Result;
@@ -88,7 +88,7 @@ namespace Kamban.ViewModels.Core
             SubscribeRemoved(boardsChanges,
                 bvm =>
                 {
-                    mon.LogicVerbose($"Box.Boards.Remove {bvm.Id}::{bvm.Name}");
+                    log.Verbose($"Box.Boards.Remove {bvm.Id}::{bvm.Name}");
 
                     repo.DeleteBoard(bvm.Id).Wait();
                 });
@@ -102,7 +102,7 @@ namespace Kamban.ViewModels.Core
             SubscribeChanged(columnsChanges,
                 cvm =>
                 {
-                    mon.LogicVerbose($"Box.Columns.ItemChanged {cvm.Id}::{cvm.Name}::{cvm.Order}");
+                    log.Verbose($"Box.Columns.ItemChanged {cvm.Id}::{cvm.Name}::{cvm.Order}");
                     var ci = mapper.Map<ColumnViewModel, Column>(cvm);
                     repo.CreateOrUpdateColumn(ci).Wait();
                 });
@@ -110,7 +110,7 @@ namespace Kamban.ViewModels.Core
             SubscribeAdded(columnsChanges,
                 cvm =>
                 {
-                    mon.LogicVerbose($"Box.Columns.Add {cvm.Id}::{cvm.Name}::{cvm.Order}");
+                    log.Verbose($"Box.Columns.Add {cvm.Id}::{cvm.Name}::{cvm.Order}");
 
                     var ci = mapper.Map<ColumnViewModel, Column>(cvm);
                     ci = repo.CreateOrUpdateColumn(ci).Result;
@@ -121,7 +121,7 @@ namespace Kamban.ViewModels.Core
             SubscribeRemoved(columnsChanges,
                 cvm =>
                 {
-                    mon.LogicVerbose($"Box.Columns.Remove {cvm.Id}::{cvm.Name}::{cvm.Order}");
+                    log.Verbose($"Box.Columns.Remove {cvm.Id}::{cvm.Name}::{cvm.Order}");
 
                     repo.DeleteColumn(cvm.Id).Wait();
                 });
@@ -136,7 +136,7 @@ namespace Kamban.ViewModels.Core
             SubscribeChanged(rowsChanges,
                 rvm =>
                 {
-                    mon.LogicVerbose($"Box.Rows.ItemChanged {rvm.Id}::{rvm.Name}::{rvm.Order}");
+                    log.Verbose($"Box.Rows.ItemChanged {rvm.Id}::{rvm.Name}::{rvm.Order}");
                     var row = mapper.Map<RowViewModel, Row>(rvm);
                     repo.CreateOrUpdateRow(row).Wait();
                 });
@@ -144,7 +144,7 @@ namespace Kamban.ViewModels.Core
             SubscribeAdded(rowsChanges,
                 rvm =>
                 {
-                    mon.LogicVerbose($"Box.Rows.Add {rvm.Id}::{rvm.Name}::{rvm.Order}");
+                    log.Verbose($"Box.Rows.Add {rvm.Id}::{rvm.Name}::{rvm.Order}");
 
                     var ri = mapper.Map<RowViewModel, Row>(rvm);
                     ri = repo.CreateOrUpdateRow(ri).Result;
@@ -155,7 +155,7 @@ namespace Kamban.ViewModels.Core
             SubscribeRemoved(rowsChanges,
                 rvm =>
                 {
-                    mon.LogicVerbose($"Box.Rows.Remove {rvm.Id}::{rvm.Name}::{rvm.Order}");
+                    log.Verbose($"Box.Rows.Remove {rvm.Id}::{rvm.Name}::{rvm.Order}");
 
                     repo.DeleteRow(rvm.Id).Wait();
                 });
@@ -169,7 +169,7 @@ namespace Kamban.ViewModels.Core
             SubscribeChanged(cardsChanges,
                 cvm =>
                 {
-                    mon.LogicVerbose($"Box.Cards.ItemChanged {cvm.Id}::{cvm.Header}");
+                    log.Verbose($"Box.Cards.ItemChanged {cvm.Id}::{cvm.Header}");
                     var iss = mapper.Map<CardViewModel, Card>(cvm);
                     repo.CreateOrUpdateCard(iss).Wait();
                 });
@@ -177,7 +177,7 @@ namespace Kamban.ViewModels.Core
             SubscribeAdded(cardsChanges,
                 cvm =>
                 {
-                    mon.LogicVerbose($"Box.Cards.Add {cvm.Id}::{cvm.Header}");
+                    log.Verbose($"Box.Cards.Add {cvm.Id}::{cvm.Header}");
                     var ci = mapper.Map<CardViewModel, Card>(cvm);
                     ci = repo.CreateOrUpdateCard(ci).Result;
 
@@ -187,7 +187,7 @@ namespace Kamban.ViewModels.Core
             SubscribeRemoved(cardsChanges,
                 cvm =>
                 {
-                    mon.LogicVerbose($"Box.Cards.Remove {cvm.Id}::{cvm.Header}");
+                    log.Verbose($"Box.Cards.Remove {cvm.Id}::{cvm.Header}");
 
                     repo.DeleteCard(cvm.Id).Wait();
                 });

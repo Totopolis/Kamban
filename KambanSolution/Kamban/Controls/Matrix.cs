@@ -18,7 +18,7 @@ namespace Kamban.MatrixControl
         public static void OnEnableWorkPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
             var mx = obj as Matrix;
-            mx.Monik?.ApplicationVerbose("Matrix.OnEnableWorkPropertyChanged");
+            mx.Monik?.Verbose("Matrix.OnEnableWorkPropertyChanged");
 
             if (mx.EnableWork)
                 mx.RebuildGrid();
@@ -27,25 +27,25 @@ namespace Kamban.MatrixControl
         public static void OnCardsObservablePropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
             var mx = obj as Matrix;
-            mx.Monik?.ApplicationVerbose("Matrix.OnCardsObservablePropertyChanged");
+            mx.Monik?.Verbose("Matrix.OnCardsObservablePropertyChanged");
         }
 
         public static void OnCardsPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
             var mx = obj as Matrix;
-            mx.Monik?.ApplicationVerbose("Matrix.OnCardsPropertyChanged");
+            mx.Monik?.Verbose("Matrix.OnCardsPropertyChanged");
         }
 
         public static void OnColumnsPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
             var mx = obj as Matrix;
-            mx.Monik?.ApplicationVerbose("Matrix.OnColumnsPropertyChanged");
+            mx.Monik?.Verbose("Matrix.OnColumnsPropertyChanged");
         }
 
         public static void OnRowsPropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
             var mx = obj as Matrix;
-            mx.Monik?.ApplicationVerbose("Matrix.OnRowsPropertyChanged");
+            mx.Monik?.Verbose("Matrix.OnRowsPropertyChanged");
         }
 
         private ColumnDefinition columnWidthChanging = null;
@@ -153,7 +153,7 @@ namespace Kamban.MatrixControl
 
         void IDropTarget.Drop(IDropInfo dropInfo)
         {
-            Monik?.ApplicationVerbose("Matrix.Drop");
+            Monik?.Verbose("Matrix.Drop");
 
             var card = dropInfo.Data as CardViewModel;
             var targetCard = dropInfo.TargetItem as CardViewModel;
@@ -166,7 +166,7 @@ namespace Kamban.MatrixControl
             if (card.ColumnDeterminant != targetIntersec.ColumnDeterminant ||
                 card.RowDeterminant != targetIntersec.RowDeterminant)
             {
-                Monik?.ApplicationVerbose("Matrix.Drop move to other intersection");
+                Monik?.Verbose("Matrix.Drop move to other intersection");
                 card.ColumnDeterminant = targetIntersec.ColumnDeterminant;
                 card.RowDeterminant = targetIntersec.RowDeterminant;
             }

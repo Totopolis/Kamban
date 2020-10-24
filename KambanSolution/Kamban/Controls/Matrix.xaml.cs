@@ -5,8 +5,8 @@ using System.Windows;
 using System.Windows.Controls;
 using GongSolutions.Wpf.DragDrop;
 using Kamban.ViewModels.Core;
-using Monik.Common;
 using ReactiveUI;
+using Serilog;
 using CardsObservableType = System.IObservable<DynamicData.IChangeSet<Kamban.ViewModels.Core.ICard>>;
 
 namespace Kamban.MatrixControl
@@ -60,15 +60,15 @@ namespace Kamban.MatrixControl
                 typeof(Matrix),
                 new PropertyMetadata(false, new PropertyChangedCallback(OnEnableWorkPropertyChanged)));
 
-        public IMonik Monik
+        public ILogger Monik
         {
-            get => (IMonik)GetValue(MonikProperty);
+            get => (ILogger)GetValue(MonikProperty);
             set => SetValue(MonikProperty, value);
         }
 
         public static readonly DependencyProperty MonikProperty =
             DependencyProperty.Register("Monik",
-                typeof(IMonik),
+                typeof(ILogger),
                 typeof(Matrix),
                 new PropertyMetadata(null));
 

@@ -1,26 +1,26 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using AutoMapper;
 using DynamicData;
 using Kamban.Repository;
 using Kamban.Contracts;
 using Kamban.ViewModels.Core;
-using Monik.Common;
 using Moq;
 using Xunit;
+using Serilog;
 
 namespace Kamban.Tests
 {
     public class BoxViewModelConnectTest
     {
         private readonly BoxViewModel _box;
-        private readonly Mock<IMonik> _monik;
+        private readonly Mock<ILogger> _monik;
         private readonly IMapper _mapper;
         private readonly Mock<ISaveRepository> _repo;
 
         public BoxViewModelConnectTest()
         {
             _repo = new Mock<ISaveRepository>();
-            _monik = new Mock<IMonik>();
+            _monik = new Mock<ILogger>();
             _mapper = new MapperConfiguration(cfg => { cfg.AddProfile<MapperProfile>(); }).CreateMapper();
             _box = new BoxViewModel(_monik.Object, _mapper);
         }

@@ -16,9 +16,9 @@ using Kamban.Core;
 using Kamban.ViewModels.Core;
 using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
-using Monik.Common;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Serilog;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ShowOptions;
 using Ui.Wpf.Common.ViewModels;
@@ -32,7 +32,7 @@ namespace Kamban.ViewModels
         private readonly IDialogCoordinator dialCoord;
         private readonly IMapper mapper;
         private readonly IAppConfig appConfig;
-        private readonly IMonik mon;
+        private readonly ILogger log;
         private bool initialized;
 
         public const string StartupViewId = "KambanStartupView";
@@ -60,14 +60,14 @@ namespace Kamban.ViewModels
         [Reactive] public ReactiveCommand<PublicBoardJson, Unit> OpenPublicBoardCommand { get; set; }
 
         public StartupViewModel(IShell shell, IAppModel appModel, IDialogCoordinator dc,
-            IMapper mp, IAppConfig cfg, IMonik m)
+            IMapper mp, IAppConfig cfg, ILogger l)
         {
             this.shell = shell as IShell;
             this.appModel = appModel;
             dialCoord = dc;
             mapper = mp;
             appConfig = cfg;
-            mon = m;
+            log = l;
 
             initialized = false;
 
@@ -190,7 +190,7 @@ namespace Kamban.ViewModels
                 }
                 catch(Exception ex)
                 {
-                    mon.ApplicationError($"StartupViewModel.OpenPublicBoardCommandExecute network error: {ex.Message}");
+                    log.Error($"StartupViewModel.OpenPublicBoardCommandExecute network error: {ex.Message}");
                     await dialCoord.ShowMessageAsync(this, "Network Error", "Can not download file");
                     return;
                 }
@@ -201,7 +201,7 @@ namespace Kamban.ViewModels
                 }
                 catch(Exception ex)
                 {
-                    mon.ApplicationError($"StartupViewModel.OpenPublicBoardCommandExecute file save error: {ex.Message}");
+                    log.Error($"StartupViewModel.OpenPublicBoardCommandExecute file save error: {ex.Message}");
                     await dialCoord.ShowMessageAsync(this, "Error", "Can not save file");
                     return;
                 }

@@ -9,10 +9,10 @@ using DynamicData;
 using Kamban.ViewModels;
 using Kamban.ViewModels.Core;
 using Kamban.Views;
-using Monik.Common;
 using Newtonsoft.Json;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Serilog;
 using Ui.Wpf.Common;
 
 namespace Kamban.Core
@@ -20,7 +20,7 @@ namespace Kamban.Core
     public partial class AppConfig : ReactiveObject, IAppConfig
     {
         private readonly IShell shell;
-        private readonly IMonik mon;
+        private readonly ILogger log;
         private readonly AppConfigJson appConfig;
         private readonly string appConfigPath;
         private readonly SourceList<RecentViewModel> recentList;
@@ -35,10 +35,10 @@ namespace Kamban.Core
         [Reactive] private string GetStartedValue { get; set; }
         [Reactive] private string BasementValue { get; set; }
 
-        public AppConfig(IShell sh, IMonik m)
+        public AppConfig(IShell sh, ILogger l)
         {
             shell = sh;
-            mon = m;
+            log = l;
 
             appConfigPath = GetRomaingPath("kamban.config");
             FileInfo file = new FileInfo(appConfigPath);
@@ -234,7 +234,7 @@ namespace Kamban.Core
             }
             catch (Exception ex)
             {
-                mon.ApplicationError($"AppConfig.LoadOnlineContentAsync download error: {ex.Message}");
+                log.Error($"AppConfig.LoadOnlineContentAsync download error: {ex.Message}");
             }
 
             if (appConfig.Startup != null)

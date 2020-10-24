@@ -10,7 +10,7 @@ using Kamban.ViewModels;
 using Kamban.ViewModels.Core;
 using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
-using Monik.Common;
+using Serilog;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
 
@@ -29,8 +29,8 @@ namespace Kamban
             var shell = container.Resolve<IShell>();
             shell.Container = container;
 
-            var mon = container.Resolve<IMonik>();
-            mon.ApplicationInfo("Bootstrapper initialized");
+            var log = container.Resolve<ILogger>();
+            log.Information("Bootstrapper initialized");
 
             return shell;
         }
@@ -86,8 +86,15 @@ namespace Kamban
                 .As<IDialogCoordinator>()
                 .SingleInstance();
 
-            builder.RegisterInstance(new MonikFile(AppConfig.GetRomaingPath("kamban.log")))
-                .As<IMonik>()
+            var logPath = AppConfig.GetRomaingPath("kamban-.log");
+            var logger = new LoggerConfiguration()
+                // TODO: select at app settings
+                .MinimumLevel.Information()
+                .WriteTo.File(logPath, rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+
+            builder.RegisterInstance(logger)
+                .As<ILogger>()
                 .SingleInstance();
 
             builder.RegisterInstance(

@@ -32,14 +32,14 @@ namespace Kamban.MatrixControl
     {
         public void RebuildGrid()
         {
-            Monik?.ApplicationVerbose("Matrix.RebuildGrid started");
+            Monik?.Verbose("Matrix.RebuildGrid started");
 
             MainGrid.Children.Clear();
 
             if (Rows == null || Columns == null ||
                 Rows.Count == 0 || Columns.Count == 0)
             {
-                Monik?.ApplicationVerbose("Matrix.RebuildGrid skip func");
+                Monik?.Verbose("Matrix.RebuildGrid skip func");
                 return;
             }
 
@@ -60,7 +60,7 @@ namespace Kamban.MatrixControl
             for (int i = 0; i < columnCount; i++)
             {
                 var it = columns[i];
-                Monik?.ApplicationVerbose($"Matrix.RebuildGrid add column {it.Id}::{it.Name}::{it.Order}");
+                Monik?.Verbose($"Matrix.RebuildGrid add column {it.Id}::{it.Name}::{it.Order}");
 
                 var cd = new ColumnDefinition();
                 cd.DataContext = it;
@@ -104,7 +104,7 @@ namespace Kamban.MatrixControl
             for (int i = 0; i < rowCount; i++)
             {
                 var it = rows[i];
-                Monik?.ApplicationVerbose($"Matrix.RebuildGrid add row {it.Id}::{it.Name}::{it.Order}");
+                Monik?.Verbose($"Matrix.RebuildGrid add row {it.Id}::{it.Name}::{it.Order}");
 
                 var rd = new RowDefinition();
                 rd.DataContext = it;
@@ -167,7 +167,7 @@ namespace Kamban.MatrixControl
                     Grid.SetRowSpan(cell, 1);
                 }
             SwimLanePropertyChanged(this, null);
-            Monik?.ApplicationVerbose("Matrix.RebuildGrid finished");
+            Monik?.Verbose("Matrix.RebuildGrid finished");
         }
 
         private List<ContentControl> VerticalHeaders = new List<ContentControl>();

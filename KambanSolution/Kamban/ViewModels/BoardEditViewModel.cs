@@ -15,9 +15,9 @@ using Kamban.ViewModels.Core;
 using Kamban.ViewRequests;
 using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
-using Monik.Common;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Serilog;
 using Ui.Wpf.Common;
 using Ui.Wpf.Common.ViewModels;
 using CardsObservableType = System.IObservable<DynamicData.IChangeSet<Kamban.ViewModels.Core.ICard>>;
@@ -31,7 +31,7 @@ namespace Kamban.ViewModels
         private readonly IShell shell;
         private readonly IAppConfig appConfig;
         private readonly IDialogCoordinator dialCoord;
-        private readonly IMonik mon;
+        private readonly ILogger log;
         private readonly IMapper mapper;
         
         private ReadOnlyObservableCollection<CardViewModel> cardList;
@@ -42,7 +42,7 @@ namespace Kamban.ViewModels
         [Reactive] public bool SwimLaneView { get; set; }
 
         [Reactive] public bool EnableMatrix { get; set; }
-        [Reactive] public IMonik Monik { get; set; }
+        [Reactive] public ILogger Monik { get; set; }
 
         [Reactive] public BoardViewModel CurrentBoard { get; set; }
 
@@ -89,18 +89,19 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> ToggleShowCardIdsCommand { get; set; }
         public ReactiveCommand<Unit, Unit> ToggleSwimLaneViewCommand { get; set; }
        
-        public BoardEditViewModel(IShell shell, IAppConfig ac, IDialogCoordinator dc, IMonik m, IMapper mp)
+        public BoardEditViewModel(IShell shell, IAppConfig ac, 
+            IDialogCoordinator dc, ILogger l, IMapper mp)
         {
             this.shell = shell;
             appConfig = ac;
             dialCoord = dc;
-            mon = m;
+            log = l;
             mapper = mp;
         
-            mon.LogicVerbose($"{nameof(BoardEditViewModel)}.ctor started");
+            log.Verbose($"{nameof(BoardEditViewModel)}.ctor started");
 
             EnableMatrix = false;
-            Monik = mon;
+            Monik = log;
 
             Columns = null;
             Rows = null;
@@ -172,7 +173,7 @@ namespace Kamban.ViewModels
             SelectBoardCommand = ReactiveCommand
                 .Create((object mi) =>
                 {
-                    mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(SelectBoardCommand)} executed");
+                    log.Verbose($"{nameof(BoardEditViewModel)}.{nameof(SelectBoardCommand)} executed");
 
                     string name = ((MenuItem)mi).Header as string;
                     CurrentBoard = BoardsInFile.First(x => x.Name == name);
@@ -187,7 +188,7 @@ namespace Kamban.ViewModels
                 .Where(x => x.Value == false && CardEditFlyout.Result == CardEditResult.Created)
                 .Subscribe(_ =>
                 {
-                    mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(CardEditFlyout)} closed and card will be created");
+                    log.Verbose($"{nameof(BoardEditViewModel)}.{nameof(CardEditFlyout)} closed and card will be created");
 
                     var card = CardEditFlyout.Card;
                     var targetCards = cardList
@@ -204,7 +205,7 @@ namespace Kamban.ViewModels
             appConfig.ShowFileNameInTabObservable
                 .Subscribe(x => UpdateTitle());
 
-            mon.LogicVerbose($"{nameof(BoardEditViewModel)}.ctor finished");
+            log.Verbose($"{nameof(BoardEditViewModel)}.ctor finished");
         }
 
         private void UpdateTitle()
@@ -225,7 +226,7 @@ namespace Kamban.ViewModels
 
         private void OnBoardChanged()
         {
-            mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(CurrentBoard)} changed");
+            log.Verbose($"{nameof(BoardEditViewModel)}.{nameof(CurrentBoard)} changed");
 
             BoardsInFile.ToList().ForEach(x => x.IsChecked = false);
 
@@ -292,7 +293,7 @@ namespace Kamban.ViewModels
 
         public void Initialize(ViewRequest viewRequest)
         {
-            mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(Initialize)} started");
+            log.Verbose($"{nameof(BoardEditViewModel)}.{nameof(Initialize)} started");
 
             shell.AddVMCommand("Edit", "Add Card", nameof(CreateCardCommand), this)
                 .SetHotKey(ModifierKeys.Control, Key.W);
@@ -376,17 +377,17 @@ namespace Kamban.ViewModels
                 .ForEach(x => x.MenuCommand = shell.AddInstanceCommand("Boards", x.Name, nameof(SelectBoardCommand), this));
 
 
-            mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(Initialize)} finished");
+            log.Verbose($"{nameof(BoardEditViewModel)}.{nameof(Initialize)} finished");
         }
 
         public void Activate(ViewRequest viewRequest)
         {
-            mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(Activate)} started");
+            log.Verbose($"{nameof(BoardEditViewModel)}.{nameof(Activate)} started");
 
             var request = viewRequest as BoardViewRequest;
             CurrentBoard = request?.Board ?? BoardsInFile.FirstOrDefault();
 
-            mon.LogicVerbose($"{nameof(BoardEditViewModel)}.{nameof(Activate)} finished");
+            log.Verbose($"{nameof(BoardEditViewModel)}.{nameof(Activate)} finished");
         }
     }//end of class
 }

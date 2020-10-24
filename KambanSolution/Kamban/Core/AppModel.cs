@@ -8,7 +8,7 @@ using DynamicData;
 using DynamicData.Kernel;
 using Kamban.Repository.LiteDb;
 using Kamban.ViewModels.Core;
-using Monik.Common;
+using Serilog;
 using Ui.Wpf.Common;
 
 namespace Kamban.Core
@@ -28,10 +28,10 @@ namespace Kamban.Core
         private readonly SourceCache<BoxViewModel, string> BoxesCache =
             new SourceCache<BoxViewModel, string>(x => x.Uri);
 
-        public AppModel(IShell shell, IMapper mp, IMonik m)
+        public AppModel(IShell shell, IMapper mp, ILogger log)
         {
             this.shell = shell;
-            m.LogicVerbose("AppModel.ctor");
+            log.Verbose("AppModel.ctor");
 
             BoxesCache.Connect()
                 .Bind(out _boxes)
