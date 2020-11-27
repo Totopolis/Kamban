@@ -6,6 +6,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using AutoMapper;
 using DynamicData;
 using DynamicData.Aggregation;
@@ -40,6 +41,7 @@ namespace Kamban.ViewModels
 
         [Reactive] public bool ShowCardIds { get; set; }
         [Reactive] public bool SwimLaneView { get; set; }
+        [Reactive] public Color ColorThemeBoard { get; set; }
 
         [Reactive] public bool EnableMatrix { get; set; }
         [Reactive] public ILogger Monik { get; set; }
@@ -97,6 +99,7 @@ namespace Kamban.ViewModels
             dialCoord = dc;
             log = l;
             mapper = mp;
+            ColorThemeBoard = ac.ColorTheme;
         
             log.Verbose($"{nameof(BoardEditViewModel)}.ctor started");
 
@@ -204,8 +207,15 @@ namespace Kamban.ViewModels
 
             appConfig.ShowFileNameInTabObservable
                 .Subscribe(x => UpdateTitle());
+            appConfig.ColorThemeObservable
+                .Subscribe(x => UpdateColorTheme());
 
             log.Verbose($"{nameof(BoardEditViewModel)}.ctor finished");
+        }
+
+        private void UpdateColorTheme()
+        {
+            ColorThemeBoard = appConfig.ColorTheme;
         }
 
         private void UpdateTitle()
@@ -293,6 +303,7 @@ namespace Kamban.ViewModels
 
         public void Initialize(ViewRequest viewRequest)
         {
+           
             log.Verbose($"{nameof(BoardEditViewModel)}.{nameof(Initialize)} started");
 
             shell.AddVMCommand("Edit", "Add Card", nameof(CreateCardCommand), this)

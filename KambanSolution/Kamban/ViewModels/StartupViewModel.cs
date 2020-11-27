@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using AutoMapper;
 using DynamicData;
@@ -55,6 +56,7 @@ namespace Kamban.ViewModels
 
         [Reactive] public string GetStarted { get; set; }
         [Reactive] public string Basement { get; set; }
+        [Reactive] public Color ColorTheme { get; set; }
         [Reactive] public ReadOnlyObservableCollection<PublicBoardJson> PublicBoards { get; set; }
 
         [Reactive] public ReactiveCommand<PublicBoardJson, Unit> OpenPublicBoardCommand { get; set; }
@@ -68,7 +70,7 @@ namespace Kamban.ViewModels
             mapper = mp;
             appConfig = cfg;
             log = l;
-
+            ColorTheme = appConfig.ColorTheme;
             initialized = false;
 
             OpenRecentBoxCommand = ReactiveCommand.Create<RecentViewModel>(async (rvm) =>
@@ -165,7 +167,17 @@ namespace Kamban.ViewModels
             if (appConfig.OpenLatestAtStartup)
                 foreach (var uri in appConfig.LastOpenedAtStartup)
                     Dispatcher.CurrentDispatcher.InvokeAsync(() => OpenBoardView(uri));
+
+            appConfig.ColorThemeObservable
+                .Subscribe(x => UpdateColorTheme());
         } //ctor
+        private void UpdateColorTheme()
+        {
+            if(appConfig.ColorTheme == Color.FromArgb(0, 255,255,255)) //transparent
+                ColorTheme = Color.FromArgb(255,255,255,255); //white as classical theme
+            else
+                ColorTheme = appConfig.ColorTheme;
+        }
 
         public async Task OpenPublicBoardCommandExecute(PublicBoardJson obj)
         {

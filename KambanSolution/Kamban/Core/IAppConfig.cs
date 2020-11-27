@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Windows.Media;
 using System.Text;
 using System.Threading.Tasks;
 using DynamicData;
@@ -33,7 +34,9 @@ namespace Kamban.Core
 
         IObservable<bool> OpenLatestAtStartupObservable { get; }
         IObservable<bool> ShowFileNameInTabObservable { get; }
+        IObservable<Color> ColorThemeObservable { get; }
         bool OpenLatestAtStartup { get; set; }
         bool ShowFileNameInTab { get; set; }
+        Color ColorTheme { get; set; }
     }
 }

@@ -8,14 +8,13 @@
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:mykanban="clr-namespace:Kamban.MatrixControl"
              xmlns:viewModels="clr-namespace:Kamban.ViewModels"
+             xmlns:common="clr-namespace:Kamban.Common"
              x:Name="boardUserControl"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance viewModels:BoardEditViewModel}">
-
     <UserControl.Resources>
-        <ResourceDictionary Source="WpfResources/TemplatesDictionary.xaml"/>
+        <ResourceDictionary  Source="WpfResources/TemplatesDictionary.xaml"/>
     </UserControl.Resources>
-
     <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalAlignment="Stretch">
         <ScrollViewer.Style>
             <Style>
@@ -36,26 +35,27 @@
             <ColumnDefinition Width="20*"/>
             <ColumnDefinition Width="30*"/>
         </Grid.ColumnDefinitions>
-
         <mykanban:Matrix x:Name="Matrix"                         
-            Monik="{Binding Monik}"
-            ShowCardIds="{Binding ShowCardIds}"
-            SwimLaneView="{Binding SwimLaneView}"             
-            Columns="{Binding Columns}"
-            Rows="{Binding Rows}"
-            CardsObservable="{Binding CardsObservable}"
-            EnableWork="{Binding EnableMatrix}"
-            Grid.Column="0"
-            Grid.ColumnSpan="4"
-            IsTabStop="False"
-            NormalizeGridCommand="{Binding NormalizeGridCommand}"
-            CardClickCommand="{Binding CardClickCommand}"
-            CardOfContextMenu="{Binding CardOfContextMenu, Mode=TwoWay}"
-            HeadOfContextMenu="{Binding HeadOfContextMenu, Mode=TwoWay}"
-            CellDoubleClickCommand="{Binding CellDoubleClickCommand}"
-            mykanban:ContextMenuServiceExtensions.DataContext="{Binding}">
+                         Monik="{Binding Monik}"
+                         ShowCardIds="{Binding ShowCardIds}"
+                         SwimLaneView="{Binding SwimLaneView}"             
+                         Columns="{Binding Columns}"
+                         ColorTheme="{Binding ColorThemeBoard}"
+                         Rows="{Binding Rows}"
+                         CardsObservable="{Binding CardsObservable}"
+                         EnableWork="{Binding EnableMatrix}"
+                         Grid.Column="0"
+                         Grid.ColumnSpan="4"
+                         IsTabStop="False"
+                         NormalizeGridCommand="{Binding NormalizeGridCommand}"
+                         CardClickCommand="{Binding CardClickCommand}"
+                         CardOfContextMenu="{Binding CardOfContextMenu, Mode=TwoWay}"
+                         HeadOfContextMenu="{Binding HeadOfContextMenu, Mode=TwoWay}"
+                         CellDoubleClickCommand="{Binding CellDoubleClickCommand}"
+                         Background="{Binding ColorThemeBoard, Converter={StaticResource ColorClassCvt}}"
+                         mykanban:ContextMenuServiceExtensions.DataContext="{Binding}">
 
-            <mykanban:Matrix.CardContextMenu>
+                <mykanban:Matrix.CardContextMenu>
                 <ContextMenu>
                     <MenuItem 
                         Header="Move"

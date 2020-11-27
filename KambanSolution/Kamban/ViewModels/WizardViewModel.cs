@@ -7,6 +7,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Media;
 using DynamicData;
 using Kamban.Core;
 using Kamban.Contracts;
@@ -32,7 +33,7 @@ namespace Kamban.ViewModels
         [Reactive] public BoardTemplate SelectedTemplate { get; set; }
         [Reactive] public string FileName { get; set; }
         [Reactive] public string FolderName { get; set; }
-
+        [Reactive] public Color ColorTheme { get; set; }
         [Reactive] public ObservableCollection<Column> Columns { get; set; }
         [Reactive] public ObservableCollection<Row> Rows { get; set; }
 
@@ -58,7 +59,7 @@ namespace Kamban.ViewModels
             this.shell = shell;
             dialCoord = dc;
             appConfig = cfg;
-
+            ColorTheme = appConfig.ColorTheme;
             Templates = templates.GetBoardTemplates().Result;
 
             Columns = new ObservableCollection<Column>();
@@ -129,6 +130,15 @@ namespace Kamban.ViewModels
             this.WhenAnyValue(x => x.BoardName)
                 .Where(x => !string.IsNullOrWhiteSpace(x) && IsNewFile)
                 .Subscribe(v => FileName = BoardNameToFileName(v));
+            appConfig.ColorThemeObservable
+                .Subscribe(x => UpdateColorTheme());
+        }
+        private void UpdateColorTheme()
+        {
+            if (appConfig.ColorTheme == Color.FromArgb(0, 255, 255, 255)) //transparent
+                ColorTheme = Color.FromArgb(255, 255, 255, 255); //white as classical theme
+            else
+                ColorTheme = appConfig.ColorTheme;
         }
 
         private async Task CreateCommandExecute()

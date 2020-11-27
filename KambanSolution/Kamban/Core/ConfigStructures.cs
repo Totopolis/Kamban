@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Windows.Media;
 
 namespace Kamban.Core
 {
@@ -59,5 +60,6 @@ namespace Kamban.Core
 
         public bool OpenLatestAtStartup { get; set; }
         public bool ShowFileNameInTab { get; set; }
+        public Color ColorTheme { get; set; }
     }
 }

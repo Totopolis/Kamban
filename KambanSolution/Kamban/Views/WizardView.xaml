@@ -8,7 +8,10 @@
         mc:Ignorable="d"
         d:DesignHeight="400"
         d:DesignWidth="400">
-    <Grid>
+    <UserControl.Resources>
+        <ResourceDictionary  Source="WpfResources/TemplatesDictionary.xaml"/>
+    </UserControl.Resources>
+    <Grid Background="{Binding ColorTheme, Converter={StaticResource ColorClassCvt}}">
         <ScrollViewer>
             <StackPanel Orientation="Vertical" Margin="20" MaxWidth="800">
 

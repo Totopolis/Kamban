@@ -46,8 +46,15 @@ namespace Kamban.Core
             if (file.Exists)
             {
                 string data = File.ReadAllText(appConfigPath);
-                appConfig = JsonConvert.DeserializeObject<AppConfigJson>(data);
 
+                try
+                {
+                    appConfig = JsonConvert.DeserializeObject<AppConfigJson>(data);
+                }
+                catch (Exception ex){ }
+                
+                if( appConfig == null)
+                    appConfig = new AppConfigJson();
                 if (string.IsNullOrEmpty(appConfig.AppGuid))
                     appConfig.AppGuid = Guid.NewGuid().ToString();
             }
@@ -59,7 +66,7 @@ namespace Kamban.Core
 
             OpenLatestAtStartupValue = appConfig.OpenLatestAtStartup;
             ShowFileNameInTabValue = appConfig.ShowFileNameInTab;
-
+            ColorThemeValue = appConfig.ColorTheme;
             appConfig.StartNumber++;
             SaveConfig();
 
@@ -81,7 +88,7 @@ namespace Kamban.Core
             Basement = this.WhenAnyValue(x => x.BasementValue);
             OpenLatestAtStartupObservable = this.WhenAnyValue(x => x.OpenLatestAtStartupValue);
             ShowFileNameInTabObservable = this.WhenAnyValue(x => x.ShowFileNameInTabValue);
-
+            ColorThemeObservable = this.WhenAnyValue(x => x.ColorThemeValue);
             // Manage current opened boards for raise on next startup
 
             shell.DockingManager.ActiveContentChanged += (s, e) =>
@@ -89,8 +96,9 @@ namespace Kamban.Core
                 var view = shell.DockingManager.ActiveContent as BoardView;
                 if (view == null)
                     return;
-
                 var vm = view.ViewModel as BoardEditViewModel;
+                if (vm.Box == null)
+                    return;
                 if (!appConfig.LatestOpenedAtStartup.Contains(vm.Box.Uri))
                     appConfig.LatestOpenedAtStartup.Add(vm.Box.Uri);
                 SaveConfig();

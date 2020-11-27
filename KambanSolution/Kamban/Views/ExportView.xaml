@@ -7,6 +7,7 @@
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:wpfResources="clr-namespace:Kamban.Views.WpfResources"
              xmlns:viewModels="clr-namespace:Kamban.ViewModels"
+             xmlns:common="clr-namespace:Kamban.Common"
              mah:DialogParticipation.Register="{Binding}"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance viewModels:ExportViewModel}"
@@ -14,8 +15,9 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolCvt" />
         <wpfResources:ThicknessToStringConverter x:Key="ThicknessCvt" />
+        <common:ColorToBrushConverter x:Key="ColorCvt" />
     </UserControl.Resources>
-    <Grid>
+    <Grid Background="{Binding ColorTheme, Converter={StaticResource ColorCvt}}">
         <ScrollViewer>
             <StackPanel Orientation="Vertical" Margin="20" MaxWidth="600">
                 <TextBlock FontWeight="DemiBold" Margin="0,0,0,5">Select source</TextBlock>
