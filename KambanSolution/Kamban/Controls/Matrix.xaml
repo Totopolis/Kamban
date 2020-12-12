@@ -188,7 +188,6 @@
             </Border>
         </DataTemplate>
     </UserControl.Resources>
-    
-    <Grid Name="MainGrid">        
-    </Grid>
+    <Grid Name="MainGrid">
+</Grid>
 </UserControl>

@@ -172,6 +172,11 @@ namespace Kamban.MatrixControl
 
         private List<ContentControl> VerticalHeaders = new List<ContentControl>();
 
+        private void ColorThemePropertyChanged(object sender, EventArgs e)
+        {
+            RebuildGrid();
+        }
+
         private void SwimLanePropertyChanged(object sender, EventArgs e)
         {
             if (Rows == null || Columns == null || MainGrid == null ||

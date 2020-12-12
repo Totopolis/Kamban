@@ -9,6 +9,9 @@
         xmlns:metro="http://metro.mahapps.com/winfx/xaml/controls"
               xmlns:wpfresources="clr-namespace:Kamban.Views.WpfResources"
               mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary  Source="WpfResources/TemplatesDictionary.xaml"/>
+    </UserControl.Resources>
     <Grid>
         <Grid.Background>
             <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
@@ -36,7 +39,7 @@
                 x:Name="CentralGrid"
                 Grid.Column="1" 
                 Grid.ColumnSpan="1"
-                Background="White">
+                Background="{Binding ColorTheme, Converter={StaticResource ColorClassCvt}}">
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="50*"/>

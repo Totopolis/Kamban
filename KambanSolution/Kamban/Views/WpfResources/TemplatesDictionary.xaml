@@ -3,7 +3,8 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:viewModels="clr-namespace:Kamban.ViewModels"
                     xmlns:views="clr-namespace:Kamban.Views"
-                    xmlns:kam="clr-namespace:Kamban.Views.WpfResources">
+                    xmlns:kam="clr-namespace:Kamban.Views.WpfResources"
+                    xmlns:common="clr-namespace:Kamban.Common">
 
     <Style TargetType="Label">
         <Setter Property="BorderThickness" Value="1" />
@@ -48,7 +49,6 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-
     <DataTemplate DataType="{x:Type viewModels:CardEditViewModel}">
         <views:CardEditView />
     </DataTemplate>
@@ -60,4 +60,5 @@
     <DataTemplate DataType="{x:Type viewModels:HeaderPropertyViewModel }">
         <views:HeaderPropertyView/>
     </DataTemplate>
+    <common:ColorToBrushConverter x:Key="ColorClassCvt"/>
 </ResourceDictionary>

@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Reactive;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using GongSolutions.Wpf.DragDrop;
 using Kamban.ViewModels.Core;
 using ReactiveUI;
@@ -22,6 +23,9 @@ namespace Kamban.MatrixControl
 
             PropertyDescriptor pdSL = DependencyPropertyDescriptor.FromProperty(Matrix.SwimLaneViewProperty, typeof(Matrix));
             pdSL.AddValueChanged(this, new System.EventHandler(SwimLanePropertyChanged) );
+
+            PropertyDescriptor pdColorTheme = DependencyPropertyDescriptor.FromProperty(Matrix.ColorThemeProperty, typeof(Matrix));
+            pdColorTheme.AddValueChanged(this, new System.EventHandler(ColorThemePropertyChanged));
         }
 
         public bool ShowCardIds
@@ -59,6 +63,19 @@ namespace Kamban.MatrixControl
                 typeof(bool),
                 typeof(Matrix),
                 new PropertyMetadata(false, new PropertyChangedCallback(OnEnableWorkPropertyChanged)));
+
+
+        public Color ColorTheme
+        {
+            get => (Color)GetValue(ColorThemeProperty);
+            set => SetValue(ColorThemeProperty, value);
+        }
+
+        public static readonly DependencyProperty ColorThemeProperty =
+            DependencyProperty.Register("ColorTheme",
+                typeof(Color),
+                typeof(Matrix),
+                new PropertyMetadata(Color.FromArgb(0, 255, 255, 255))); // transparent
 
         public ILogger Monik
         {

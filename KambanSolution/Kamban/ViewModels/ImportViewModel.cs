@@ -2,6 +2,7 @@
 using System.Reactive;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 using Autofac;
 using Kamban.Core;
 using Kamban.Repository.Redmine;
@@ -24,6 +25,7 @@ namespace Kamban.ViewModels
         private readonly IAppConfig _appConfig;
 
         [Reactive] public bool LoadFullScheme { get; set; }
+        [Reactive] public Color ColorTheme { get; set; }
         public ReactiveCommand<Unit, Unit> ImportRedmineCommand { get; set; }
 
         public ImportViewModel(IShell shell, IDialogCoordinator dialogCoordinator,
@@ -32,8 +34,17 @@ namespace Kamban.ViewModels
             _shell = shell;
             _dialogCoordinator = dialogCoordinator;
             _appConfig = appCfg;
-
+            ColorTheme = _appConfig.ColorTheme;
             ImportRedmineCommand = ReactiveCommand.CreateFromTask(ShowRedmineImport);
+            _appConfig.ColorThemeObservable
+                .Subscribe(x => UpdateColorTheme());
+        }
+        private void UpdateColorTheme()
+        {
+            if (_appConfig.ColorTheme == Color.FromArgb(0, 255, 255, 255)) //transparent
+                ColorTheme = Color.FromArgb(255, 255, 255, 255); //white as classical theme
+            else
+                ColorTheme = _appConfig.ColorTheme;
         }
 
         private async Task ShowRedmineImport()

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Forms;
+using System.Windows.Media;
 using AutoMapper;
 using DynamicData;
 using Kamban.Core;
@@ -39,6 +40,7 @@ namespace Kamban.ViewModels
         private readonly IAppModel appModel;
         private readonly IDialogCoordinator dialCoord;
         private readonly IMapper mapper;
+        private readonly IAppConfig _appConfig;
         private SourceList<BoardToExport> boards;
 
         [Reactive] public ReadOnlyObservableCollection<BoxViewModel> AvailableBoxes { get; set; }
@@ -62,7 +64,7 @@ namespace Kamban.ViewModels
         [Reactive] public bool SplitBoardsToFiles { get; set; }
         [Reactive] public bool ShowCardIds { get; set; }
         [Reactive] public bool SwimLaneView { get; set; }
-
+        [Reactive] public Color ColorTheme { get; set; }
         public ReactiveCommand<Unit, Unit> SelectTargetFolderCommand { get; set; }
         public ReactiveCommand<Unit, Unit> ExportCommand { get; set; }
         public ReactiveCommand<Unit, Unit> CancelCommand { get; set; }
@@ -74,7 +76,7 @@ namespace Kamban.ViewModels
             appModel = am;
             dialCoord = dc;
             this.mapper = mapper;
-
+            _appConfig = cfg;
             AvailableBoxes = appModel.Boxes;
 
             boards = new SourceList<BoardToExport>();
@@ -133,6 +135,15 @@ namespace Kamban.ViewModels
 
             var fi = new FileInfo(SelectedBox.Uri);
             TargetFolder = cfg.ArchiveFolder ?? fi.DirectoryName;
+            _appConfig.ColorThemeObservable
+                .Subscribe(x => UpdateColorTheme());
+        }
+        private void UpdateColorTheme()
+        {
+            if (_appConfig.ColorTheme == Color.FromArgb(0, 255, 255, 255)) //transparent
+                ColorTheme = Color.FromArgb(255, 255, 255, 255); //white as classical theme
+            else
+                ColorTheme = _appConfig.ColorTheme;
         }
 
         private async Task ExportCommandExecute()

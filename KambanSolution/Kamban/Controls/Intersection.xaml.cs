@@ -18,10 +18,12 @@ namespace Kamban.MatrixControl
         public Intersection(Matrix parent)
         {
             mx = parent;
+            
             InitializeComponent();
-
+            
             SelfCards = null;
             SelectedCard = null;
+            ColorThemeIntersection = parent.ColorTheme;
         }
 
         public int ColumnDeterminant { get; set; }
@@ -30,7 +32,7 @@ namespace Kamban.MatrixControl
         [Reactive] public ReadOnlyObservableCollection<ICard> SelfCards { get; set; }
 
         [Reactive] public ICard SelectedCard { get; set; }
-
+        [Reactive] public Color ColorThemeIntersection { get; set; }
         private void Grid_MouseMove(object sender, MouseEventArgs e)
         {
             var point = e.GetPosition(mainListView);

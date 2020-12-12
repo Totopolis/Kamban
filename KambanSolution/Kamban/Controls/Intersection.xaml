@@ -13,7 +13,8 @@
 
     <UserControl.Resources>
         <common:ColorNameToSolidColorBrushValueConverter x:Key="ColorCvt"/>
-        <BooleanToVisibilityConverter x:Key="BoolCvt" />
+        <common:ColorToBrushConverter x:Key="ColorClassCvt"/>
+            <BooleanToVisibilityConverter x:Key="BoolCvt" />
 
         <Style TargetType="{x:Type ListViewItem}">
             <Setter Property="Background" Value="Azure" />
@@ -28,7 +29,6 @@
     </UserControl.Resources>
 
     <Grid MouseMove="Grid_MouseMove">
-
         <ListView
             Name="mainListView"
             Margin="0"
@@ -37,6 +37,9 @@
             dd:DragDrop.DropHandler="{Binding}"
             ContextMenuOpening="ContextMenu_ContextMenuOpening"
             MouseDoubleClick="mainListView_MouseDoubleClick"
+            Background="{Binding ColorThemeIntersection, 
+                                RelativeSource={RelativeSource Mode=FindAncestor,
+                                AncestorType={x:Type UserControl}}, Converter={StaticResource ColorClassCvt}}"
             ContextMenu="{Binding CardContextMenu}"
             ItemsSource="{Binding Path=SelfCards, 
                                 RelativeSource={RelativeSource Mode=FindAncestor,
@@ -104,6 +107,5 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-
     </Grid>
 </UserControl>
