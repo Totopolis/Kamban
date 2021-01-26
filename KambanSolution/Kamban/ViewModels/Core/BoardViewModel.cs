@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 using Kamban.Repository.Attributes;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Ui.Wpf.Common;
+using wpf.ui;
 
 namespace Kamban.ViewModels.Core
 {

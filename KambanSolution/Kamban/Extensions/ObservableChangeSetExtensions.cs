@@ -1,8 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DynamicData;
-using DynamicData.Annotations;
 using Kamban.Repository.Attributes;
 
 namespace Kamban.Extensions

@@ -10,21 +10,19 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Media;
+using Autofac;
 using AutoMapper;
 using DynamicData;
-using Kamban.Core;
-using Kamban.Export;
-using Kamban.Export.Options;
 using Kamban.Contracts;
+using Kamban.Core;
+using Kamban.Export.Options;
 using Kamban.ViewModels.Core;
 using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
 using PdfSharp;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Ui.Wpf.Common;
-using Ui.Wpf.Common.ViewModels;
-using Autofac;
+using wpf.ui;
 
 namespace Kamban.ViewModels
 {

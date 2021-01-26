@@ -20,9 +20,7 @@ using MahApps.Metro.Controls.Dialogs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
-using Ui.Wpf.Common;
-using Ui.Wpf.Common.ShowOptions;
-using Ui.Wpf.Common.ViewModels;
+using wpf.ui;
 
 namespace Kamban.ViewModels
 {

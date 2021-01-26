@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Kamban.ViewModels;
-using Ui.Wpf.Common;
-using Ui.Wpf.Common.ShowOptions;
-using Ui.Wpf.Common.ViewModels;
+using wpf.ui;
 
 namespace Kamban.Views
 {

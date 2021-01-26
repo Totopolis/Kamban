@@ -1,4 +1,4 @@
-﻿using Ui.Wpf.Common;
+﻿using wpf.ui;
 
 namespace Kamban.ViewModels.Core
 {

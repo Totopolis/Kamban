@@ -19,10 +19,9 @@ using MahApps.Metro.Controls.Dialogs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
-using Ui.Wpf.Common;
-using Ui.Wpf.Common.ViewModels;
+using wpf.ui;
 using CardsObservableType = System.IObservable<DynamicData.IChangeSet<Kamban.ViewModels.Core.ICard>>;
-using IActivatableViewModel = Ui.Wpf.Common.ViewModels.IActivatableViewModel;
+using IActivatableViewModel = wpf.ui.IActivatableViewModel;
 
 namespace Kamban.ViewModels
 {

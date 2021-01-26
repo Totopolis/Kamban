@@ -26,12 +26,11 @@
             </CheckBox>
             <Separator Margin="0, 10, 0, 10"/>
             <TextBlock  FontWeight="DemiBold" Margin="0,0,0,5">Background Color</TextBlock>
-            <xctk:ColorPicker  Name="cp" Grid.Column="1"
+            <mah:ColorPicker  Name="cp" Grid.Column="1"
                                MinWidth="150"
                                HorizontalAlignment="Left" 
-                               SelectedColor="{Binding ColorTheme, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
-                               DisplayColorAndName="True"  AvailableColorsSortingMode="HueSaturationBrightness" >
-            </xctk:ColorPicker>
+                               SelectedColor="{Binding ColorTheme, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" >
+            </mah:ColorPicker>
         </StackPanel>
     </Grid>
 </UserControl>

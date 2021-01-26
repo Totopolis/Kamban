@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Serilog;
-using Ui.Wpf.Common;
+using wpf.ui;
 
 namespace Kamban.Core
 {
@@ -51,7 +51,7 @@ namespace Kamban.Core
                 {
                     appConfig = JsonConvert.DeserializeObject<AppConfigJson>(data);
                 }
-                catch (Exception ex){ }
+                catch { }
                 
                 if( appConfig == null)
                     appConfig = new AppConfigJson();

@@ -2,8 +2,7 @@
 using Autofac;
 using Kamban.ViewModels;
 using Kamban.Views;
-using Ui.Wpf.Common;
-using Ui.Wpf.Common.ShowOptions;
+using wpf.ui;
 
 namespace Kamban
 {

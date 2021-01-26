@@ -4,8 +4,7 @@ using System.Reactive;
 using Kamban.ViewModels.Core;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Ui.Wpf.Common;
-using Ui.Wpf.Common.ViewModels;
+using wpf.ui;
 
 namespace Kamban.ViewModels
 {

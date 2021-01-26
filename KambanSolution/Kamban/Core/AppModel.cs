@@ -9,7 +9,7 @@ using DynamicData.Kernel;
 using Kamban.Repository.LiteDb;
 using Kamban.ViewModels.Core;
 using Serilog;
-using Ui.Wpf.Common;
+using wpf.ui;
 
 namespace Kamban.Core
 {

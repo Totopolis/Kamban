@@ -1,5 +1,5 @@
 ﻿using Kamban.Contracts;
-using Ui.Wpf.Common;
+using wpf.ui;
 
 namespace Kamban.ViewRequests
 {

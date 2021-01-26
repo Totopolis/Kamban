@@ -8,8 +8,7 @@ using System.Windows.Threading;
 using Autofac;
 using Kamban.Export.Options;
 using Kamban.Views;
-using Ui.Wpf.Common;
-using Ui.Wpf.Common.ViewModels;
+using wpf.ui;
 
 namespace Kamban.Core
 {

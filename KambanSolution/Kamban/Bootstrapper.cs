@@ -11,8 +11,7 @@ using Kamban.ViewModels.Core;
 using Kamban.Views;
 using MahApps.Metro.Controls.Dialogs;
 using Serilog;
-using Ui.Wpf.Common;
-using Ui.Wpf.Common.ViewModels;
+using wpf.ui;
 
 namespace Kamban
 {
