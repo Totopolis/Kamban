@@ -64,7 +64,7 @@ namespace Kamban.Core
                 appConfigJson.AppGuid = Guid.NewGuid().ToString();
 
             if (string.IsNullOrEmpty(appConfigJson.ColorTheme))
-                appConfigJson.ColorTheme = Color.FromArgb(255, 255, 255, 255).ToString();
+                appConfigJson.ColorTheme = Colors.White.ToString();
 
             OpenLatestAtStartupValue = appConfigJson.OpenLatestAtStartup;
             ShowFileNameInTabValue = appConfigJson.ShowFileNameInTab;
@@ -121,9 +121,16 @@ namespace Kamban.Core
 
         private Color ToColor(string str)
         {
-            TypeConverter cc = TypeDescriptor.GetConverter(typeof(Color));
-            var result = (Color)cc.ConvertFromString(str);
-            return result;
+            try
+            {
+                TypeConverter cc = TypeDescriptor.GetConverter(typeof(Color));
+                var result = (Color)cc.ConvertFromString(str);
+                return result;
+            }
+            catch
+            {
+                return Colors.White;
+            }
         }
 
         public IObservable<IChangeSet<RecentViewModel>> RecentObservable { get; private set; }
