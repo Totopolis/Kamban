@@ -165,17 +165,10 @@ namespace Kamban.ViewModels
             if (appConfig.OpenLatestAtStartup)
                 foreach (var uri in appConfig.LastOpenedAtStartup)
                     Dispatcher.CurrentDispatcher.InvokeAsync(() => OpenBoardView(uri));
-
+            
             appConfig.ColorThemeObservable
-                .Subscribe(x => UpdateColorTheme());
+                .Subscribe(x => ColorTheme = x);
         } //ctor
-        private void UpdateColorTheme()
-        {
-            if(appConfig.ColorTheme == Color.FromArgb(0, 255,255,255)) //transparent
-                ColorTheme = Color.FromArgb(255,255,255,255); //white as classical theme
-            else
-                ColorTheme = appConfig.ColorTheme;
-        }
 
         public async Task OpenPublicBoardCommandExecute(PublicBoardJson obj)
         {

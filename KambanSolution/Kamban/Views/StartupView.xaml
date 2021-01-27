@@ -7,11 +7,14 @@
         dialogs:DialogParticipation.Register="{Binding}"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:metro="http://metro.mahapps.com/winfx/xaml/controls"
-              xmlns:wpfresources="clr-namespace:Kamban.Views.WpfResources"
-              mc:Ignorable="d">
+        xmlns:common="clr-namespace:Kamban.Common"
+        xmlns:wpfresources="clr-namespace:Kamban.Views.WpfResources"
+        mc:Ignorable="d">
+    
     <UserControl.Resources>
-        <ResourceDictionary  Source="WpfResources/TemplatesDictionary.xaml"/>
+        <common:ColorToBrushConverter x:Key="ColorClassCvt"/>
     </UserControl.Resources>
+    
     <Grid>
         <Grid.Background>
             <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">

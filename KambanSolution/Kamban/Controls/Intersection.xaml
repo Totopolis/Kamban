@@ -14,7 +14,7 @@
     <UserControl.Resources>
         <common:ColorNameToSolidColorBrushValueConverter x:Key="ColorCvt"/>
         <common:ColorToBrushConverter x:Key="ColorClassCvt"/>
-            <BooleanToVisibilityConverter x:Key="BoolCvt" />
+        <BooleanToVisibilityConverter x:Key="BoolCvt" />
 
         <Style TargetType="{x:Type ListViewItem}">
             <Setter Property="Background" Value="Azure" />

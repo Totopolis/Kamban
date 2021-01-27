@@ -128,15 +128,9 @@ namespace Kamban.ViewModels
             this.WhenAnyValue(x => x.BoardName)
                 .Where(x => !string.IsNullOrWhiteSpace(x) && IsNewFile)
                 .Subscribe(v => FileName = BoardNameToFileName(v));
+
             appConfig.ColorThemeObservable
-                .Subscribe(x => UpdateColorTheme());
-        }
-        private void UpdateColorTheme()
-        {
-            if (appConfig.ColorTheme == Color.FromArgb(0, 255, 255, 255)) //transparent
-                ColorTheme = Color.FromArgb(255, 255, 255, 255); //white as classical theme
-            else
-                ColorTheme = appConfig.ColorTheme;
+                .Subscribe(x => ColorTheme = x);
         }
 
         private async Task CreateCommandExecute()

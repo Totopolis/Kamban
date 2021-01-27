@@ -5,13 +5,16 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:viewModels="clr-namespace:Kamban.ViewModels"
+             xmlns:common="clr-namespace:Kamban.Common"
              mah:DialogParticipation.Register="{Binding}"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance viewModels:ImportViewModel}"
              d:DesignHeight="450" d:DesignWidth="800">
+
     <UserControl.Resources>
-        <ResourceDictionary  Source="WpfResources/TemplatesDictionary.xaml"/>
+        <common:ColorToBrushConverter x:Key="ColorClassCvt"/>
     </UserControl.Resources>
+
     <Grid Background="{Binding ColorTheme, Converter={StaticResource ColorClassCvt}}">
         <ScrollViewer>
             <StackPanel Orientation="Vertical" Margin="20" MaxWidth="400">

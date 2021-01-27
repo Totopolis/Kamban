@@ -4,13 +4,16 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+        xmlns:common="clr-namespace:Kamban.Common"
         dialogs:DialogParticipation.Register="{Binding}"
         mc:Ignorable="d"
         d:DesignHeight="400"
         d:DesignWidth="400">
+
     <UserControl.Resources>
-        <ResourceDictionary  Source="WpfResources/TemplatesDictionary.xaml"/>
+        <common:ColorToBrushConverter x:Key="ColorClassCvt"/>
     </UserControl.Resources>
+
     <Grid Background="{Binding ColorTheme, Converter={StaticResource ColorClassCvt}}">
         <ScrollViewer>
             <StackPanel Orientation="Vertical" Margin="20" MaxWidth="800">

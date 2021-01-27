@@ -18,31 +18,24 @@ namespace Kamban.ViewModels
 {
     public class ImportViewModel : ViewModelBase
     {
-        private IShell _shell;
-        private IDialogCoordinator _dialogCoordinator;
-        private readonly IAppConfig _appConfig;
+        private IShell shell;
+        private IDialogCoordinator dialCoord;
+        private readonly IAppConfig appConfig;
 
         [Reactive] public bool LoadFullScheme { get; set; }
         [Reactive] public Color ColorTheme { get; set; }
         public ReactiveCommand<Unit, Unit> ImportRedmineCommand { get; set; }
 
-        public ImportViewModel(IShell shell, IDialogCoordinator dialogCoordinator,
-            IAppConfig appCfg)
+        public ImportViewModel(IShell sh, IDialogCoordinator dc, IAppConfig ac)
         {
-            _shell = shell;
-            _dialogCoordinator = dialogCoordinator;
-            _appConfig = appCfg;
-            ColorTheme = _appConfig.ColorTheme;
+            shell = sh;
+            dialCoord = dc;
+            appConfig = ac;
+            
             ImportRedmineCommand = ReactiveCommand.CreateFromTask(ShowRedmineImport);
-            _appConfig.ColorThemeObservable
-                .Subscribe(x => UpdateColorTheme());
-        }
-        private void UpdateColorTheme()
-        {
-            if (_appConfig.ColorTheme == Color.FromArgb(0, 255, 255, 255)) //transparent
-                ColorTheme = Color.FromArgb(255, 255, 255, 255); //white as classical theme
-            else
-                ColorTheme = _appConfig.ColorTheme;
+
+            appConfig.ColorThemeObservable
+                .Subscribe(x => ColorTheme = x);
         }
 
         private async Task ShowRedmineImport()
@@ -54,7 +47,7 @@ namespace Kamban.ViewModels
             try
             {
                 var repo = new RedmineRepository(loginData.Host, loginData.Username, loginData.Password);
-                _shell.ShowView(
+                shell.ShowView(
                     scope => scope.Resolve<ImportSchemeView>(new NamedParameter("loadAll", LoadFullScheme)),
                     new ImportSchemeViewRequest
                     {
@@ -68,7 +61,7 @@ namespace Kamban.ViewModels
             }
             catch (Exception e)
             {
-                await _dialogCoordinator.ShowMessageAsync(this, "Error", e.Message);
+                await dialCoord.ShowMessageAsync(this, "Error", e.Message);
             }
         }
 
@@ -76,8 +69,8 @@ namespace Kamban.ViewModels
         {
             var settings = new LoginWithUrlDialogSettings
             {
-                InitialHost = _appConfig.LastRedmineUrl,
-                InitialUsername = _appConfig.LastRedmineUser,
+                InitialHost = appConfig.LastRedmineUrl,
+                InitialUsername = appConfig.LastRedmineUser,
                 AnimateShow = true,
                 AnimateHide = true,
                 AffirmativeButtonText = "Login",
@@ -88,14 +81,14 @@ namespace Kamban.ViewModels
             };
 
             var loginDialog = new LoginWithUrlDialog(null, settings) { Title = "Login to Redmine" };
-            await _dialogCoordinator.ShowMetroDialogAsync(this, loginDialog);
+            await dialCoord.ShowMetroDialogAsync(this, loginDialog);
             var result = await loginDialog.WaitForButtonPressAsync();
-            await _dialogCoordinator.HideMetroDialogAsync(this, loginDialog);
+            await dialCoord.HideMetroDialogAsync(this, loginDialog);
 
             if (result != null)
             {
-                _appConfig.LastRedmineUrl = result.Host;
-                _appConfig.LastRedmineUser = result.Username;
+                appConfig.LastRedmineUrl = result.Host;
+                appConfig.LastRedmineUser = result.Username;
             }
 
             return result;

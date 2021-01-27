@@ -12,11 +12,13 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance viewModels:ExportViewModel}"
              d:DesignHeight="450" d:DesignWidth="800">
+    
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolCvt" />
         <wpfResources:ThicknessToStringConverter x:Key="ThicknessCvt" />
         <common:ColorToBrushConverter x:Key="ColorCvt" />
     </UserControl.Resources>
+    
     <Grid Background="{Binding ColorTheme, Converter={StaticResource ColorCvt}}">
         <ScrollViewer>
             <StackPanel Orientation="Vertical" Margin="20" MaxWidth="600">

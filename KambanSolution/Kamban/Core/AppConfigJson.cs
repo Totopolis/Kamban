@@ -60,6 +60,6 @@ namespace Kamban.Core
 
         public bool OpenLatestAtStartup { get; set; }
         public bool ShowFileNameInTab { get; set; }
-        public Color ColorTheme { get; set; }
+        public string ColorTheme { get; set; }
     }
 }

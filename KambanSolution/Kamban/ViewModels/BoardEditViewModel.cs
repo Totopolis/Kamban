@@ -206,15 +206,11 @@ namespace Kamban.ViewModels
 
             appConfig.ShowFileNameInTabObservable
                 .Subscribe(x => UpdateTitle());
+
             appConfig.ColorThemeObservable
-                .Subscribe(x => UpdateColorTheme());
+                .Subscribe(x => ColorThemeBoard = x);
 
             log.Verbose($"{nameof(BoardEditViewModel)}.ctor finished");
-        }
-
-        private void UpdateColorTheme()
-        {
-            ColorThemeBoard = appConfig.ColorTheme;
         }
 
         private void UpdateTitle()

@@ -67,7 +67,7 @@ namespace Kamban.ViewModels
         public ReactiveCommand<Unit, Unit> ExportCommand { get; set; }
         public ReactiveCommand<Unit, Unit> CancelCommand { get; set; }
 
-        public ExportViewModel(IShell sh, IAppModel am, IDialogCoordinator dc, 
+        public ExportViewModel(IShell sh, IAppModel am, IDialogCoordinator dc,
             IAppConfig cfg, IMapper mapper)
         {
             shell = sh;
@@ -121,7 +121,7 @@ namespace Kamban.ViewModels
                 .Subscribe(box =>
                 {
                     boards.ClearAndAddRange(box.Boards.Items
-                        .Select(x => new BoardToExport {Board = x, IsChecked = true}));
+                        .Select(x => new BoardToExport { Board = x, IsChecked = true }));
 
                     TargetFile = Path.GetFileNameWithoutExtension(box.Uri) + "_export";
                 });
@@ -133,15 +133,9 @@ namespace Kamban.ViewModels
 
             var fi = new FileInfo(SelectedBox.Uri);
             TargetFolder = cfg.ArchiveFolder ?? fi.DirectoryName;
+
             _appConfig.ColorThemeObservable
-                .Subscribe(x => UpdateColorTheme());
-        }
-        private void UpdateColorTheme()
-        {
-            if (_appConfig.ColorTheme == Color.FromArgb(0, 255, 255, 255)) //transparent
-                ColorTheme = Color.FromArgb(255, 255, 255, 255); //white as classical theme
-            else
-                ColorTheme = _appConfig.ColorTheme;
+                .Subscribe(x => ColorTheme = x);
         }
 
         private async Task ExportCommandExecute()

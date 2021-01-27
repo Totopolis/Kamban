@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using DynamicData;
 using Kamban.ViewModels;
 using Kamban.ViewModels.Core;
@@ -21,7 +23,7 @@ namespace Kamban.Core
     {
         private readonly IShell shell;
         private readonly ILogger log;
-        private readonly AppConfigJson appConfig;
+        private readonly AppConfigJson appConfigJson;
         private readonly string appConfigPath;
         private readonly SourceList<RecentViewModel> recentList;
         private readonly SourceList<PublicBoardJson> publicBoards;
@@ -49,29 +51,30 @@ namespace Kamban.Core
 
                 try
                 {
-                    appConfig = JsonConvert.DeserializeObject<AppConfigJson>(data);
+                    appConfigJson = JsonConvert.DeserializeObject<AppConfigJson>(data);
                 }
                 catch { }
-                
-                if( appConfig == null)
-                    appConfig = new AppConfigJson();
-                if (string.IsNullOrEmpty(appConfig.AppGuid))
-                    appConfig.AppGuid = Guid.NewGuid().ToString();
-            }
-            else
-            {
-                appConfig = new AppConfigJson();
-                appConfig.AppGuid = Guid.NewGuid().ToString();
             }
 
-            OpenLatestAtStartupValue = appConfig.OpenLatestAtStartup;
-            ShowFileNameInTabValue = appConfig.ShowFileNameInTab;
-            ColorThemeValue = appConfig.ColorTheme;
-            appConfig.StartNumber++;
+            // file not exists or deserialize error
+            if (appConfigJson == null)
+                appConfigJson = new AppConfigJson();
+
+            if (string.IsNullOrEmpty(appConfigJson.AppGuid))
+                appConfigJson.AppGuid = Guid.NewGuid().ToString();
+
+            if (string.IsNullOrEmpty(appConfigJson.ColorTheme))
+                appConfigJson.ColorTheme = Color.FromArgb(255, 255, 255, 255).ToString();
+
+            OpenLatestAtStartupValue = appConfigJson.OpenLatestAtStartup;
+            ShowFileNameInTabValue = appConfigJson.ShowFileNameInTab;
+            ColorThemeValue = ToColor(appConfigJson.ColorTheme);
+
+            appConfigJson.StartNumber++;
             SaveConfig();
 
             recentList = new SourceList<RecentViewModel>();
-            recentList.AddRange(appConfig.Feed.Select(x => new RecentViewModel
+            recentList.AddRange(appConfigJson.Feed.Select(x => new RecentViewModel
             { Uri = x.Uri, LastAccess = x.LastAccess, Pinned = x.Pinned }));
 
             RecentObservable = recentList.Connect().AutoRefresh();
@@ -99,8 +102,8 @@ namespace Kamban.Core
                 var vm = view.ViewModel as BoardEditViewModel;
                 if (vm.Box == null)
                     return;
-                if (!appConfig.LatestOpenedAtStartup.Contains(vm.Box.Uri))
-                    appConfig.LatestOpenedAtStartup.Add(vm.Box.Uri);
+                if (!appConfigJson.LatestOpenedAtStartup.Contains(vm.Box.Uri))
+                    appConfigJson.LatestOpenedAtStartup.Add(vm.Box.Uri);
                 SaveConfig();
             };
 
@@ -111,9 +114,16 @@ namespace Kamban.Core
                     return;
 
                 var vm = view.ViewModel as BoardEditViewModel;
-                appConfig.LatestOpenedAtStartup.Remove(vm.Box.Uri);
+                appConfigJson.LatestOpenedAtStartup.Remove(vm.Box.Uri);
                 SaveConfig();
             };
+        }
+
+        private Color ToColor(string str)
+        {
+            TypeConverter cc = TypeDescriptor.GetConverter(typeof(Color));
+            var result = (Color)cc.ConvertFromString(str);
+            return result;
         }
 
         public IObservable<IChangeSet<RecentViewModel>> RecentObservable { get; private set; }
@@ -126,47 +136,47 @@ namespace Kamban.Core
 
         public string Caption
         {
-            get => appConfig.Caption;
+            get => appConfigJson.Caption;
             set
             {
-                appConfig.Caption = value;
+                appConfigJson.Caption = value;
                 SaveConfig();
             }
         }
 
         public string ArchiveFolder
         {
-            get => appConfig.ArchiveFolder;
+            get => appConfigJson.ArchiveFolder;
             set
             {
-                appConfig.ArchiveFolder = value;
+                appConfigJson.ArchiveFolder = value;
                 SaveConfig();
             }
         }
 
         public string LastRedmineUrl
         {
-            get => appConfig.LastRedmineUrl;
+            get => appConfigJson.LastRedmineUrl;
             set
             {
-                appConfig.LastRedmineUrl = value;
+                appConfigJson.LastRedmineUrl = value;
                 SaveConfig();
             }
         }
 
         public string LastRedmineUser
         {
-            get => appConfig.LastRedmineUser;
+            get => appConfigJson.LastRedmineUser;
             set
             {
-                appConfig.LastRedmineUser = value;
+                appConfigJson.LastRedmineUser = value;
                 SaveConfig();
             }
         }
 
-        public string AppGuid => appConfig.AppGuid;
+        public string AppGuid => appConfigJson.AppGuid;
 
-        public IEnumerable<string> LastOpenedAtStartup => appConfig.LatestOpenedAtStartup;
+        public IEnumerable<string> LastOpenedAtStartup => appConfigJson.LatestOpenedAtStartup;
 
         public void UpdateRecent(string uri, bool pinned)
         {
@@ -189,7 +199,7 @@ namespace Kamban.Core
                 recentVm.Pinned = pinned;
             }
 
-            var recentJson = appConfig.Feed.FirstOrDefault(x => x.Uri == uri);
+            var recentJson = appConfigJson.Feed.FirstOrDefault(x => x.Uri == uri);
             if (recentJson == null)
             {
                 recentJson = new RecentJson
@@ -198,7 +208,7 @@ namespace Kamban.Core
                     LastAccess = now
                 };
 
-                appConfig.Feed.Add(recentJson);
+                appConfigJson.Feed.Add(recentJson);
             }
             else
             {
@@ -212,19 +222,19 @@ namespace Kamban.Core
         public void RemoveRecent(string uri)
         {
             var recentVm = recentList.Items.FirstOrDefault(x => x.Uri == uri);
-            var recentJson = appConfig.Feed.FirstOrDefault(x => x.Uri == uri);
+            var recentJson = appConfigJson.Feed.FirstOrDefault(x => x.Uri == uri);
 
             if (recentVm == null || recentJson == null)
                 return;
 
             recentList.Remove(recentVm);
-            appConfig.Feed.Remove(recentJson);
+            appConfigJson.Feed.Remove(recentJson);
             SaveConfig();
         }
 
         private void SaveConfig()
         {
-            string data = JsonConvert.SerializeObject(appConfig);
+            string data = JsonConvert.SerializeObject(appConfigJson);
             File.WriteAllText(appConfigPath, data);
         }
 
@@ -234,9 +244,9 @@ namespace Kamban.Core
             {
                 var common = await DownloadAndDeserialize<CommonJson>("common.json");
 
-                var startup = await DownloadAndDeserialize<StartupConfigJson>($"{appConfig.Language}/startup.json");
-                appConfig.Startup = startup;
-                appConfig.Common = common;
+                var startup = await DownloadAndDeserialize<StartupConfigJson>($"{appConfigJson.Language}/startup.json");
+                appConfigJson.Startup = startup;
+                appConfigJson.Common = common;
 
                 SaveConfig();
             }
@@ -245,31 +255,31 @@ namespace Kamban.Core
                 log.Error($"AppConfig.LoadOnlineContentAsync download error: {ex.Message}");
             }
 
-            if (appConfig.Startup != null)
+            if (appConfigJson.Startup != null)
             {
-                publicBoards.AddRange(appConfig.Startup.PublicBoards);
+                publicBoards.AddRange(appConfigJson.Startup.PublicBoards);
 
-                BasementValue = appConfig.Startup.Basement;
+                BasementValue = appConfigJson.Startup.Basement;
 
-                int tipsCount = appConfig.Startup.Tips.Count;
+                int tipsCount = appConfigJson.Startup.Tips.Count;
 
-                if (tipsCount == 0 || appConfig.StartNumber == 1)
+                if (tipsCount == 0 || appConfigJson.StartNumber == 1)
                 {
-                    GetStartedValue = appConfig.Startup.FirstStart;
+                    GetStartedValue = appConfigJson.Startup.FirstStart;
                     return;
                 }
 
                 // tips rotate
-                int indx = appConfig.StartNumber - 2;
+                int indx = appConfigJson.StartNumber - 2;
                 // preserve of out-of-range
                 if (indx >= tipsCount)
                     indx = 1;
 
-                GetStartedValue = appConfig.Startup.Tips[indx];
+                GetStartedValue = appConfigJson.Startup.Tips[indx];
 
                 if (indx == tipsCount - 1)
                 {
-                    appConfig.StartNumber = 1;
+                    appConfigJson.StartNumber = 1;
                     SaveConfig();
                 }
             }
