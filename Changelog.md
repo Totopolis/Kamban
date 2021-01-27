@@ -1,5 +1,10 @@
 # Kamban Changelog
 
+### v.1.0.11 (2021-01-27)
+- Update libraries
+- Background setting added
+- Use Serilog
+
 ### v.1.0.10 (2020-09-06)
 - Bugfix: roaming folder does not created
 
